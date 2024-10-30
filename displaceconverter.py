@@ -8,12 +8,12 @@ translations = {
     "en": {
         "title": "displace.bin converter",
         "error": "Error",
-        "sel_file": "Please select file",
+        "sel_file": "Please select a file",
         "select_file": "Selected file",
         "file_saved": "File saved as",
         "conv_result": "Processing result",
         "result": "Result",
-        "plssel_file": "Please select a file, format and size.",
+        "plssel_file": "Please select a file, format, and size.",
         "sel_button": "Select file",
         "select_size": "Select size",
         "convert_file": "Convert file",
@@ -23,12 +23,12 @@ translations = {
             "This program will help you to convert displace.bin of your map\n"
             "to .raw or .png format.\n"
             "\n"
-            "To convert the file you need to select the displace.bin file in the map folder, select the format (raw or png) and select the map size (512 or 1024).\n"
+            "To convert the file, you need to select the displace.bin file in the map folder, select the format (raw or png), and select the map size (512 or 1024).\n"
             "\n"
-            "After that, click the 'Convert file' button. In case of success you will see a success message\n"
+            "After that, click the 'Convert file' button. In case of success, you will see a success message\n"
             "and a file in the format of your choice will appear in the folder.\n"
             "\n"
-            "Map size reference: 512 - in size like Krai. 1024 - in size like Vaterland, Vahat\n"
+            "Map size reference: 512 - the size of Krai. 1024 - the size of Vaterland, Vahat\n"
             "\n"
             "Program author: stakan\n"
             "Convert script author: ThePlain\n"
@@ -43,12 +43,12 @@ translations = {
             "\n"
             "For additional information, please open the help section."
         ),
-        "wrong_extension": "Wrong file extension! Please select .bin file!" 
+        "wrong_extension": "Wrong file extension! Please select a .bin file!"
     },
     "ru": {
         "title": "displace.bin конвертер",
         "error": "Ошибка",
-        "sel_file": "Пожалуйста выберите файл",
+        "sel_file": "Пожалуйста, выберите файл",
         "select_file": "Выбранный файл",
         "file_saved": "Файл сохранён как",
         "conv_result": "Результат обработки",
@@ -65,10 +65,10 @@ translations = {
             "\n"
             "Для конвертирования файла вам необходимо выбрать файл displace.bin в папке карты, выбрать формат (raw или png) и выбрать размер карты (512 или 1024).\n"
             "\n"
-            "После этого нажать кнопку 'Преобразовать файл'. В случае успеха увидите соответствующее сообщение\n"
+            "После этого нажать кнопку 'Преобразовать файл'. В случае успеха вы увидите соответствующее сообщение\n"
             "и в папке появится файл в выбранном вами формате.\n"
             "\n"
-            "Справка по размеру карт: 512 - по размеру с Край. 1024 - по размеру с Фатерлянд, Вахат\n"
+            "Справка по размеру карт: 512 - по размеру как Край. 1024 - по размеру как Фатерлянд, Вахат\n"
             "\n"
             "Автор программы: стакан\n"
             "Автор скрипта конвертирования: ThePlain\n"
@@ -83,7 +83,7 @@ translations = {
             "\n"
             "Для получения дополнительной информации откройте раздел помощи."
         ),
-        "wrong_extension": "Неверное расширение файла! Пожалуйста выберите файл формата .bin!" 
+        "wrong_extension": "Неверное расширение файла! Пожалуйста, выберите файл формата .bin!"
     },
     "uk": {
         "title": "displace.bin конвертер",
@@ -126,6 +126,7 @@ translations = {
         "wrong_extension": "Невірне розширення файлу! Будь ласка, виберіть файл формату .bin!"
     }
 }
+
 
 
 # Detect system language
