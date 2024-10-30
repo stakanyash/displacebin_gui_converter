@@ -42,7 +42,8 @@ translations = {
             "Please check the selected map size (valid values: 512 or 1024).\n"
             "\n"
             "For additional information, please open the help section."
-        ),    
+        ),
+        "wrong_extension": "Wrong file extension! Please select .bin file!" 
     },
     "ru": {
         "title": "displace.bin конвертер",
@@ -82,6 +83,7 @@ translations = {
             "\n"
             "Для получения дополнительной информации откройте раздел помощи."
         ),
+        "wrong_extension": "Неверное расширение файла! Пожалуйста выберите файл формата .bin!" 
     },
     "uk": {
         "title": "displace.bin конвертер",
@@ -121,6 +123,7 @@ translations = {
             "\n"
             "Для отримання додаткової інформації відкрийте розділ допомоги."
         ),
+        "wrong_extension": "Невірне розширення файлу! Будь ласка, виберіть файл формату .bin!"
     }
 }
 
@@ -217,8 +220,31 @@ def main(page: ft.Page):
         nonlocal input_file_path
         if e.files:
             input_file_path = e.files[0].path
-            file_name.value = input_file_path  # Update the value in the input field
+        
+        # Проверка на формат .bin
+        if not input_file_path.lower().endswith('.bin'):
+            show_error_dialog(lang["error"], lang["wrong_extension"])
+            input_file_path = None  # Сбросить путь файла, если он некорректный
+            return
+            
+        file_name.value = input_file_path  # Update the value in the input field
+        page.update()
+
+    def show_error_dialog(title, message):
+        def close_error_dialog(e):
+            error_dialog.open = False
             page.update()
+
+        error_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(title),
+            content=ft.Text(message),
+            actions=[ft.TextButton("OK", on_click=close_error_dialog)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.dialog = error_dialog
+        error_dialog.open = True
+        page.update()
 
     # file picker init
     file_picker = ft.FilePicker(on_result=on_file_selected)
