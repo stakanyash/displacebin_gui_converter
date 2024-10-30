@@ -51,7 +51,7 @@
 
 3. Установите необходимые зависимости:
    ```bash
-   pip install flet pillow
+   pip install requirements.txt
    ```
 
 ## Запуск программы из исходного кода
