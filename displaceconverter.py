@@ -183,9 +183,32 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.theme_mode = "dark"
     page.window_maximizable = False
-    page.window_height = 682
+    page.window_height = 680
     page.window_width = 640
     page.window_resizable = False
+
+    title_text = ft.Text(
+        lang["title"],
+        size=24,
+        weight="bold",
+        text_align=ft.TextAlign.CENTER
+    )
+
+    # Создание колонки с выравниванием по центру
+    title_container = ft.Container(
+        content=title_text,
+        padding=ft.padding.all(10),
+        alignment=ft.alignment.center
+    )
+
+    page.add(
+        ft.Column(
+            [title_container],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.START,
+            expand=False
+        )
+    )
 
     input_file_path = None
 
@@ -302,9 +325,7 @@ def main(page: ft.Page):
                 plsselfile.open = True
                 page.update()
 
-    
-    # UI
-    # Секция 1: Поле пути выбранного файла и кнопка выбора
+
     file_name = ft.TextField(
         value="",  # Initially empty value
         label=lang["select_file"],
@@ -314,7 +335,6 @@ def main(page: ft.Page):
 
     select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
 
-    # Секция 2: Текст выбора формата и радио кнопки форматов
     output_format = ft.RadioGroup(
         content=ft.Row([
             ft.Radio(label=".raw", value="RAW"),
@@ -322,7 +342,6 @@ def main(page: ft.Page):
         ], alignment=ft.MainAxisAlignment.CENTER)
     )
 
-    # Секция 3: Выбор размера и кнопка конвертирования
     output_size = ft.Dropdown(
         width=400,
         options=[
@@ -334,7 +353,6 @@ def main(page: ft.Page):
 
     process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
 
-    # Секция 4: Кнопка помощи
     help_icon = ft.icons.HELP_OUTLINE
     hover_icon = ft.icons.HELP
 
@@ -345,32 +363,30 @@ def main(page: ft.Page):
     )
 
     def change_icon(e):
-        if e.data == "true":  # Если курсор над кнопкой
+        if e.data == "true": 
             help_btn.icon = hover_icon
         else:
-            help_btn.icon = help_icon  # Возвращаем иконку по умолчанию
+            help_btn.icon = help_icon
         page.update()
 
     help_btn_container = ft.Container(
         content=help_btn,
-        on_hover=change_icon  # Добавляем обработчик наведения
+        on_hover=change_icon 
     )
 
     page.add(
         ft.Column(
             [
-                # Секция 1 с разделением
                 ft.Container(
                     ft.Column(
-                        [file_name, select_button],  # Кнопка выбора файла под полем
+                        [file_name, select_button],
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     padding=ft.padding.all(10),
                 ),
-                ft.Divider(color="transparent"),  # Невидимый разделитель
+                ft.Divider(color="transparent"),
 
-                # Секция 2 с разделением
                 ft.Container(
                     ft.Column(
                         [
@@ -384,7 +400,6 @@ def main(page: ft.Page):
                 ),
                 ft.Divider(color="transparent"),
 
-                # Секция 3 с разделением
                 ft.Container(
                 ft.Column(
                     [
@@ -397,7 +412,6 @@ def main(page: ft.Page):
             ),
             ft.Divider(color="transparent"),
 
-                # Секция 4 с разделением
                 ft.Container(
                     help_btn_container,
                     alignment=ft.alignment.center,
@@ -408,11 +422,5 @@ def main(page: ft.Page):
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
-
-
-    def on_resize(e):
-        print(f"Window resized: {page.window_width} x {page.window_height}")
-
-    page.on_resize = on_resize
 
 ft.app(target=main)
