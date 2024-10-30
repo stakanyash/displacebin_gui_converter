@@ -63,7 +63,7 @@
 
 Для запуска программы выполните следующую команду:
 ```bash
-python main.py
+python displaceconverter.py
 ```
 
 ## Лицензия
