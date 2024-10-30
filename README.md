@@ -46,12 +46,12 @@
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/yourusername/displace-bin-converter.git
+   git clone https://github.com/stakanyash/displacebin_gui_converter.git
    ```
 
 2. Перейдите в директорию проекта:
    ```bash
-   cd displace-bin-converter
+   cd displacebin_gui_converter
    ```
 
 3. Установите необходимые зависимости:
