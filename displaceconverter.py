@@ -28,7 +28,12 @@ translations = {
             "After that, click the 'Convert file' button. In case of success you will see a success message\n"
             "and a file in the format of your choice will appear in the folder.\n"
             "\n"
-            "Map size reference: 512 - in size like Krai. 1024 - in size like Vaterland, Vahat"
+            "Map size reference: 512 - in size like Krai. 1024 - in size like Vaterland, Vahat\n"
+            "\n"
+            "Program author: stakan\n"
+            "Convert script author: ThePlain\n"
+            "\n"
+            "Created for the convenience of modders in the Deus Ex Machina community :)"
         ),
         "help_print": "Help dialog window is closed",
         "struct_error": (
@@ -62,7 +67,12 @@ translations = {
             "После этого нажать кнопку 'Преобразовать файл'. В случае успеха увидите соответствующее сообщение\n"
             "и в папке появится файл в выбранном вами формате.\n"
             "\n"
-            "Справка по размеру карт: 512 - по размеру с Край. 1024 - по размеру с Риджин, Фатерлянд, Вахат"
+            "Справка по размеру карт: 512 - по размеру с Край. 1024 - по размеру с Фатерлянд, Вахат\n"
+            "\n"
+            "Автор программы: стакан\n"
+            "Автор скрипта конвертирования: ThePlain\n"
+            "\n"
+            "Создано для удобства мододелов сообщества Deus Ex Machina :)"
         ),
         "help_print": "Закрыто диалоговое окно помощи",
         "struct_error": (
@@ -72,8 +82,48 @@ translations = {
             "\n"
             "Для получения дополнительной информации откройте раздел помощи."
         ),
+    },
+    "uk": {
+        "title": "displace.bin конвертер",
+        "error": "Помилка",
+        "sel_file": "Будь ласка, виберіть файл",
+        "select_file": "Вибраний файл",
+        "file_saved": "Файл збережено як",
+        "conv_result": "Результат обробки",
+        "result": "Результат",
+        "plssel_file": "Будь ласка, виберіть файл, формат та розмір.",
+        "sel_button": "Вибрати файл",
+        "select_size": "Виберіть розмір",
+        "convert_file": "Перетворити файл",
+        "select_format": "Виберіть формат вихідного файлу:",
+        "help": "Допомога",
+        "help_text": (
+            "Ця програма допоможе вам перетворити displace.bin вашої карти\n"
+            "в .raw або .png формат.\n"
+            "\n"
+            "Щоб перетворити файл, вам потрібно вибрати файл displace.bin у папці з картою, вибрати формат (raw або png) та вибрати розмір карти (512 або 1024).\n"
+            "\n"
+            "Після цього натисніть кнопку 'Перетворити файл'. У разі успіху ви побачите повідомлення про успіх\n"
+            "і файл у вибраному вами форматі з'явиться у папці.\n"
+            "\n"
+            "Довідка про розміри карт: 512 - за розміром як Край. 1024 - за розміром як Фатерлянд, Вахат\n"
+            "\n"
+            "Автор програми: стакан\n"
+            "Автор скрипта перетворення: ThePlain\n"
+            "\n"
+            "Створено для зручності моддерів у спільноті Deus Ex Machina :)"
+        ),
+        "help_print": "Діалогове вікно допомоги закрито",
+        "struct_error": (
+            "Сталася помилка під час перетворення файлу.\n"
+            "\n"
+            "Будь ласка, перевірте обраний розмір карти (допустимі значення: 512 або 1024).\n"
+            "\n"
+            "Для отримання додаткової інформації відкрийте розділ допомоги."
+        ),
     }
 }
+
 
 # Detect system language
 system_lang = locale.getdefaultlocale()[0][:2]
@@ -254,6 +304,7 @@ def main(page: ft.Page):
 
     
     # UI
+    # Секция 1: Поле пути выбранного файла и кнопка выбора
     file_name = ft.TextField(
         value="",  # Initially empty value
         label=lang["select_file"],
@@ -262,14 +313,16 @@ def main(page: ft.Page):
     )
 
     select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
-    output_format = ft.RadioGroup(
-    content=ft.Row([
-        ft.Radio(label=".raw", value="RAW"),
-        ft.Radio(label=".png", value="PNG")
-    ], alignment=ft.MainAxisAlignment.CENTER)
-)
 
-    # size select
+    # Секция 2: Текст выбора формата и радио кнопки форматов
+    output_format = ft.RadioGroup(
+        content=ft.Row([
+            ft.Radio(label=".raw", value="RAW"),
+            ft.Radio(label=".png", value="PNG")
+        ], alignment=ft.MainAxisAlignment.CENTER)
+    )
+
+    # Секция 3: Выбор размера и кнопка конвертирования
     output_size = ft.Dropdown(
         width=400,
         options=[
@@ -281,25 +334,81 @@ def main(page: ft.Page):
 
     process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
 
+    # Секция 4: Кнопка помощи
+    help_icon = ft.icons.HELP_OUTLINE
+    hover_icon = ft.icons.HELP
+
     help_btn = ft.IconButton(
-        icon=ft.icons.HELP, on_click=helpdialog, icon_color="#9ecaff"
+        icon=help_icon,
+        on_click=helpdialog,
+        icon_color="#9ecaff"
+    )
+
+    def change_icon(e):
+        if e.data == "true":  # Если курсор над кнопкой
+            help_btn.icon = hover_icon
+        else:
+            help_btn.icon = help_icon  # Возвращаем иконку по умолчанию
+        page.update()
+
+    help_btn_container = ft.Container(
+        content=help_btn,
+        on_hover=change_icon  # Добавляем обработчик наведения
     )
 
     page.add(
         ft.Column(
             [
-                file_name,
-                select_button,
-                ft.Text(lang["select_format"], size=16),
-                output_format,
-                output_size,
-                process_button,
-                help_btn
+                # Секция 1 с разделением
+                ft.Container(
+                    ft.Column(
+                        [file_name, select_button],  # Кнопка выбора файла под полем
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    padding=ft.padding.all(10),
+                ),
+                ft.Divider(color="transparent"),  # Невидимый разделитель
+
+                # Секция 2 с разделением
+                ft.Container(
+                    ft.Column(
+                        [
+                            ft.Text(lang["select_format"], size=16, text_align=ft.TextAlign.CENTER),
+                            output_format,
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    padding=ft.padding.all(10),
+                ),
+                ft.Divider(color="transparent"),
+
+                # Секция 3 с разделением
+                ft.Container(
+                ft.Column(
+                    [
+                        ft.Row([output_size], alignment=ft.MainAxisAlignment.CENTER),
+                        ft.Row([process_button], alignment=ft.MainAxisAlignment.CENTER)  # Центрируем кнопку
+                    ],
+                    spacing=10,
+                ),
+                padding=ft.padding.all(10),
+            ),
+            ft.Divider(color="transparent"),
+
+                # Секция 4 с разделением
+                ft.Container(
+                    help_btn_container,
+                    alignment=ft.alignment.center,
+                    padding=ft.padding.all(10),
+                )
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
+
 
     def on_resize(e):
         print(f"Window resized: {page.window_width} x {page.window_height}")
