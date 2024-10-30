@@ -133,6 +133,9 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.theme_mode = "dark"
     page.window_maximizable = False
+    page.window_height = 682
+    page.window_width = 640
+    page.window_resizable = False
 
     input_file_path = None
 
@@ -141,7 +144,7 @@ def main(page: ft.Page):
         nonlocal input_file_path
         if e.files:
             input_file_path = e.files[0].path
-            file_name.value = f"{lang['select_file']}: {os.path.basename(input_file_path)}"
+            file_name.value = input_file_path  # Update the value in the input field
             page.update()
 
     # file picker init
@@ -188,83 +191,87 @@ def main(page: ft.Page):
         if input_file_path and output_format.value and output_size.value:
             size = int(output_size.value)
             output_path = os.path.splitext(input_file_path)[0] + (".raw" if output_format.value == "RAW" else ".png")
-        
-        try:
-            if output_format.value == "RAW":
-                _min, _max, _del = process_raw(input_file_path, output_path, size)
-            else:
-                _min, _max, _del = process_png(input_file_path, output_path, size)
 
-            def close_dlgconvert(e):
-                global dialog_open
-                convertsuc.open = False
-                dialog_open = False  # Close dialog state
-                page.update()
-            
-            convertsuc = ft.AlertDialog(
-                modal=True,
-                title=ft.Text(lang["result"]),
-                content=ft.Text(f"{lang['file_saved']}: {output_path}\n"),
-                actions=[ft.TextButton("OK", on_click=close_dlgconvert)],
-                actions_alignment=ft.MainAxisAlignment.END,
-                on_dismiss=lambda e: print(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
-            )
-            page.dialog = convertsuc
-            convertsuc.open = True
-            page.update()
+            try:
+                if output_format.value == "RAW":
+                    _min, _max, _del = process_raw(input_file_path, output_path, size)
+                else:
+                    _min, _max, _del = process_png(input_file_path, output_path, size)
 
-        except struct.error as e:
-            # Обработка ошибки struct.error
-            def close_dlg_error(e):
-                global dialog_open
-                error_dialog.open = False
-                dialog_open = False
+                def close_dlgconvert(e):
+                    convertsuc.open = False
+                    page.update()
+
+                convertsuc = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text(lang["result"]),
+                    content=ft.Text(f"{lang['file_saved']}: {output_path}\n"),
+                    actions=[ft.TextButton("OK", on_click=close_dlgconvert)],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                    on_dismiss=lambda e: print(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
+                )
+                page.dialog = convertsuc
+                convertsuc.open = True
                 page.update()
 
-            error_dialog = ft.AlertDialog(
-                modal=True,
-                title=ft.Text(lang["error"]),
-                content=ft.Text(lang["struct_error"]),
-                actions=[ft.TextButton("OK", on_click=close_dlg_error)],
-                actions_alignment=ft.MainAxisAlignment.END,
-                on_dismiss=lambda e: print(f"Error: {str(e)}"),
-            )
-            page.dialog = error_dialog
-            error_dialog.open = True
-            page.update()
-        
+            except struct.error as e:
+                # Handle struct.error
+                def close_dlg_error(e):
+                    error_dialog.open = False
+                    page.update()
+
+                error_dialog = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text(lang["error"]),
+                    content=ft.Text(lang["struct_error"]),
+                    actions=[ft.TextButton("OK", on_click=close_dlg_error)],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                    on_dismiss=lambda e: print(f"Error: {str(e)}"),
+                )
+                page.dialog = error_dialog
+                error_dialog.open = True
+                page.update()
+
         else:
-            def close_dlgpleaseselfile(e):
-                global dialog_open
-                plsselfile.open = False
-                dialog_open = False
+            # The window requesting to select a file opens only if nothing is selected
+            if not input_file_path or not output_format.value or not output_size.value:
+                def close_dlgpleaseselfile(e):
+                    global dialog_open
+                    plsselfile.open = False
+                    dialog_open = False
+                    page.update()
+                
+                plsselfile = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text(lang["error"]),
+                    content=ft.Text(lang["plssel_file"]),
+                    actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                page.dialog = plsselfile
+                plsselfile.open = True
                 page.update()
-        
-            plsselfile = ft.AlertDialog(
-                modal=True,
-                title=ft.Text(lang["result"]),
-                content=ft.Text(lang["plssel_file"]),
-                actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
-                actions_alignment=ft.MainAxisAlignment.END,
-                on_dismiss=lambda e: print(lang["plssel_file"]),
-            )
-            page.dialog = plsselfile
-            plsselfile.open = True
-            page.update()
 
-
+    
     # UI
-    file_name = ft.Text(value=lang["sel_file"], size=16)
+    file_name = ft.TextField(
+        value="",  # Initially empty value
+        label=lang["select_file"],
+        read_only=True,  # Disallow editing
+        width=550  # You can set the desired width
+    )
+
     select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
-    output_format = ft.RadioGroup(content=ft.Row([
-        ft.Radio(label="RAW", value="RAW"),
-        ft.Radio(label="PNG", value="PNG")
-    ]))
-    alignment=ft.MainAxisAlignment.CENTER
+    output_format = ft.RadioGroup(
+    content=ft.Row([
+        ft.Radio(label=".raw", value="RAW"),
+        ft.Radio(label=".png", value="PNG")
+    ], alignment=ft.MainAxisAlignment.CENTER)
+)
 
     # size select
     output_size = ft.Dropdown(
-        width=100,
+        width=400,
         options=[
             ft.dropdown.Option("512"),
             ft.dropdown.Option("1024")
@@ -278,7 +285,6 @@ def main(page: ft.Page):
         icon=ft.icons.HELP, on_click=helpdialog, icon_color="#9ecaff"
     )
 
-    # add pages
     page.add(
         ft.Column(
             [
@@ -295,5 +301,9 @@ def main(page: ft.Page):
         )
     )
 
-# start app
+    def on_resize(e):
+        print(f"Window resized: {page.window_width} x {page.window_height}")
+
+    page.on_resize = on_resize
+
 ft.app(target=main)
