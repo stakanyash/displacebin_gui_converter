@@ -2,3 +2,5 @@ dev/
 displaceconverter.build/
 displaceconverter.dist/
 displaceconverter.exe
+*.exe
+/main.dist
