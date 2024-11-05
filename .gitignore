@@ -4,3 +4,4 @@ displaceconverter.dist/
 displaceconverter.exe
 *.exe
 /main.dist
+/src/__pycache__
