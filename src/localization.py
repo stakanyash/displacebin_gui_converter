@@ -40,7 +40,9 @@ translations = {
             "For additional information, please open the help section."
         ),
         "wrong_extension": "Wrong file extension! Please select a .bin file!",
-        "sel_lang": "Select language"
+        "sel_lang": "Select language",
+        "cancel": "Cancel",
+        "menu": "Menu"
     },
     "ru": {
         "title": "displace.bin конвертер",
@@ -81,7 +83,9 @@ translations = {
             "Для получения дополнительной информации откройте раздел помощи."
         ),
         "wrong_extension": "Неверное расширение файла! Пожалуйста, выберите файл формата .bin!",
-        "sel_lang": "Выберите язык"
+        "sel_lang": "Выберите язык",
+        "cancel": "Отмена",
+        "menu": "Меню"
     },
     "uk": {
         "title": "displace.bin конвертер",
@@ -122,7 +126,9 @@ translations = {
             "Для отримання додаткової інформації відкрийте розділ допомоги."
         ),
         "wrong_extension": "Невірне розширення файлу! Будь ласка, виберіть файл формату .bin!",
-        "sel_lang": "Виберіть мову"
+        "sel_lang": "Виберіть мову",
+        "cancel": "Скасування",
+        "menu": "Меню"
     }
 }
 
