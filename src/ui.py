@@ -3,6 +3,7 @@ import locale
 from localization import translations
 from converter import process_raw, process_png, struct
 import os
+from resources import get_asset_path
 
 system_lang = locale.getdefaultlocale()[0][:2]
 lang = translations.get(system_lang, translations["en"])
@@ -20,11 +21,11 @@ def create_ui(page: ft.Page):
     def update_theme():
         if page.theme_mode == "dark":
             icon_color = "#9ecaff"
-            logo_src = "src_assets/logo.png"
+            logo_src = get_asset_path('logo.png')
             theme_icon = ft.icons.BRIGHTNESS_MEDIUM
         else:
             icon_color = "black"
-            logo_src = "src_assets/logo_white.png"
+            logo_src = get_asset_path('logo_white.png')
             theme_icon = ft.icons.BRIGHTNESS_3
 
         help_btn.content.icon_color = icon_color
@@ -39,7 +40,7 @@ def create_ui(page: ft.Page):
         page.update()
 
     title_image = ft.Image(
-        src="src_assets/logo.png",
+        src=get_asset_path('logo.png'),
         width=900,
         height=155,
         fit=ft.ImageFit.CONTAIN
@@ -305,22 +306,22 @@ def create_ui(page: ft.Page):
     )
 
     git_btn = ft.IconButton(
-        content=ft.Image(src="src_assets/git.png", width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('git.png'), width=24, height=24, color="#9ecaff"),
         on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
     )
 
     dis_btn = ft.IconButton(
-        content=ft.Image(src="src_assets/dis.png", width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('dis.png'), width=24, height=24, color="#9ecaff"),
         on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
     )
 
     tg_btn = ft.IconButton(
-        content=ft.Image(src="src_assets/tg.png", width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('tg.png'), width=24, height=24, color="#9ecaff"),
         on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
     )
 
     yt_btn = ft.IconButton(
-        content=ft.Image(src="src_assets/yt.png", width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('yt.png'), width=24, height=24, color="#9ecaff"),
         on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
     )
 
@@ -404,4 +405,3 @@ def create_ui(page: ft.Page):
     )
 
     update_theme()
-
