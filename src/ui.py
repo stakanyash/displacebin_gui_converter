@@ -11,22 +11,42 @@ def create_ui(page: ft.Page):
     global lang
 
     page.title = lang["title"]
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.theme_mode = "dark"
     page.window_maximizable = False
-    page.window_height = 680
+    page.window_height = 800
     page.window_width = 640
     page.window_resizable = False
 
-    title_text = ft.Text(
-        lang["title"],
-        size=24,
-        weight="bold",
-        text_align=ft.TextAlign.CENTER
+    def update_theme():
+        if page.theme_mode == "dark":
+            icon_color = "#9ecaff"
+            logo_src = "src_assets/logo.png"
+            theme_icon = ft.icons.BRIGHTNESS_MEDIUM
+        else:
+            icon_color = "black"
+            logo_src = "src_assets/logo_white.png"
+            theme_icon = ft.icons.BRIGHTNESS_3
+
+        help_btn.content.icon_color = icon_color
+        language_btn.content.icon_color = icon_color
+        theme_btn.icon = theme_icon
+        theme_btn.icon_color = icon_color
+        git_btn.content.color = icon_color
+        dis_btn.content.color = icon_color
+        tg_btn.content.color = icon_color
+        yt_btn.content.color = icon_color
+        title_image.src = logo_src
+        page.update()
+
+    title_image = ft.Image(
+        src="src_assets/logo.png",
+        width=900,
+        height=155,
+        fit=ft.ImageFit.CONTAIN
     )
 
     title_container = ft.Container(
-        content=title_text,
+        content=title_image,
         padding=ft.padding.all(10),
         alignment=ft.alignment.center
     )
@@ -171,13 +191,13 @@ def create_ui(page: ft.Page):
                 plsselfile.open = True
                 page.update()
 
-    def change_language(e):
+    def change_language(language_code):
         global lang
-        lang = translations[language_selector.value]
+        lang = translations[language_code]
         update_ui()
+        show_language_dialog(None)
 
     def update_ui():
-        title_text.value = lang["title"]
         file_name.label = lang["select_file"]
         select_button.text = lang["sel_button"]
         output_format_text.value = lang["select_format"]
@@ -185,9 +205,39 @@ def create_ui(page: ft.Page):
         output_format.content.controls[1].label = ".png"
         output_size.label = lang["select_size"]
         process_button.text = lang["convert_file"]
-        help_btn.tooltip = lang["help"]
-        language_selector.label = lang["sel_lang"]
+        help_btn.content.tooltip = lang["help"]
         page.update()
+
+    def show_language_dialog(e):
+        def close_language_dialog(e):
+            language_dialog.open = False
+            page.update()
+
+        language_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(lang["sel_lang"]),
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.TextButton("Русский", on_click=lambda e: change_language("ru")),
+                        ft.TextButton("English", on_click=lambda e: change_language("en")),
+                        ft.TextButton("Українська", on_click=lambda e: change_language("uk")),
+                    ],
+                    spacing=10,
+                ),
+                width=250,
+                height=120,
+            ),
+            actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.dialog = language_dialog
+        language_dialog.open = True
+        page.update()
+
+    def toggle_theme(e):
+        page.theme_mode = "light" if page.theme_mode == "dark" else "dark"
+        update_theme()
 
     file_name = ft.TextField(
         value="",
@@ -226,35 +276,52 @@ def create_ui(page: ft.Page):
     help_icon = ft.icons.HELP_OUTLINE
     hover_icon = ft.icons.HELP
 
-    help_btn = ft.IconButton(
-        icon=help_icon,
-        on_click=helpdialog,
+    help_btn = ft.Container(
+        content=ft.IconButton(
+            icon=help_icon,
+            on_click=helpdialog,
+            icon_color="#9ecaff",
+        ),
+        on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
+    )
+
+    language_icon = ft.icons.LANGUAGE
+    language_hover_icon = ft.icons.LANGUAGE_OUTLINED
+
+    language_btn = ft.Container(
+        content=ft.IconButton(
+            icon=language_icon,
+            on_click=show_language_dialog,
+            icon_color="#9ecaff",
+        ),
+        on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
+    )
+
+    theme_icon = ft.icons.BRIGHTNESS_MEDIUM
+    theme_btn = ft.IconButton(
+        icon=theme_icon,
+        on_click=toggle_theme,
         icon_color="#9ecaff"
     )
 
-    def change_icon(e):
-        if e.data == "true":
-            help_btn.icon = hover_icon
-        else:
-            help_btn.icon = help_icon
-        page.update()
-
-    help_btn_container = ft.Container(
-        content=help_btn,
-        on_hover=change_icon,
-        alignment=ft.alignment.center,
-        padding=ft.padding.only(left=0, right=0, top=5, bottom=5)
+    git_btn = ft.IconButton(
+        content=ft.Image(src="src_assets/git.png", width=24, height=24, color="#9ecaff"),
+        on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
     )
 
-    language_selector = ft.Dropdown(
-        width=200,
-        options=[
-            ft.dropdown.Option("ru", "Русский"),
-            ft.dropdown.Option("en", "English"),
-            ft.dropdown.Option("uk", "Українська")
-        ],
-        label=lang["sel_lang"],
-        on_change=change_language
+    dis_btn = ft.IconButton(
+        content=ft.Image(src="src_assets/dis.png", width=24, height=24, color="#9ecaff"),
+        on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
+    )
+
+    tg_btn = ft.IconButton(
+        content=ft.Image(src="src_assets/tg.png", width=24, height=24, color="#9ecaff"),
+        on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
+    )
+
+    yt_btn = ft.IconButton(
+        content=ft.Image(src="src_assets/yt.png", width=24, height=24, color="#9ecaff"),
+        on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
     )
 
     page.add(
@@ -302,15 +369,39 @@ def create_ui(page: ft.Page):
 
     page.add(
         ft.Container(
-            ft.Row(
+            ft.Column(
                 [
-                    help_btn_container,
-                    ft.Container(width=5),
-                    language_selector,
+                    ft.Row(
+                        [
+                            help_btn,
+                            ft.Container(width=5),
+                            language_btn,
+                            ft.Container(width=5),
+                            theme_btn,
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        vertical_alignment=ft.CrossAxisAlignment.END,
+                    ),
+                    ft.Container(height=1),
+                    ft.Row(
+                        [
+                            git_btn,
+                            ft.Container(width=5),
+                            dis_btn,
+                            ft.Container(width=5),
+                            tg_btn,
+                            ft.Container(width=5),
+                            yt_btn,
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        vertical_alignment=ft.CrossAxisAlignment.END,
+                    ),
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                vertical_alignment=ft.CrossAxisAlignment.END,
+                spacing=2,
             ),
             padding=ft.padding.all(2),
         )
     )
+
+    update_theme()
+
