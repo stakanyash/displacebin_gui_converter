@@ -69,7 +69,9 @@ def create_ui(page: ft.Page):
 
         if not input_file_path.lower().endswith('.bin'):
             show_error_dialog(lang["error"], lang["wrong_extension"])
+            file_name.value = ""
             input_file_path = None
+            page.update()
             return
 
         file_name.value = input_file_path
@@ -222,11 +224,13 @@ def create_ui(page: ft.Page):
                         ft.TextButton("Русский", on_click=lambda e: change_language("ru")),
                         ft.TextButton("English", on_click=lambda e: change_language("en")),
                         ft.TextButton("Українська", on_click=lambda e: change_language("uk")),
+                        ft.TextButton("Беларуская", on_click=lambda e: change_language("be")),
+                        ft.TextButton("Polski", on_click=lambda e: change_language("pl"))
                     ],
                     spacing=10,
                 ),
                 width=250,
-                height=120,
+                height=200,
             ),
             actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
@@ -264,8 +268,10 @@ def create_ui(page: ft.Page):
     output_size = ft.Dropdown(
         width=400,
         options=[
-            ft.dropdown.Option("512"),
-            ft.dropdown.Option("1024")
+            ft.dropdown.Option(key="256", text="16x16"),
+            ft.dropdown.Option(key="512", text="32x32"),
+            ft.dropdown.Option(key="1024", text="64x64"),
+            ft.dropdown.Option(key="2056", text="128x128")
         ],
         label=lang["select_size"],
         label_style=ft.TextStyle(size=13)
