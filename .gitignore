@@ -5,3 +5,5 @@ displaceconverter.exe
 *.exe
 /main.dist
 /src/__pycache__
+/src/assets
+src/nuitka-crash-report.xml
