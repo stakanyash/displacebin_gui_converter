@@ -269,10 +269,10 @@ def create_ui(page: ft.Page):
     output_size = ft.Dropdown(
         width=400,
         options=[
+            ft.dropdown.Option(key="128", text="8x8"),
             ft.dropdown.Option(key="256", text="16x16"),
             ft.dropdown.Option(key="512", text="32x32"),
-            ft.dropdown.Option(key="1024", text="64x64"),
-            ft.dropdown.Option(key="2056", text="128x128")
+            ft.dropdown.Option(key="1024", text="64x64")
         ],
         label=lang["select_size"],
         label_style=ft.TextStyle(size=13)
