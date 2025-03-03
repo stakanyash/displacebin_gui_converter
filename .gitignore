@@ -8,3 +8,4 @@ displaceconverter.exe
 /src/assets
 /src/main.dist
 src/nuitka-crash-report.xml
+/src/.vs

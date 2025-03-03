@@ -1,2 +1,2 @@
-flet
-pillow
+flet==0.25.2
+Pillow
