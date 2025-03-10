@@ -5,18 +5,21 @@ from converter import process_raw, process_png, struct
 import os
 from resources import get_asset_path
 
-system_lang = locale.getdefaultlocale()[0][:2]
-lang = translations.get(system_lang, translations["en"])
+locale.setlocale(locale.LC_ALL, '')
+current_locale = locale.getlocale()[0]
+system_lang = current_locale[:2] if current_locale else 'En'
+lang = translations.get(system_lang, translations["En"])
 
 def create_ui(page: ft.Page):
     global lang
 
     page.title = lang["title"]
     page.theme_mode = "dark"
-    page.window_maximizable = False
-    page.window_height = 800
-    page.window_width = 640
-    page.window_resizable = False
+    page.window.maximizable = False
+    page.window.height = 800
+    page.window.width = 640
+    page.window.resizable = False
+    page.window.icon = get_asset_path('icon.ico')
 
     def update_theme():
         if page.theme_mode == "dark":
@@ -84,14 +87,13 @@ def create_ui(page: ft.Page):
             page.update()
 
         error_dialog = ft.AlertDialog(
-            modal=True,
+            open=True,
             title=ft.Text(title),
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=close_error_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
-        page.dialog = error_dialog
-        error_dialog.open = True
+        page.overlay.append(error_dialog)
         page.update()
 
     file_picker = ft.FilePicker(on_result=on_file_selected)
@@ -99,16 +101,6 @@ def create_ui(page: ft.Page):
 
     def select_file(e):
         file_picker.pick_files()
-
-    def show_result_dialog(result_text):
-        dialog = ft.AlertDialog(
-            title=ft.Text(lang["conv_result"]),
-            content=ft.Text(result_text),
-            actions=[ft.TextButton("OK", on_click=lambda e: page.dialog.close())],
-        )
-        page.dialog = dialog
-        dialog.open = True
-        page.update()
 
     def helpdialog(e):
         def close_dlghelp(e):
@@ -118,7 +110,7 @@ def create_ui(page: ft.Page):
             page.update()
 
         help_dlg = ft.AlertDialog(
-            modal=True,
+            open=True,
             title=ft.Text(lang["help"]),
             content=ft.Text(lang["help_text"]),
             actions=[
@@ -127,8 +119,7 @@ def create_ui(page: ft.Page):
             actions_alignment=ft.MainAxisAlignment.END,
             on_dismiss=lambda e: print(lang["help_print"]),
         )
-        page.dialog = help_dlg
-        help_dlg.open = True
+        page.overlay.append(help_dlg)
         page.update()
 
     def process_file(e):
@@ -147,32 +138,32 @@ def create_ui(page: ft.Page):
                     page.update()
 
                 convertsuc = ft.AlertDialog(
-                    modal=True,
+                    open=True,
                     title=ft.Text(lang["result"]),
                     content=ft.Text(f"{lang['file_saved']}: {output_path}\n"),
                     actions=[ft.TextButton("OK", on_click=close_dlgconvert)],
                     actions_alignment=ft.MainAxisAlignment.END,
                     on_dismiss=lambda e: print(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
                 )
-                page.dialog = convertsuc
-                convertsuc.open = True
+                page.overlay.append(convertsuc)
                 page.update()
 
             except struct.error as e:
-                def close_dlg_error(e):
-                    error_dialog.open = False
+                def close_banner(e):
+                    errorbanner.open = False
                     page.update()
 
-                error_dialog = ft.AlertDialog(
-                    modal=True,
-                    title=ft.Text(lang["error"]),
+                errorbanner = ft.Banner(
+                    open=True,
+                    bgcolor=ft.colors.RED_700,
+                    leading=ft.Icon(ft.icons.WARNING, size=35, color=ft.colors.AMBER),
                     content=ft.Text(lang["struct_error"]),
-                    actions=[ft.TextButton("OK", on_click=close_dlg_error)],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                    on_dismiss=lambda e: print(f"Error: {str(e)}"),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: close_banner(e)),
+                        ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)])
+                    ]
                 )
-                page.dialog = error_dialog
-                error_dialog.open = True
+                page.overlay.append(errorbanner)
                 page.update()
 
         else:
@@ -184,14 +175,13 @@ def create_ui(page: ft.Page):
                     page.update()
 
                 plsselfile = ft.AlertDialog(
-                    modal=True,
+                    open=True,
                     title=ft.Text(lang["error"]),
                     content=ft.Text(lang["plssel_file"]),
                     actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
-                page.dialog = plsselfile
-                plsselfile.open = True
+                page.overlay.append(plsselfile)
                 page.update()
 
     def change_language(language_code):
@@ -209,6 +199,12 @@ def create_ui(page: ft.Page):
         output_size.label = lang["select_size"]
         process_button.text = lang["convert_file"]
         help_btn.content.tooltip = lang["help"]
+        language_btn.content.tooltip = lang["cnglang"]
+        theme_btn.tooltip = lang["toggletheme"]
+        git_btn.content.tooltip = lang["github"]
+        dis_btn.content.tooltip = lang["discord"]
+        tg_btn.content.tooltip = lang["telegram"]
+        yt_btn.content.tooltip = lang["youtube"]
         page.update()
 
     def show_language_dialog(e):
@@ -217,16 +213,16 @@ def create_ui(page: ft.Page):
             page.update()
 
         language_dialog = ft.AlertDialog(
-            modal=True,
+            open=True,
             title=ft.Text(lang["sel_lang"]),
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.TextButton("Русский", on_click=lambda e: change_language("ru")),
-                        ft.TextButton("English", on_click=lambda e: change_language("en")),
-                        ft.TextButton("Українська", on_click=lambda e: change_language("uk")),
-                        ft.TextButton("Беларуская", on_click=lambda e: change_language("be")),
-                        ft.TextButton("Polski", on_click=lambda e: change_language("pl"))
+                        ft.TextButton("Русский", on_click=lambda e: change_language("Ru")),
+                        ft.TextButton("English", on_click=lambda e: change_language("En")),
+                        ft.TextButton("Українська", on_click=lambda e: change_language("Uk")),
+                        ft.TextButton("Беларуская", on_click=lambda e: change_language("Be")),
+                        ft.TextButton("Polski", on_click=lambda e: change_language("Pl"))
                     ],
                     spacing=10,
                 ),
@@ -236,8 +232,7 @@ def create_ui(page: ft.Page):
             actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
-        page.dialog = language_dialog
-        language_dialog.open = True
+        page.overlay.append(language_dialog)
         page.update()
 
     def toggle_theme(e):
@@ -288,6 +283,7 @@ def create_ui(page: ft.Page):
             icon=help_icon,
             on_click=helpdialog,
             icon_color="#9ecaff",
+            tooltip=lang["help"]
         ),
         on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
     )
@@ -300,6 +296,7 @@ def create_ui(page: ft.Page):
             icon=language_icon,
             on_click=show_language_dialog,
             icon_color="#9ecaff",
+            tooltip=lang["cnglang"]
         ),
         on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
     )
@@ -308,26 +305,27 @@ def create_ui(page: ft.Page):
     theme_btn = ft.IconButton(
         icon=theme_icon,
         on_click=toggle_theme,
-        icon_color="#9ecaff"
+        icon_color="#9ecaff",
+        tooltip=lang["toggletheme"]
     )
 
     git_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('git.png'), width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('git.png'), width=24, height=24, color="#9ecaff", tooltip=lang["github"]),
         on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
     )
 
     dis_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('dis.png'), width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('dis.png'), width=24, height=24, color="#9ecaff", tooltip=lang["discord"]),
         on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
     )
 
     tg_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('tg.png'), width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('tg.png'), width=24, height=24, color="#9ecaff", tooltip=lang["telegram"]),
         on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
     )
 
     yt_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('yt.png'), width=24, height=24, color="#9ecaff"),
+        content=ft.Image(src=get_asset_path('yt.png'), width=24, height=24, color="#9ecaff", tooltip=lang["youtube"]),
         on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
     )
 

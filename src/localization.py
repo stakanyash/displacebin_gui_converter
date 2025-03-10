@@ -1,7 +1,7 @@
 import locale
 
 translations = {
-    "en": {
+    "En": {
         "title": "displace.bin converter",
         "error": "Error",
         "sel_file": "Please select a file",
@@ -44,9 +44,15 @@ translations = {
         "wrong_extension": "Wrong file extension! Please select a .bin file!",
         "sel_lang": "Select language",
         "cancel": "Cancel",
-        "menu": "Menu"
+        "menu": "Menu",
+        "cnglang": "Change language",
+        "toggletheme": "Switch theme",
+        "github": "GitHub repository",
+        "discord": "Discord server",
+        "telegram": "Telegram channel",
+        "youtube": "YouTube channel"
     },
-    "ru": {
+    "Ru": {
         "title": "displace.bin конвертер",
         "error": "Ошибка",
         "sel_file": "Пожалуйста, выберите файл",
@@ -89,9 +95,15 @@ translations = {
         "wrong_extension": "Неверное расширение файла! Пожалуйста, выберите файл формата .bin!",
         "sel_lang": "Выберите язык",
         "cancel": "Отмена",
-        "menu": "Меню"
+        "menu": "Меню",
+        "cnglang": "Смена языка",
+        "toggletheme": "Переключение темы",
+        "github": "GitHub репозиторий",
+        "discord": "Discord сервер",
+        "telegram": "Telegram канал",
+        "youtube": "YouTube канал"
     },
-    "uk": {
+    "Uk": {
         "title": "displace.bin конвертер",
         "error": "Помилка",
         "sel_file": "Будь ласка, виберіть файл",
@@ -127,18 +139,22 @@ translations = {
         ),
         "help_print": "Діалогове вікно допомоги закрито",
         "struct_error": (
-            "Сталася помилка під час перетворення файлу.\n"
-            "\n"
-            "Будь ласка, перевірте обраний розмір карти (допустимі значення: 512 або 1024).\n"
+            "Сталася помилка під час конвертації файлу. Будь ласка, перевірте обраний розмір карти.\n"
             "\n"
             "Для отримання додаткової інформації відкрийте розділ допомоги."
         ),
         "wrong_extension": "Невірне розширення файлу! Будь ласка, виберіть файл формату .bin!",
         "sel_lang": "Виберіть мову",
         "cancel": "Скасування",
-        "menu": "Меню"
+        "menu": "Меню",
+        "cnglang": "Зміна мови",
+        "toggletheme": "Переключення теми",
+        "github": "GitHub репозиторій",
+        "discord": "Discord сервер",
+        "telegram": "Telegram канал",
+        "youtube": "YouTube канал"
     },
-    "pl": {
+    "Pl": {
         "title": "Konwerter displace.bin",
         "error": "Błąd",
         "sel_file": "Proszę wybrać plik",
@@ -167,7 +183,7 @@ translations = {
             "32x32 - mapa z wartością levelsize '32'.\n"
             "64x64 - mapa z wartością levelsize '64'.\n"
             "\n"
-            "Wartość levelsize można znaleźć otwierając plik .ssl Twojej mapy w trybie tekstowym (np. przez VS Code).\n"
+            "Wartość levelsize można znaleźć otwierając plik .ssl twojej mapy w trybie tekstowym (np. przez VS Code).\n"
             "\n"
             "Autor programu: stakan\n"
             "Autor skryptu konwersji: ThePlain\n"
@@ -181,9 +197,15 @@ translations = {
         "wrong_extension": "Nieprawidłowe rozszerzenie pliku! Proszę wybrać plik formatu .bin!",
         "sel_lang": "Wybierz język",
         "cancel": "Anuluj",
-        "menu": "Menu"
+        "menu": "Menu",
+        "cnglang": "Zmiana języka",
+        "toggletheme": "Przełączanie motywu",
+        "github": "Repozytorium GitHub",
+        "discord": "Serwer Discord",
+        "telegram": "Kanał Telegram",
+        "youtube": "Kanał YouTube"
     },
-    "be": {
+    "Be": {
         "title": "displace.bin канвертар",
         "error": "Памылка",
         "sel_file": "Калі ласка, выберыце файл",
@@ -227,9 +249,12 @@ translations = {
         "wrong_extension": "Няправільнае пашырэнне файла! Калі ласка, выберыце файл фармату .bin!",
         "sel_lang": "Выберыце мову",
         "cancel": "Адмена",
-        "menu": "Меню"
+        "menu": "Меню",
+        "cnglang": "Змена мовы",
+        "toggletheme": "Пераключэнне тэмы",
+        "github": "GitHub рэпазіторый",
+        "discord": "Discord сервер",
+        "telegram": "Telegram канал",
+        "youtube": "YouTube канал"
     }
 }
-
-system_lang = locale.getdefaultlocale()[0][:2]
-lang = translations.get(system_lang, translations["en"])
