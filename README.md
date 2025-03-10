@@ -1,6 +1,6 @@
 # displace.bin GUI конвертер
 
-![icon1](https://github.com/user-attachments/assets/5d407247-d70d-45ce-923d-26cb401d9be4)
+![logo](https://github.com/user-attachments/assets/f63de348-033f-4404-b24f-072d999fb998)
 
 Эта программа помогает вам конвертировать файлы `displace.bin` вашей карты в формат `.raw` или `.png`. Она разработана для упрощения процесса конвертации.
 
