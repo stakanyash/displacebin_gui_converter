@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:ui'; // Для получения локали системы
-import 'lang.dart'; // Файл с локализациями
+import 'dart:ui';
+import 'lang.dart';
 
 class LanguageProvider extends ChangeNotifier {
   String _currentLanguage = "en"; // Язык по умолчанию

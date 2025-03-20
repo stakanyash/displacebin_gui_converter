@@ -14,6 +14,9 @@ void showSettingsDialog(BuildContext context, Function(String) onLanguageSelecte
           children: [
             TextButton(onPressed: () => onLanguageSelected("ru"), child: Text("Русский")),
             TextButton(onPressed: () => onLanguageSelected("en"), child: Text("English")),
+            TextButton(onPressed: () => onLanguageSelected("uk"), child: Text("Українська")),
+            TextButton(onPressed: () => onLanguageSelected("be"), child: Text("Беларуская")),
+            TextButton(onPressed: () => onLanguageSelected("pl"), child: Text("Polski")),
           ],
         ),
         actions: [

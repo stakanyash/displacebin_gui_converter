@@ -32,6 +32,8 @@ final Map<String, Map<String, String>> lang = {
         "\n"
         "Автор программы: стакан\n"
         "Автор скрипта конвертирования: ThePlain\n"
+        "\n"
+        "Портирование на Dart было выполнено с помощью ChatGPT."
     ),
     "struct_error": (
         "Произошла ошибка при конвертации файла. Пожалуйста, проверьте выбранный размер карты.\n"
@@ -46,7 +48,9 @@ final Map<String, Map<String, String>> lang = {
     "github": "GitHub репозиторий",
     "discord": "Discord сервер",
     "telegram": "Telegram канал",
-    "youtube": "YouTube канал"
+    "youtube": "YouTube канал",
+    "light_mode": "Переключиться на светлую тему",
+    "dark_mode": "Переключиться на тёмную тему"
   },
   "en": {
     "title": "displace.bin converter",
@@ -97,6 +101,168 @@ final Map<String, Map<String, String>> lang = {
     "github": "GitHub repository",
     "discord": "Discord server",
     "telegram": "Telegram channel",
-    "youtube": "YouTube channel"
-  }
+    "youtube": "YouTube channel",
+    "light_mode": "Switch to white theme",
+    "dark_mode": "Switch to dark theme"
+  },
+  "uk": {
+        "title": "displace.bin конвертер",
+        "error": "Помилка",
+        "sel_file": "Будь ласка, виберіть файл",
+        "select_file": "Вибраний файл",
+        "file_saved": "Файл збережено як",
+        "conv_result": "Результат обробки",
+        "result": "Результат",
+        "plssel_file": "Будь ласка, виберіть файл, формат та розмір.",
+        "sel_button": "Вибрати файл",
+        "select_size": "Виберіть розмір (докладніше у вкладці 'Допомога')",
+        "convert_file": "Перетворити файл",
+        "select_format": "Виберіть формат вихідного файлу:",
+        "help": "Допомога",
+        "help_text": (
+            "Ця програма допоможе вам перетворити displace.bin вашої карти\n"
+            "в .raw або .png формат.\n"
+            "\n"
+            "Щоб перетворити файл, вам потрібно вибрати файл displace.bin у папці з картою, вибрати формат (raw або png) та вибрати розмір карти.\n"
+            "\n"
+            "Після цього натисніть кнопку 'Перетворити файл'. У разі успіху ви побачите повідомлення про успіх\n"
+            "і файл у вибраному вами форматі з'явиться у папці.\n"
+            "\n"
+            "Довідка по розміру карт:\n"
+            "8x8 - карта з значенням levelsize '8'.\n"
+            "16x16 - карта з значенням levelsize '16'.\n"
+            "32x32 - карта з значенням levelsize '32'.\n"
+            "64x64 - карта з значенням levelsize '64'.\n"
+            "\n"
+            "Дізнатися значення levelsize можна відкривши .ssl файл вашої карти в текстовому режимі (наприклад через VS Code).\n"
+            "\n"
+            "Автор програми: стакан\n"
+            "Автор скрипта перетворення: ThePlain\n"
+            "\n"
+            "Портування на Dart було зроблено за допомогою ChatGPT."
+        ),
+        "struct_error": (
+            "Сталася помилка під час конвертації файлу. Будь ласка, перевірте обраний розмір карти.\n"
+            "\n"
+            "Для отримання додаткової інформації відкрийте розділ допомоги."
+        ),
+        "sel_lang": "Виберіть мову",
+        "cancel": "Скасування",
+        "menu": "Меню",
+        "cnglang": "Зміна мови",
+        "toggletheme": "Переключення теми",
+        "github": "GitHub репозиторій",
+        "discord": "Discord сервер",
+        "telegram": "Telegram канал",
+        "youtube": "YouTube канал",
+        "light_mode": "Перейти на світлу тему",
+        "dark_mode": "Перейти на темну тему"
+    },
+    "pl": {
+        "title": "Konwerter displace.bin",
+        "error": "Błąd",
+        "sel_file": "Proszę wybrać plik",
+        "select_file": "Wybrany plik",
+        "file_saved": "Plik zapisany jako",
+        "conv_result": "Wynik przetwarzania",
+        "result": "Wynik",
+        "plssel_file": "Proszę wybrać plik, format i rozmiar.",
+        "sel_button": "Wybierz plik",
+        "select_size": "Wybierz rozmiar (więcej informacji w zakładce 'Pomoc')",
+        "convert_file": "Konwertuj plik",
+        "select_format": "Wybierz format pliku wyjściowego:",
+        "help": "Pomoc",
+        "help_text": (
+            "Ten program pomoże Ci skonwertować displace.bin Twojej mapy\n"
+            "do formatu .raw lub .png.\n"
+            "\n"
+            "Aby skonwertować plik, musisz wybrać plik displace.bin w folderze mapy, wybrać format (raw lub png) i wybrać rozmiar mapy.\n"
+            "\n"
+            "Następnie naciśnij przycisk 'Konwertuj plik'. W przypadku sukcesu zobaczysz odpowiedni komunikat\n"
+            "i plik w wybranym formacie pojawi się w folderze.\n"
+            "\n"
+            "Informacje o rozmiarze map:\n"
+            "8x8 - mapa z wartością levelsize '8'.\n"
+            "16x16 - mapa z wartością levelsize '16'.\n"
+            "32x32 - mapa z wartością levelsize '32'.\n"
+            "64x64 - mapa z wartością levelsize '64'.\n"
+            "\n"
+            "Wartość levelsize można znaleźć otwierając plik .ssl twojej mapy w trybie tekstowym (np. przez VS Code).\n"
+            "\n"
+            "Autor programu: stakan\n"
+            "Autor skryptu konwersji: ThePlain\n"
+            "\n"
+            "Portowanie na Dart zostało wykonane przy pomocy ChatGPT."
+        ),
+        "struct_error": (
+            "Wystąpił błąd podczas konwersji pliku. Proszę sprawdzić wybrany rozmiar mapy.\n"
+            "\n"
+            "Aby uzyskać więcej informacji, zobacz sekcję pomocy."
+        ),
+        "sel_lang": "Wybierz język",
+        "cancel": "Anuluj",
+        "menu": "Menu",
+        "cnglang": "Zmiana języka",
+        "toggletheme": "Przełączanie motywu",
+        "github": "Repozytorium GitHub",
+        "discord": "Serwer Discord",
+        "telegram": "Kanał Telegram",
+        "youtube": "Kanał YouTube",
+        "light_mode": "Przełącz na jasny motyw",
+        "dark_mode": "Przełącz na ciemny motyw"
+    },
+    "be": {
+        "title": "displace.bin канвертар",
+        "error": "Памылка",
+        "sel_file": "Калі ласка, выберыце файл",
+        "select_file": "Выбраны файл",
+        "file_saved": "Файл захаваны як",
+        "conv_result": "Вынік апрацоўкі",
+        "result": "Вынік",
+        "plssel_file": "Калі ласка, выберыце файл, фармат і памер.",
+        "sel_button": "Выбраць файл",
+        "select_size": "Выберыце памер (падрабязней у раздзеле 'Дапамога')",
+        "convert_file": "Канвертаваць файл",
+        "select_format": "Выберыце фармат выхаднога файла:",
+        "help": "Дапамога",
+        "help_text": (
+            "Гэтая праграма дапаможа вам канвертаваць displace.bin вашай карты\n"
+            "у фармат .raw або .png.\n"
+            "\n"
+            "Каб канвертаваць файл, вам трэба выбраць файл displace.bin у тэчцы з картай, выбраць фармат (raw або png) і выбраць памер карты.\n"
+            "\n"
+            "Пасля гэтага націсніце кнопку 'Канвертаваць файл'. У выпадку поспеху вы ўбачыце адпаведны паведамленне\n"
+            "і файл у выбраным вамі фармаце з'явіцца ў тэчцы.\n"
+            "\n"
+            "Даведка па памеру карт:\n"
+            "8x8 - карта з значэннем levelsize '8'.\n"
+            "16x16 - карта з значэннем levelsize '16'.\n"
+            "32x32 - карта з значэннем levelsize '32'.\n"
+            "64x64 - карта з значэннем levelsize '64'.\n"
+            "\n"
+            "Даведацца значэнне levelsize можна адкрыўшы .ssl файл вашай карты ў тэкставым рэжыме (напрыклад праз VS Code).\n"
+            "\n"
+            "Аўтар праграмы: стакан\n"
+            "Аўтар скрыпта канвертавання: ThePlain\n"
+            "Праверка перакладу: nEmPoBu4, MrKirov\n"
+            "\n"
+            "Партаванне на Dart было зроблена дзякуючы ChatGPT."
+        ),
+        "struct_error": (
+            "Адбылася памылка пры канвертаванні файла. Калі ласка, праверце выбраны памер карты.\n"
+            "\n"
+            "Каб атрымаць дадатковую інфармацыю, адкрыйце раздзел дапамогі."
+        ),
+        "sel_lang": "Выберыце мову",
+        "cancel": "Адмена",
+        "menu": "Меню",
+        "cnglang": "Змена мовы",
+        "toggletheme": "Пераключэнне тэмы",
+        "github": "GitHub рэпазіторый",
+        "discord": "Discord сервер",
+        "telegram": "Telegram канал",
+        "youtube": "YouTube канал",
+        "light_mode": "Перайсці на светлую тэму",
+        "dark_mode": "Перайсці на цёмную тэму"
+    }
 };
