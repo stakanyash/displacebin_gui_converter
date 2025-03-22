@@ -182,6 +182,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               contentPadding: EdgeInsets.symmetric(horizontal: 12),
                             ),
                             items: [
+                              DropdownMenuItem(value: 64, child: Text("4x4")),
                               DropdownMenuItem(value: 128, child: Text("8x8")),
                               DropdownMenuItem(value: 256, child: Text("16x16")),
                               DropdownMenuItem(value: 512, child: Text("32x32")),
@@ -375,6 +376,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             "and a file in the selected format will appear in the folder.\n"
             "\n"
             "Map size reference:\n"
+            "4x4 - map with levelsize value '4'.\n"
             "8x8 - map with levelsize value '8'.\n"
             "16x16 - map with levelsize value '16'.\n"
             "32x32 - map with levelsize value '32'.\n"
