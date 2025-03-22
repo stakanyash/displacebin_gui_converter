@@ -4,6 +4,21 @@ from localization import translations
 from converter import process_raw, process_png, struct
 import os
 from resources import get_asset_path
+import logging
+from datetime import datetime
+import traceback
+
+log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+log_filename = f"dgc_{log_timestamp}.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler()
+    ]
+)
 
 locale.setlocale(locale.LC_ALL, '')
 current_locale = locale.getlocale()[0]
@@ -75,6 +90,7 @@ def create_ui(page: ft.Page):
             show_error_dialog(lang["error"], lang["wrong_extension"])
             file_name.value = ""
             input_file_path = None
+            logging.error("Selected file is not .bin file!")
             page.update()
             return
 
@@ -146,6 +162,7 @@ def create_ui(page: ft.Page):
                     on_dismiss=lambda e: print(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
                 )
                 page.overlay.append(convertsuc)
+                logging.info(f"Converted file saved to: {output_path}")
                 page.update()
 
             except struct.error as e:
@@ -163,6 +180,8 @@ def create_ui(page: ft.Page):
                         ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)])
                     ]
                 )
+                logging.error(f"struct.error occurred: {e}")
+                logging.error("Traceback:\n" + traceback.format_exc())
                 page.overlay.append(errorbanner)
                 page.update()
 
@@ -182,6 +201,7 @@ def create_ui(page: ft.Page):
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
                 page.overlay.append(plsselfile)
+                logging.warning("File is not selected!")
                 page.update()
 
     def change_language(language_code):
@@ -264,6 +284,7 @@ def create_ui(page: ft.Page):
     output_size = ft.Dropdown(
         width=400,
         options=[
+            ft.dropdown.Option(key="64", text="4x4"),
             ft.dropdown.Option(key="128", text="8x8"),
             ft.dropdown.Option(key="256", text="16x16"),
             ft.dropdown.Option(key="512", text="32x32"),
@@ -408,5 +429,19 @@ def create_ui(page: ft.Page):
         )
     )
 
-    update_theme()
+    version_text = ft.Text(
+        "Python 1.2.6 [250320]",
+        size=10,
+        color=ft.colors.GREY,
+    )
 
+    version_container = ft.Container(
+        content=version_text,
+        alignment=ft.alignment.bottom_right,
+        padding=ft.padding.only(right=10, bottom=10),
+    )
+
+    page.add(version_container)
+
+
+    update_theme()

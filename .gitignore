@@ -9,3 +9,4 @@ displaceconverter.exe
 /src/main.dist
 src/nuitka-crash-report.xml
 /src/.vs
+*.log
