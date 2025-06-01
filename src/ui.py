@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 import traceback
 
-VERSION = "1.3"
+VERSION = "1.3.1"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
@@ -575,7 +575,7 @@ def create_ui(page: ft.Page):
     )
 
     version_text = ft.Text(
-        "Python 1.3 [250601g]",
+        "Python 1.3.1 [250601h]",
         size=10,
         color=ft.Colors.GREY,
     )
