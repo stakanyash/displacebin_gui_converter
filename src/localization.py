@@ -50,7 +50,15 @@ translations = {
         "github": "GitHub repository",
         "discord": "Discord server",
         "telegram": "Telegram channel",
-        "youtube": "YouTube channel"
+        "youtube": "YouTube channel",
+        "zerodiv_error": (
+            "Oops! An unexpected error occurred during the conversion process!\n"
+            "\n"
+            "Please contact the program developer and attach the log file."
+        ),
+        "opengit": "Open Github",
+        "min": "Minimize",
+        "exit": "Exit"
     },
     "Ru": {
         "title": "displace.bin конвертер",
@@ -101,7 +109,15 @@ translations = {
         "github": "GitHub репозиторий",
         "discord": "Discord сервер",
         "telegram": "Telegram канал",
-        "youtube": "YouTube канал"
+        "youtube": "YouTube канал",
+        "zerodiv_error": (
+            "Упс! В процессе конвертации произошла непредвиденная ошибка!\n" 
+            "\n"
+            "Обратитесь к разработчику программы, прикрепив лог-файл." 
+        ),
+        "opengit": "Открыть Github",
+        "min": "Свернуть",
+        "exit": "Закрыть"
     },
     "Uk": {
         "title": "displace.bin конвертер",
@@ -152,7 +168,15 @@ translations = {
         "github": "GitHub репозиторій",
         "discord": "Discord сервер",
         "telegram": "Telegram канал",
-        "youtube": "YouTube канал"
+        "youtube": "YouTube канал",
+        "zerodiv_error": (
+            "Упс! Під час конвертації сталася непередбачена помилка!\n"
+            "\n"
+            "Зверніться до розробника програми, додавши лог-файл."
+        ),
+        "opengit": "Відкрити Github",
+        "min": "Згорнути",
+        "exit": "Закрити"
     },
     "Pl": {
         "title": "Konwerter displace.bin",
@@ -203,7 +227,15 @@ translations = {
         "github": "Repozytorium GitHub",
         "discord": "Serwer Discord",
         "telegram": "Kanał Telegram",
-        "youtube": "Kanał YouTube"
+        "youtube": "Kanał YouTube",
+        "zerodiv_error": (
+            "Ups! W trakcie konwersji wystąpił nieoczekiwany błąd.\n"
+            "\n"
+            "Proszę skontaktować się z programistą aplikacji i dołączyć plik dziennika (log)."
+        ),
+        "opengit": "Otwórz Github",
+        "min": "Zminimalizuj",
+        "exit": "Zamknij"
     },
     "Be": {
         "title": "displace.bin канвертар",
@@ -255,6 +287,14 @@ translations = {
         "github": "GitHub рэпазіторый",
         "discord": "Discord сервер",
         "telegram": "Telegram канал",
-        "youtube": "YouTube канал"
+        "youtube": "YouTube канал",
+        "zerodiv_error": (
+            "Упс! Падчас канвертацыі адбылася няспадзяваная памылка!\n"
+            "\n"
+            "Калі ласка, звярніцеся да распрацоўшчыка праграмы і далучыце лаг-файл."
+        ),
+        "opengit": "Адкрыць Github",
+        "min": "Згарнуць",
+        "exit": "Закрыць"
     }
 }

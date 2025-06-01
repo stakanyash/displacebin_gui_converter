@@ -8,6 +8,8 @@ import logging
 from datetime import datetime
 import traceback
 
+VERSION = "1.3"
+
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
 
@@ -25,26 +27,49 @@ current_locale = locale.getlocale()[0]
 system_lang = current_locale[:2] if current_locale else 'En'
 lang = translations.get(system_lang, translations["En"])
 
+class PageHelper:
+        def __init__(self, page: ft.Page):
+            self.page = page
+            self.min_btn = ft.IconButton(icon=ft.Icons.REMOVE, icon_size=16, tooltip=lang["min"], on_click=self.minimize)
+            self.close_btn = ft.IconButton(icon=ft.Icons.CLOSE, icon_size=16, tooltip=lang["exit"], on_click=self.close)
+
+        def toggle_theme(self, e):
+            self.page.theme_mode = (
+                ft.ThemeMode.DARK if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+            )
+            self.page.update()
+
+        def minimize(self, e):
+            self.page.window.minimized = True
+            self.page.update()
+
+        def close(self, e):
+            self.page.window.close()
+
 def create_ui(page: ft.Page):
     global lang
 
     page.title = lang["title"]
     page.theme_mode = "dark"
     page.window.maximizable = False
-    page.window.height = 800
+    page.window.height = 810
     page.window.width = 640
     page.window.resizable = False
+    page.window.title_bar_hidden = True
+    page.window.title_bar_buttons_hidden = True
     page.window.icon = get_asset_path('icon.ico')
+
+    helper = PageHelper(page)
 
     def update_theme():
         if page.theme_mode == "dark":
             icon_color = "#9ecaff"
             logo_src = get_asset_path('logo.png')
-            theme_icon = ft.icons.BRIGHTNESS_MEDIUM
+            theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
         else:
             icon_color = "black"
             logo_src = get_asset_path('logo_white.png')
-            theme_icon = ft.icons.BRIGHTNESS_3
+            theme_icon = ft.Icons.BRIGHTNESS_3
 
         help_btn.content.icon_color = icon_color
         language_btn.content.icon_color = icon_color
@@ -56,6 +81,60 @@ def create_ui(page: ft.Page):
         yt_btn.content.color = icon_color
         title_image.src = logo_src
         page.update()
+
+    logo = get_asset_path('icon.ico')
+
+    top_bar = ft.Container(
+        height=27,
+        bgcolor=ft.Colors.SURFACE,
+        padding=ft.padding.symmetric(horizontal=8),
+        content=ft.WindowDragArea(
+            ft.Row(
+                [
+                    ft.Row(
+                        [
+                            ft.Image(src=logo, width=16, height=16),
+                            ft.Text(
+                                f"{lang['title']} {VERSION}",
+                                size=12,
+                                weight=ft.FontWeight.BOLD,
+                            ),
+                        ],
+                        spacing=8,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Row(
+                        [
+                            ft.IconButton(
+                                icon=ft.Icons.REMOVE,
+                                icon_size=14,
+                                tooltip=lang["min"],
+                                on_click=helper.minimize,
+                                padding=4,
+                                width=28,
+                                height=27,
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.CLOSE,
+                                icon_size=14,
+                                tooltip=lang["exit"],
+                                on_click=helper.close,
+                                padding=4,
+                                width=28,
+                                height=27,
+                            ),
+                        ],
+                        spacing=4,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            )
+        ),
+    )
+
+    page.add(top_bar)
 
     title_image = ft.Image(
         src=get_asset_path('logo.png'),
@@ -83,15 +162,19 @@ def create_ui(page: ft.Page):
 
     def on_file_selected(e: ft.FilePickerResultEvent):
         nonlocal input_file_path
-        if e.files:
-            input_file_path = e.files[0].path
+        try:
+            if e.files:
+                input_file_path = e.files[0].path
 
-        if not input_file_path.lower().endswith('.bin'):
-            show_error_dialog(lang["error"], lang["wrong_extension"])
-            file_name.value = ""
-            input_file_path = None
-            logging.error("Selected file is not .bin file!")
-            page.update()
+            if not input_file_path.lower().endswith('.bin'):
+                show_error_dialog(lang["error"], lang["wrong_extension"])
+                file_name.value = ""
+                input_file_path = None
+                logging.error("Selected file is not .bin file!")
+                page.update()
+                return
+        except AttributeError:
+            logging.info("User closed file picker.")
             return
 
         file_name.value = input_file_path
@@ -155,11 +238,22 @@ def create_ui(page: ft.Page):
 
                 convertsuc = ft.AlertDialog(
                     open=True,
-                    title=ft.Text(lang["result"]),
-                    content=ft.Text(f"{lang['file_saved']}: {output_path}\n"),
-                    actions=[ft.TextButton("OK", on_click=close_dlgconvert)],
+                    bgcolor=ft.Colors.GREEN_900,
+                    title=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.CHECK, size=30, color=ft.Colors.WHITE),
+                            ft.Text(lang["result"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                        ],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                    content=ft.Column([
+                        ft.Text(f"{lang['file_saved']}:", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                        ft.Text(output_path, size=12, width=450, color=ft.Colors.WHITE),
+                    ], tight=True),
+                    actions=[ft.TextButton("OK", on_click=close_dlgconvert, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
                     actions_alignment=ft.MainAxisAlignment.END,
-                    on_dismiss=lambda e: print(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
+                    on_dismiss=lambda e: logging.info(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
                 )
                 page.overlay.append(convertsuc)
                 logging.info(f"Converted file saved to: {output_path}")
@@ -167,22 +261,59 @@ def create_ui(page: ft.Page):
 
             except struct.error as e:
                 def close_banner(e):
-                    errorbanner.open = False
+                    errordialog.open = False
                     page.update()
 
-                errorbanner = ft.Banner(
+                errordialog = ft.AlertDialog(
                     open=True,
-                    bgcolor=ft.colors.RED_700,
-                    leading=ft.Icon(ft.icons.WARNING, size=35, color=ft.colors.AMBER),
-                    content=ft.Text(lang["struct_error"]),
+                    bgcolor=ft.Colors.RED_900,
+                    title=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                        ],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                    content=ft.Text(lang["struct_error"], color=ft.Colors.WHITE),
                     actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_banner(e)),
-                        ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)])
-                    ]
+                        ft.TextButton("OK", on_click=lambda e: close_banner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                        ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)], style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
                 )
+
                 logging.error(f"struct.error occurred: {e}")
                 logging.error("Traceback:\n" + traceback.format_exc())
-                page.overlay.append(errorbanner)
+                page.overlay.append(errordialog)
+                page.update()
+
+            except ZeroDivisionError as e:
+                def close_zerbanner(e):
+                    zererrordialog.open = False
+                    page.update()
+
+                zererrordialog = ft.AlertDialog(
+                    open=True,
+                    bgcolor=ft.Colors.RED_ACCENT_700,
+                    title=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.ERROR, size=30, color=ft.Colors.WHITE),
+                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                        ],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                    content=ft.Text(lang["zerodiv_error"], color=ft.Colors.WHITE),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: close_zerbanner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                        ft.TextButton(lang["opengit"], on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new"), style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                logging.error(f"ZeroDivisionError occurred: {e}")
+                logging.error("Traceback:\n" + traceback.format_exc())
+                page.overlay.append(zererrordialog)
                 page.update()
 
         else:
@@ -195,7 +326,14 @@ def create_ui(page: ft.Page):
 
                 plsselfile = ft.AlertDialog(
                     open=True,
-                    title=ft.Text(lang["error"]),
+                    title=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.RED),
+                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM),
+                        ],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
                     content=ft.Text(lang["plssel_file"]),
                     actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
                     actions_alignment=ft.MainAxisAlignment.END,
@@ -211,6 +349,11 @@ def create_ui(page: ft.Page):
         show_language_dialog(None)
 
     def update_ui():
+        top_bar.content.content.controls[0].controls[1].value = f"{lang['title']} {VERSION}"
+        top_bar.content.content.controls[1].controls[0].tooltip = lang["min"]
+        top_bar.content.content.controls[1].controls[1].tooltip = lang["exit"]
+        helper.min_btn.tooltip = lang["min"]
+        helper.close_btn.tooltip = lang["exit"]
         file_name.label = lang["select_file"]
         select_button.text = lang["sel_button"]
         output_format_text.value = lang["select_format"]
@@ -263,7 +406,8 @@ def create_ui(page: ft.Page):
         value="",
         label=lang["select_file"],
         read_only=True,
-        width=550
+        width=550,
+        border_color="#46678F"
     )
 
     select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
@@ -291,13 +435,14 @@ def create_ui(page: ft.Page):
             ft.dropdown.Option(key="1024", text="64x64")
         ],
         label=lang["select_size"],
-        label_style=ft.TextStyle(size=13)
+        label_style=ft.TextStyle(size=13),
+        border_color="#46678F"
     )
 
     process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
 
-    help_icon = ft.icons.HELP_OUTLINE
-    hover_icon = ft.icons.HELP
+    help_icon = ft.Icons.HELP_OUTLINE
+    hover_icon = ft.Icons.HELP
 
     help_btn = ft.Container(
         content=ft.IconButton(
@@ -309,8 +454,8 @@ def create_ui(page: ft.Page):
         on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
     )
 
-    language_icon = ft.icons.LANGUAGE
-    language_hover_icon = ft.icons.LANGUAGE_OUTLINED
+    language_icon = ft.Icons.LANGUAGE
+    language_hover_icon = ft.Icons.LANGUAGE_OUTLINED
 
     language_btn = ft.Container(
         content=ft.IconButton(
@@ -322,7 +467,7 @@ def create_ui(page: ft.Page):
         on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
     )
 
-    theme_icon = ft.icons.BRIGHTNESS_MEDIUM
+    theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
     theme_btn = ft.IconButton(
         icon=theme_icon,
         on_click=toggle_theme,
@@ -430,9 +575,9 @@ def create_ui(page: ft.Page):
     )
 
     version_text = ft.Text(
-        "Python 1.2.6 [250320]",
+        "Python 1.3 [250601g]",
         size=10,
-        color=ft.colors.GREY,
+        color=ft.Colors.GREY,
     )
 
     version_container = ft.Container(
