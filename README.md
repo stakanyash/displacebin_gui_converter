@@ -6,6 +6,8 @@
 
 **[ENGLISH README](https://github.com/stakanyash/displacebin_gui_converter/blob/main/README_EN.md)**
 
+powered by [python](https://github.com/python/cpython) & [flet](https://github.com/flet-dev/flet)
+
 ## Оглавление
 
 - [Возможности](#возможности)
