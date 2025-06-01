@@ -11,6 +11,7 @@
 - [Возможности](#возможности)
 - [Как использовать](#как-использовать)
 - [Скачать](#скачать)
+- [Скриншоты](#скриншоты)
 - [Требования](#требования)
 - [Установка](#установка)
 - [Запуск программы](#запуск-программы-из-исходного-кода)
@@ -39,6 +40,16 @@
 ## Скачать
 
 **Скачать скомпилированный файл можете здесь:** https://github.com/stakanyash/displacebin_gui_converter/releases
+
+## Скриншоты
+
+<div align="center">
+  
+![image](https://github.com/user-attachments/assets/dda96e86-53a4-4f65-ab54-7b67c2c1d632)
+![image](https://github.com/user-attachments/assets/6158f22e-f045-4aea-a435-89900c568d43)
+![image](https://github.com/user-attachments/assets/abac6461-641e-4b9a-8f73-c9e5f69c70c1)
+
+</div>
 
 ## Требования
 
