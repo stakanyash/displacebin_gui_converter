@@ -32,6 +32,8 @@ translations = {
             "\n"
             "You can find the levelsize value by opening the .ssl file of your map in text mode (for example via VS Code).\n"
             "\n"
+            "If you want to use \"reverse\" conversion in the future, enable the \"Save metadata\" checkbox.\n"
+            "\n"
             "Program author: stakan\n"
             "Conversion script author: ThePlain\n"
         ),
@@ -58,8 +60,57 @@ translations = {
         ),
         "opengit": "Open Github",
         "min": "Minimize",
-        "exit": "Exit"
+        "exit": "Exit",
+        "wrong_extension_reverse": "Selected file is not .raw!",
+        "invalid_json_metadata": "JSON file is not selected or contains invalid data. Make sure you selected the correct file!",
+        "meta_path": "Metadata file saved to:",
+        "json": "JSON metadata file",
+        "modeswitch1": "Switch to \".bin to .raw/.png\" converter",
+        "modeswitch2": "Switch to \".raw/.png to .bin\" converter",
+        "reversehelp_text": (
+            "This mode of the \"displace.bin GUI Converter\" program helps you convert a raw or png format file back to bin format.\n"
+            "\n"
+            "To convert a file, you need to select a file with a .raw or .png extension and choose a JSON metadata file (see Help in the main mode for details).\n"
+            "\n"
+            "The size is calculated automatically.\n"
+            "\n"
+            "After selecting the files, press the \"Convert File\" button. If successful, you will see a confirmation message and the file \"displace.bin\" will appear in the folder. If it already exists, it will be overwritten.\n"
+            "\n"
+            "FAQ:\n"
+            "Q: Can I use this to enlarge the map?\n"
+            "A: No, you can't. This feature will be implemented in version 3.0.\n"
+            "\n"
+            "Q: Can I perform reverse conversion without the metadata file?\n"
+            "A: No, you can't. The metadata file contains critical information about the minimum and maximum terrain height.\n"
+            "\n"
+            "Q: What is this useful for?\n"
+            "A: For cases where you want to manually edit the map terrain outside of M3D Editor.\n"
+            "\n"
+            "\n"
+            "Program author: stakan\n"
+            "Conversion script author: ThePlain\n"
+        ),
+        "unsupportedfile": (
+            "Oops! It looks like you're trying to convert a file that is not supported!\n"
+            "\n"
+            "Make sure the file is map data and that you have selected the correct metadata file.\n"
+            "If you selected a PNG file as the main input, make sure it is 16-bit depth and in \"grayscale\" format."
+        ),
+        "wrong_extension_json": "The selected file is not a .json format file!",
+        "metadatacheckbox": "Save metadata",
+        "metadatainfo": "What are metadata for?",
+        "meta_text": (
+            "Metadata is required for \"reverse\" conversion.\n"
+            "\n"
+            "Metadata contains information about the minimum and maximum height of the landscape.\n"
+            "Without this data, reverse conversion is IMPOSSIBLE!\n"
+            "\n"
+            "Therefore, if you plan to use \"reverse\" conversion, saving metadata is mandatory.\n"
+            "Metadata is saved in .json format inside the folder where the source .bin file is located."
+        )
     },
+
+    # Russian language
     "Ru": {
         "title": "displace.bin конвертер",
         "error": "Ошибка",
@@ -91,8 +142,10 @@ translations = {
             "\n"
             "Узнать значение levelsize можно открыв .ssl файл вашей карты в текстовом режиме (например через VS Code).\n"
             "\n"
+            "Если вы хотите использовать \"обратную\" конвертацию в будущем, активируете галочку \"Сохранить метаданные\".\n"
+            "\n"
             "Автор программы: стакан\n"
-            "Автор скрипта конвертирования: ThePlain\n"
+            "Автор скрипта конвертирования: ThePlain"
         ),
         "help_print": "Закрыто диалоговое окно помощи",
         "struct_error": (
@@ -117,8 +170,57 @@ translations = {
         ),
         "opengit": "Открыть Github",
         "min": "Свернуть",
-        "exit": "Закрыть"
+        "exit": "Закрыть",
+        "wrong_extension_reverse": "Выбранный файл не является .raw или .png!",
+        "invalid_json_metadata": "JSON-файл не выбран или содержит неверные данные. Убедитесь, что вы выбрали правильный файл!",
+        "meta_path": "Путь к метаданным:",
+        "json": "JSON-файл метаданных",
+        "modeswitch1": "Переключиться на конвертер \".bin в .raw/.png\"",
+        "modeswitch2": "Переключиться на конвертер \".raw/.png в .bin\"",
+        "reversehelp_text": (
+            "Данный режим программы \"displace.bin GUI Converter\" поможет вам сконвертировать файл формата raw или png обратно в bin формат.\n"
+            "\n"
+            "Для конвертирования файла вам необходимо выбрать файл с расширением raw или png и выбрать JSON файл метаданных (подробнее см. Помощь в режиме основной конвертации).\n"
+            "\n"
+            "Размер вычисляется автоматически.\n"
+            "\n"
+            "После выбора файлов нажать кнопку 'Преобразовать файл'. В случае успеха вы увидите соответствующее сообщение и в папке появится файл \"displace.bin\". В случае наличия файла он будет перезаписан.\n"
+            "\n"
+            "FAQ:\n"
+            "В: Можно ли таким образом увеличить карту?\n"
+            "О: Нет, нельзя. Данный функционал будет реализован отдельно в 3.0\n"
+            "\n"
+            "В: Можно ли произвести обратную конвертацию без файла метаданных?\n"
+            "О: Нет, нельзя. Файл метаданных содержит критически необходимую информацию о минимальной и максимальной высоте ландшафта.\n"
+            "\n"
+            "В: Для чего это может быть полезно?\n"
+            "О: Для случаев, если вы захотели вручную изменить ландшафт карты за пределами M3D Editor."
+            "\n"
+            "\n"
+            "Автор программы: стакан\n"
+            "Автор скрипта конвертирования: ThePlain\n"
+        ),
+        "unsupportedfile": (
+            "Упс! Кажется, вы пытаетесь сконвертировать файл, который не поддерживается!\n"
+            "\n"
+            "Убедитесь, что файл является данными картами и что вы выбрали правильный файл метаданных.\n"
+            "Если в качестве основного файла вы выбрали PNG, убедитесь, что он имеет глубину 16 бит и формат \"grayscale\""
+        ),
+        "wrong_extension_json": "Выбранный файл не является файлом формата .json!",
+        "metadatacheckbox": "Сохранять метаданные",
+        "metadatainfo": "Для чего нужны метаданные?",
+        "meta_text": (
+            "Метаданные нужны для \"обратного\" конвертирования.\n"
+            "\n"
+            "Метаданные содержат в себе данные о минимальной и максимальной высоте ландшафта.\n"
+            "При отсутствии этих данных обратное конвертирование НЕВОЗМОЖНО!\n"
+            "\n"
+            "Поэтому если вы планируете использовать \"обратную\" конвертацию, то сохранение метаданных является обязательным.\n"
+            "Метаданные сохраняются в формате .json в папке в которой распологается исходный .bin файл."
+        )
     },
+
+    # Ukrainian language
     "Uk": {
         "title": "displace.bin конвертер",
         "error": "Помилка",
@@ -150,6 +252,8 @@ translations = {
             "\n"
             "Дізнатися значення levelsize можна відкривши .ssl файл вашої карти в текстовому режимі (наприклад через VS Code).\n"
             "\n"
+            "Якщо ви хочете використовувати \"зворотню\" конвертацію у майбутньому, активуйте прапорець \"Зберігати метадані\".\n"
+            "\n"
             "Автор програми: стакан\n"
             "Автор скрипта перетворення: ThePlain\n"
         ),
@@ -176,8 +280,57 @@ translations = {
         ),
         "opengit": "Відкрити Github",
         "min": "Згорнути",
-        "exit": "Закрити"
+        "exit": "Закрити",
+        "wrong_extension_reverse": "Вибраний файл не є .raw або .png!",
+        "invalid_json_metadata": "JSON-файл не вибрано або він містить некоректні дані. Переконайтесь, що ви вибрали правильний файл!",
+        "meta_path": "Шлях до метаданих:",
+        "json": "JSON-файл метаданих",
+        "modeswitch1": "Перемкнутися на конвертер \".bin у .raw/.png\"",
+        "modeswitch2": "Перемкнутися на конвертер \".raw/.png у .bin\"",
+        "reversehelp_text": (
+            "Цей режим програми \"displace.bin GUI Converter\" допоможе вам сконвертувати файл у форматі raw або png назад у формат bin.\n"
+            "\n"
+            "Щоб конвертувати файл, потрібно обрати файл з розширенням raw або png і обрати JSON-файл метаданих (детальніше див. Допомогу в основному режимі конвертації).\n"
+            "\n"
+            "Розмір обчислюється автоматично.\n"
+            "\n"
+            "Після вибору файлів натисніть кнопку 'Перетворити файл'. У разі успіху ви побачите відповідне повідомлення, і у папці з'явиться файл \"displace.bin\". Якщо файл вже існує, він буде перезаписаний.\n"
+            "\n"
+            "FAQ:\n"
+            "П: Чи можна таким чином збільшити карту?\n"
+            "В: Ні, не можна. Цей функціонал буде реалізовано окремо у версії 3.0.\n"
+            "\n"
+            "П: Чи можна зробити зворотне перетворення без файлу метаданих?\n"
+            "В: Ні, не можна. Файл метаданих містить критично важливу інформацію про мінімальну та максимальну висоту рельєфу.\n"
+            "\n"
+            "П: Для чого це може бути корисно?\n"
+            "В: Для випадків, коли ви хочете вручну змінити рельєф карти поза межами M3D Editor.\n"
+            "\n"
+            "\n"
+            "Автор програми: стакан\n"
+            "Автор скрипта конвертації: ThePlain\n"
+        ),
+        "unsupportedfile": (
+            "Ой! Схоже, ви намагаєтеся конвертувати файл, який не підтримується!\n"
+            "\n"
+            "Переконайтесь, що файл є даними карти і що ви вибрали правильний файл метаданих.\n"
+            "Якщо основним файлом вибрано PNG, переконайтесь, що він має глибину 16 біт і формат \"grayscale\"."
+        ),
+        "wrong_extension_json": "Вибраний файл не є файлом у форматі .json!",
+        "metadatacheckbox": "Зберігати метадані",
+        "metadatainfo": "Для чого потрібні метадані?",
+        "meta_text": (
+            "Метадані необхідні для «зворотнього» перетворення.\n"
+            "\n"
+            "Метадані містять інформацію про мінімальну та максимальну висоту ландшафту.\n"
+            "Без цих даних зворотне перетворення НЕМОЖЛИВЕ!\n"
+            "\n"
+            "Тому якщо ви плануєте використовувати «зворотню» конвертацію, збереження метаданих є обов’язковим.\n"
+            "Метадані зберігаються у форматі .json у папці, де розташований вихідний файл .bin."
+        )
     },
+
+    # Polish language
     "Pl": {
         "title": "Konwerter displace.bin",
         "error": "Błąd",
@@ -209,6 +362,8 @@ translations = {
             "\n"
             "Wartość levelsize można znaleźć otwierając plik .ssl twojej mapy w trybie tekstowym (np. przez VS Code).\n"
             "\n"
+            "Jeśli chcesz używać \"odwrotnej\" konwersji w przyszłości, zaznacz pole \"Zapisz metadane\".\n"
+            "\n"
             "Autor programu: stakan\n"
             "Autor skryptu konwersji: ThePlain\n"
         ),
@@ -235,8 +390,57 @@ translations = {
         ),
         "opengit": "Otwórz Github",
         "min": "Zminimalizuj",
-        "exit": "Zamknij"
+        "exit": "Zamknij",
+        "wrong_extension_reverse": "Wybrany plik nie jest formatu .raw lub .png!",
+        "invalid_json_metadata": "Plik JSON nie został wybrany lub zawiera nieprawidłowe dane. Upewnij się, że wybrałeś poprawny plik!",
+        "meta_path": "Ścieżka do metadanych:",
+        "json": "Plik metadanych JSON",
+        "modeswitch1": "Przełącz na konwerter \".bin do .raw/.png\"",
+        "modeswitch2": "Przełącz na konwerter \".raw/.png do .bin\"",
+        "reversehelp_text": (
+            "Ten tryb programu \"displace.bin GUI Converter\" pomoże ci przekonwertować plik w formacie raw lub png z powrotem na format bin.\n"
+            "\n"
+            "Aby przekonwertować plik, należy wybrać plik z rozszerzeniem raw lub png oraz plik metadanych JSON (więcej informacji w Pomocy trybu głównego konwertowania).\n"
+            "\n"
+            "Rozmiar obliczany jest automatycznie.\n"
+            "\n"
+            "Po wybraniu plików kliknij przycisk 'Konwertuj plik'. W przypadku powodzenia zobaczysz odpowiedni komunikat, a w folderze pojawi się plik \"displace.bin\". Jeśli plik już istnieje, zostanie nadpisany.\n"
+            "\n"
+            "FAQ:\n"
+            "P: Czy w ten sposób można powiększyć mapę?\n"
+            "O: Nie, nie można. Ta funkcjonalność będzie dostępna oddzielnie w wersji 3.0.\n"
+            "\n"
+            "P: Czy można przeprowadzić konwersję wsteczną bez pliku metadanych?\n"
+            "O: Nie, nie można. Plik metadanych zawiera krytyczne informacje o minimalnej i maksymalnej wysokości terenu.\n"
+            "\n"
+            "P: Do czego może się to przydać?\n"
+            "O: W przypadkach, gdy chcesz ręcznie edytować teren mapy poza M3D Editor.\n"
+            "\n"
+            "\n"
+            "Autor programu: stakan\n"
+            "Autor skryptu konwersji: ThePlain\n"
+        ),
+        "unsupportedfile": (
+            "Ups! Wygląda na to, że próbujesz przekonwertować plik, który nie jest obsługiwany!\n"
+            "\n"
+            "Upewnij się, że plik zawiera dane mapy i że wybrałeś poprawny plik metadanych.\n"
+            "Jeśli jako plik główny wybrano PNG, upewnij się, że ma on głębię 16 bitów i format \"grayscale\"."
+        ),
+        "wrong_extension_json": "Wybrany plik nie jest plikiem w formacie .json!",
+        "metadatacheckbox": "Zapisz metadane",
+        "metadatainfo": "Do czego służą metadane?",
+        "meta_text": (
+            "Metadane są potrzebne do konwersji \"odwrotnej\".\n"
+            "\n"
+            "Metadane zawierają informacje o minimalnej i maksymalnej wysokości krajobrazu.\n"
+            "Bez tych danych konwersja odwrotna jest NIEMOŻLIWA!\n"
+            "\n"
+            "Dlatego jeśli planujesz używać konwersji \"odwrotnej\", zapisywanie metadanych jest obowiązkowe.\n"
+            "Metadane zapisywane są w formacie .json w folderze, w którym znajduje się plik źródłowy .bin."
+        )
     },
+
+    # Belarusian language
     "Be": {
         "title": "displace.bin канвертар",
         "error": "Памылка",
@@ -268,6 +472,8 @@ translations = {
             "\n"
             "Даведацца значэнне levelsize можна адкрыўшы .ssl файл вашай карты ў тэкставым рэжыме (напрыклад праз VS Code).\n"
             "\n"
+            "Калі вы хочаце выкарыстоўваць \"зваротную\" канверсію ў майбуднім, актывуйце праверачок \"Захаваць метаданыя\".\n"
+            "\n"
             "Аўтар праграмы: стакан\n"
             "Аўтар скрыпта канвертавання: ThePlain\n"
             "Праверка перакладу: nEmPoBu4, MrKirov\n"
@@ -295,6 +501,53 @@ translations = {
         ),
         "opengit": "Адкрыць Github",
         "min": "Згарнуць",
-        "exit": "Закрыць"
+        "exit": "Закрыць",
+        "wrong_extension_reverse": "Выбраны файл не з'яўляецца .raw або .png!",
+        "invalid_json_metadata": "JSON-файл не выбраны або змяшчае няправільныя дадзеныя. Пераканайцеся, што вы выбралі правільны файл!",
+        "meta_path": "Шлях да метаданых:",
+        "json": "JSON-файл метаданых",
+        "modeswitch1": "Пераключыцца на канвертар \".bin у .raw/.png\"",
+        "modeswitch2": "Пераключыцца на канвертар \".raw/.png у .bin\"",
+        "reversehelp_text": (
+            "Гэты рэжым праграмы \"displace.bin GUI Converter\" дапаможа вам сканвертаваць файл фармату raw або png назад у фармат bin.\n"
+            "\n"
+            "Каб сканвертаваць файл, неабходна выбраць файл з пашырэннем raw або png і выбраць JSON-файл метаданых (падрабязней гл. Дапамога ў асноўным рэжыме канвертацыі).\n"
+            "\n"
+            "Памер вызначаецца аўтаматычна.\n"
+            "\n"
+            "Пасля выбару файлаў націсніце кнопку 'Канвертаваць файл'. У выпадку поспеху вы ўбачыце адпаведнае паведамленне, і ў тэчцы з’явіцца файл \"displace.bin\". Калі файл ужо існуе, ён будзе перазапісаны.\n"
+            "\n"
+            "FAQ:\n"
+            "П: Ці можна такім чынам павялічыць карту?\n"
+            "А: Не, нельга. Гэты функцыянал будзе рэалізаваны асобна ў версіі 3.0.\n"
+            "\n"
+            "П: Ці можна выканаць зваротную канвертацыю без файла метаданых?\n"
+            "А: Не, нельга. Файл метаданых утрымлівае крытычна важную інфармацыю аб мінімальнай і максімальнай вышыні ландшафту.\n"
+            "\n"
+            "П: Навошта гэта можа быць карысна?\n"
+            "А: Для выпадкаў, калі вы хочаце ўручную змяніць ландшафт карты па-за межамі M3D Editor.\n"
+            "\n"
+            "\n"
+            "Аўтар праграмы: стакан\n"
+            "Аўтар скрыпта канвертацыі: ThePlain\n"
+        ),
+        "unsupportedfile": (
+            "Упс! Падаецца, што вы спрабуеце сканвертаваць файл, які не падтрымліваецца!\n"
+            "\n"
+            "Пераканайцеся, што файл з'яўляецца данымі карты і што вы выбралі правільны файл метаданых.\n"
+            "Калі вы выбралі PNG у якасці асноўнага файла, пераканайцеся, што ён мае глыбіню 16 бітаў і фармат \"grayscale\"."
+        ),
+        "wrong_extension_json": "Абраны файл не з'яўляецца файлам фармату .json!",
+        "metadatacheckbox": "Захаваць метаданыя",
+        "metadatainfo": "Для чаго патрэбныя метаданыя?",
+        "meta_text": (
+            "Метаданыя патрэбныя для \"зваротнага\" пераўтварэння.\n"
+            "\n"
+            "Метаданыя ўтрымліваюць інфармацыю пра мінімальную і максімальную вышыню ландшафту.\n"
+            "Без гэтых даных зваротнае пераўтварэнне НЯМОЖНАЕ!\n"
+            "\n"
+            "Таму калі вы плануеце выкарыстоўваць \"зваротную\" канвертацыю, захаванне метаданых абавязковае.\n"
+            "Метаданыя захоўваюцца ў фармаце .json у тэчцы, дзе размяшчаецца зыходны файл .bin."
+        )
     }
 }

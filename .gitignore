@@ -10,3 +10,5 @@ displaceconverter.exe
 src/nuitka-crash-report.xml
 /src/.vs
 *.log
+src/gs_c.py
+/src/src_assets/__pycache__

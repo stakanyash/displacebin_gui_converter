@@ -1,7 +1,7 @@
 import flet as ft
 import locale
 from localization import translations
-from converter import process_raw, process_png, struct, _write_metadata
+from reverse_converter import reverse_converter, struct
 import os
 from resources import get_asset_path
 import logging
@@ -11,13 +11,11 @@ import traceback
 VERSION = "2.0"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-log_filename = f"dgc_{log_timestamp}.log"
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_filename),
         logging.StreamHandler()
     ]
 )
@@ -46,25 +44,17 @@ class PageHelper:
         def close(self, e):
             self.page.window.close()
 
-def create_ui(page: ft.Page):
+def create_back_ui(page: ft.Page):
     global lang
 
-    page.title = lang["title"]
-    page.theme_mode = "dark"
-    page.window.maximizable = False
-    page.window.height = 810
-    page.window.width = 640
-    page.window.resizable = False
-    page.window.title_bar_hidden = True
-    page.window.title_bar_buttons_hidden = True
-    page.window.icon = get_asset_path('icon.ico')
-
     helper = PageHelper(page)
+    logging.info("Switched to \".raw to .bin\" mode")
 
-    def switch_to_reverse_ui(page: ft.Page):
-        from reverse_ui import create_back_ui
+    def switch_to_ui(page: ft.Page):
+        from ui import create_ui
         page.clean()
-        create_back_ui(page)
+        logging.info("Switched to \".bin to .raw/.png\" mode")
+        create_ui(page)
 
     def update_theme():
         if page.theme_mode == "dark":
@@ -86,7 +76,6 @@ def create_ui(page: ft.Page):
         yt_btn.content.color = icon_color
         title_image.src = logo_src
         rev_btn.icon_color = icon_color
-
         page.update()
 
     logo = get_asset_path('icon.ico')
@@ -172,14 +161,19 @@ def create_ui(page: ft.Page):
         try:
             if e.files:
                 input_file_path = e.files[0].path
+                file_ext = os.path.splitext(input_file_path)[1].lower()
 
-            if not input_file_path.lower().endswith('.bin'):
-                show_error_dialog(lang["error"], lang["wrong_extension"])
-                file_name.value = ""
-                input_file_path = None
-                logging.error("Selected file is not .bin file!")
-                page.update()
+                if file_ext not in [".raw", ".png"]:
+                    show_error_dialog(lang["error"], lang["wrong_extension_reverse"])
+                    file_name.value = ""
+                    input_file_path = None
+                    logging.error("Selected file is not .raw!")
+                    page.update()
+                    return
+            else:
+                logging.info("User closed file picker without selecting a file.")
                 return
+
         except AttributeError:
             logging.info("User closed file picker.")
             return
@@ -194,9 +188,17 @@ def create_ui(page: ft.Page):
 
         error_dialog = ft.AlertDialog(
             open=True,
-            title=ft.Text(title),
+            bgcolor=ft.Colors.RED_900,
+            title=ft.Row(
+                [
+                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                    ft.Text(title)
+                ],
+                spacing=10,
+                alignment=ft.MainAxisAlignment.START,
+            ),
             content=ft.Text(message),
-            actions=[ft.TextButton("OK", on_click=close_error_dialog)],
+            actions=[ft.TextButton("OK", on_click=close_error_dialog, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
             actions_alignment=ft.MainAxisAlignment.END,
         )
         page.overlay.append(error_dialog)
@@ -205,32 +207,43 @@ def create_ui(page: ft.Page):
     file_picker = ft.FilePicker(on_result=on_file_selected)
     page.overlay.append(file_picker)
 
+    json_file_path = None  # переменная для хранения пути к JSON
+    json_data = {}  # переменная для хранения содержимого JSON
+
+    def on_json_selected(e: ft.FilePickerResultEvent):
+        nonlocal json_file_path, json_data
+        if e.files:
+            json_file_path = e.files[0].path
+            _, ext = os.path.splitext(json_file_path)
+            if ext.lower() != ".json":
+                show_error_dialog(lang["error"], lang["wrong_extension_json"])
+                json_file_path = None
+                json_field.value = ""
+                json_data = {}
+                page.update()
+                return
+
+            try:
+                import json
+                with open(json_file_path, "r") as f:
+                    json_data = json.load(f)
+                json_field.value = json_file_path
+                page.update()
+            except Exception as ex:
+                logging.error(f"Ошибка чтения JSON: {ex}")
+                show_error_dialog(lang["error"], lang["invalid_json_metadata"])
+                json_file_path = None
+                json_data = {}
+                json_field.value = ""
+        else:
+            logging.info("JSON file selection canceled.")
+        page.update()
+
+    json_picker = ft.FilePicker(on_result=on_json_selected)
+    page.overlay.append(json_picker)
+
     def select_file(e):
         file_picker.pick_files()
-
-    def metadata_info_dialog(e):
-        def close_dlgmeta(e):
-            global dialog_open
-            meta_dlg.open = False
-            dialog_open = False
-            page.update()
-
-        meta_dlg = ft.AlertDialog(
-            open=True,
-            title=ft.Row(
-                [
-                    ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE),
-                    ft.Text(lang["metadatainfo"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
-                ],
-            ),
-            content=ft.Text(lang["meta_text"]),
-            actions=[
-                ft.TextButton("OK", on_click=close_dlgmeta)
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.overlay.append(meta_dlg)
-        page.update()
 
     def helpdialog(e):
         def close_dlghelp(e):
@@ -247,9 +260,8 @@ def create_ui(page: ft.Page):
                     ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
                 ],
             ),
-            content=ft.Text(lang["help_text"]),
+            content=ft.Text(lang["reversehelp_text"]),
             actions=[
-                ft.TextButton(lang["metadatainfo"], on_click=lambda e: [close_dlghelp(e), metadata_info_dialog(e)]),
                 ft.TextButton("OK", on_click=close_dlghelp)
             ],
             actions_alignment=ft.MainAxisAlignment.END,
@@ -259,31 +271,59 @@ def create_ui(page: ft.Page):
         page.update()
 
     def process_file(e):
-        if input_file_path and output_format.value and output_size.value:
-            size = int(output_size.value)
-            output_path = os.path.splitext(input_file_path)[0] + (".raw" if output_format.value == "RAW" else ".png")
+        if not json_data or "Min" not in json_data or "Max" not in json_data or "Delta" not in json_data:
+            def close_invalid_json(e):
+                invalid_json_dlg.open = False
+                page.update()
+            invalid_json_dlg = ft.AlertDialog(
+                open=True,
+                bgcolor=ft.Colors.RED_900,
+                title=ft.Row(
+                    [ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE), ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)],
+                    spacing=10,
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+                content=ft.Text(lang["invalid_json_metadata"], color=ft.Colors.WHITE),
+                actions=[ft.TextButton("OK", on_click=close_invalid_json, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+            page.overlay.append(invalid_json_dlg)
+            page.update()
+            return
 
-            try:
-                if output_format.value == "RAW":
-                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size, save_metadata_checkbox.value)
-                else:
-                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size, save_metadata_checkbox.value)
+        if input_file_path:
+            _, input_ext = os.path.splitext(input_file_path)
+            input_ext = input_ext.lower()
+            if input_ext not in [".raw", ".png"]:
+                def close_invalid_input(e):
+                    invalid_input_dialog.open = False
+                    page.update()
+                invalid_input_dialog = ft.AlertDialog(
+                    open=True,
+                    bgcolor=ft.Colors.RED_900,
+                    title=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                        ],
+                        spacing=10,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                    content=ft.Text(lang["wrong_extension_reverse"], color=ft.Colors.WHITE),
+                    actions=[ft.TextButton("OK", on_click=close_invalid_input, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                page.overlay.append(invalid_input_dialog)
+                page.update()
+                return
 
+            # Выходной файл всегда будет .bin
+            output_path = os.path.splitext(input_file_path)[0] + ".bin"
+
+            def show_success_dialog(_min, _max, _del):
                 def close_dlgconvert(e):
                     convertsuc.open = False
                     page.update()
-
-                content_controls = [
-                    ft.Text(f"{lang['file_saved']}:", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                    ft.Text(output_path, size=12, width=450, color=ft.Colors.WHITE),
-                ]
-
-                if json_path:
-                    content_controls.extend([
-                        ft.Text(f"{lang['meta_path']}", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                        ft.Text(json_path, size=12, width=450, color=ft.Colors.WHITE),
-                    ])
-
                 convertsuc = ft.AlertDialog(
                     open=True,
                     bgcolor=ft.Colors.GREEN_900,
@@ -295,7 +335,10 @@ def create_ui(page: ft.Page):
                         spacing=10,
                         alignment=ft.MainAxisAlignment.START,
                     ),
-                    content=ft.Column(content_controls, tight=True),
+                    content=ft.Column([
+                        ft.Text(f"{lang['file_saved']}:", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                        ft.Text(output_path, size=12, width=450, color=ft.Colors.WHITE),
+                    ], tight=True),
                     actions=[ft.TextButton("OK", on_click=close_dlgconvert, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
                     actions_alignment=ft.MainAxisAlignment.END,
                     on_dismiss=lambda e: logging.info(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
@@ -304,11 +347,13 @@ def create_ui(page: ft.Page):
                 logging.info(f"Converted file saved to: {output_path}")
                 page.update()
 
+            try:
+                _min, _max, _del = reverse_converter(input_file_path, output_path, json_data)
+                show_success_dialog(_min, _max, _del)
             except struct.error as e:
                 def close_banner(e):
                     errordialog.open = False
                     page.update()
-
                 errordialog = ft.AlertDialog(
                     open=True,
                     bgcolor=ft.Colors.RED_900,
@@ -322,22 +367,19 @@ def create_ui(page: ft.Page):
                     ),
                     content=ft.Text(lang["struct_error"], color=ft.Colors.WHITE),
                     actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_banner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                        ft.TextButton("OK", on_click=close_banner, style=ft.ButtonStyle(color=ft.Colors.WHITE)),
                         ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)], style=ft.ButtonStyle(color=ft.Colors.WHITE))
                     ],
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
-
                 logging.error(f"struct.error occurred: {e}")
                 logging.error("Traceback:\n" + traceback.format_exc())
                 page.overlay.append(errordialog)
                 page.update()
-
             except ZeroDivisionError as e:
                 def close_zerbanner(e):
                     zererrordialog.open = False
                     page.update()
-
                 zererrordialog = ft.AlertDialog(
                     open=True,
                     bgcolor=ft.Colors.RED_ACCENT_700,
@@ -351,8 +393,8 @@ def create_ui(page: ft.Page):
                     ),
                     content=ft.Text(lang["zerodiv_error"], color=ft.Colors.WHITE),
                     actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_zerbanner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
-                        ft.TextButton(lang["opengit"], on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new"), style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                        ft.TextButton("OK", on_click=close_zerbanner, style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                        ft.TextButton(lang["opengit"], on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new"),   style=ft.ButtonStyle(color=ft.Colors.WHITE))
                     ],
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
@@ -360,33 +402,55 @@ def create_ui(page: ft.Page):
                 logging.error("Traceback:\n" + traceback.format_exc())
                 page.overlay.append(zererrordialog)
                 page.update()
-
-        else:
-            if not input_file_path or not output_format.value or not output_size.value:
-                def close_dlgpleaseselfile(e):
-                    global dialog_open
-                    plsselfile.open = False
-                    dialog_open = False
+            except ValueError as e:
+                def close_valbanner(e):
+                    valerrordialog.open = False
                     page.update()
-
-                plsselfile = ft.AlertDialog(
+                valerrordialog = ft.AlertDialog(
                     open=True,
-                    bgcolor=ft.Colors.RED_900,
+                    bgcolor=ft.Colors.RED_ACCENT_700,
                     title=ft.Row(
                         [
-                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.AMBER),
-                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM),
+                            ft.Icon(ft.Icons.ERROR, size=30, color=ft.Colors.WHITE),
+                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
                         ],
                         spacing=10,
                         alignment=ft.MainAxisAlignment.START,
                     ),
-                    content=ft.Text(lang["plssel_file"]),
-                    actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
+                    content=ft.Text(lang["unsupportedfile"], color=ft.Colors.WHITE),
+                    actions=[
+                        ft.TextButton("OK", on_click=close_valbanner, style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                        ft.TextButton(lang["opengit"], on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new"),   style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                    ],
                     actions_alignment=ft.MainAxisAlignment.END,
                 )
-                page.overlay.append(plsselfile)
-                logging.warning("File is not selected!")
+                logging.error(f"ValueError occurred: {e}")
+                logging.error("Traceback:\n" + traceback.format_exc())
+                page.overlay.append(valerrordialog)
                 page.update()
+        else:
+            def close_dlgpleaseselfile(e):
+                global dialog_open
+                plsselfile.open = False
+                dialog_open = False
+                page.update()
+            plsselfile = ft.AlertDialog(
+                open=True,
+                title=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.RED),
+                        ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM),
+                    ],
+                    spacing=10,
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+                content=ft.Text(lang["plssel_file"]),
+                actions=[ft.TextButton("OK", on_click=close_dlgpleaseselfile)],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+            page.overlay.append(plsselfile)
+            logging.warning("File is not selected!")
+            page.update()
 
     def change_language(language_code):
         global lang
@@ -402,10 +466,6 @@ def create_ui(page: ft.Page):
         helper.close_btn.tooltip = lang["exit"]
         file_name.label = lang["select_file"]
         select_button.text = lang["sel_button"]
-        output_format_text.value = lang["select_format"]
-        output_format.content.controls[0].label = ".raw"
-        output_format.content.controls[1].label = ".png"
-        output_size.label = lang["select_size"]
         process_button.text = lang["convert_file"]
         help_btn.content.tooltip = lang["help"]
         language_btn.content.tooltip = lang["cnglang"]
@@ -414,8 +474,9 @@ def create_ui(page: ft.Page):
         dis_btn.content.tooltip = lang["discord"]
         tg_btn.content.tooltip = lang["telegram"]
         yt_btn.content.tooltip = lang["youtube"]
-        rev_btn.tooltip = lang["modeswitch2"]
-        save_metadata_checkbox.label = lang["metadatacheckbox"]
+        rev_btn.tooltip = lang["modeswitch1"]
+        json_field.label = lang["json"]
+        select_json_button.text = lang["sel_button"]
         page.update()
 
     def show_language_dialog(e):
@@ -460,40 +521,16 @@ def create_ui(page: ft.Page):
 
     select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
 
-    output_format_text = ft.Text(
-        lang["select_format"],
-        size=16,
-        text_align=ft.TextAlign.CENTER
-    )
-
-    output_format = ft.RadioGroup(
-        content=ft.Row([
-            ft.Radio(label=".raw", value="RAW"),
-            ft.Radio(label=".png", value="PNG")
-        ], alignment=ft.MainAxisAlignment.CENTER)
-    )
-
-    output_size = ft.Dropdown(
-        width=400,
-        options=[
-            ft.dropdown.Option(key="64", text="4x4"),
-            ft.dropdown.Option(key="128", text="8x8"),
-            ft.dropdown.Option(key="256", text="16x16"),
-            ft.dropdown.Option(key="512", text="32x32"),
-            ft.dropdown.Option(key="1024", text="64x64")
-        ],
-        label=lang["select_size"],
-        label_style=ft.TextStyle(size=13),
+    json_field = ft.TextField(
+        value="",
+        label=lang["json"],
+        read_only=True,
+        width=550,
         border_color="#46678F"
     )
+    select_json_button = ft.ElevatedButton(lang["sel_button"], on_click=lambda _: json_picker.pick_files())
 
     process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
-
-    save_metadata_checkbox = ft.Checkbox(
-        label=lang["metadatacheckbox"],
-        value=True,
-        active_color="#9ecaff"
-    )
 
     help_icon = ft.Icons.HELP_OUTLINE
     hover_icon = ft.Icons.HELP
@@ -550,11 +587,11 @@ def create_ui(page: ft.Page):
     )
 
     rev_btn = ft.IconButton(
-        icon=ft.Icons.SWAP_HORIZ,
+        icon=ft.Icons.SWAP_HORIZONTAL_CIRCLE_OUTLINED,
         icon_size=24,
         icon_color="#9ecaff",
-        tooltip=lang["modeswitch2"],
-        on_click=lambda e: switch_to_reverse_ui(page)
+        tooltip=lang["modeswitch1"],
+        on_click=lambda e: switch_to_ui(page)
     )
 
     page.add(
@@ -569,33 +606,29 @@ def create_ui(page: ft.Page):
                     padding=ft.padding.all(2),
                 ),
                 ft.Divider(color="transparent"),
+                ft.Container(height=0),
 
                 ft.Container(
                     ft.Column(
-                        [
-                            output_format_text,
-                            output_format,
-                        ],
+                        [json_field, select_json_button],
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     padding=ft.padding.all(2),
                 ),
                 ft.Divider(color="transparent"),
+                ft.Container(height=11.5),
 
                 ft.Container(
                     ft.Column(
                         [
-                            ft.Row([output_size], alignment=ft.MainAxisAlignment.CENTER),
-                            ft.Row([process_button], alignment=ft.MainAxisAlignment.CENTER),
-                            ft.Divider(color="transparent"),
-                            ft.Row([save_metadata_checkbox], alignment=ft.MainAxisAlignment.CENTER),
+                            ft.Row([process_button], alignment=ft.MainAxisAlignment.CENTER)
                         ],
                         spacing=10,
                     ),
                     padding=ft.padding.all(2),
                 ),
-                ft.Container(height=20),
+                ft.Container(height=85),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -641,7 +674,7 @@ def create_ui(page: ft.Page):
     )
 
     version_text = ft.Text(
-        "Python 2.0 [250602y]",
+        "Python 2.0 [250602y]\n.raw/.png to .bin mode",
         size=10,
         color=ft.Colors.GREY,
     )
@@ -653,6 +686,5 @@ def create_ui(page: ft.Page):
     )
 
     page.add(version_container)
-
 
     update_theme()
