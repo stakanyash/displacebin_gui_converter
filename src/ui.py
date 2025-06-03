@@ -70,11 +70,19 @@ def create_ui(page: ft.Page):
         if page.theme_mode == "dark":
             icon_color = "#9ecaff"
             logo_src = get_asset_path('logo.png')
+            topbar_logo = get_asset_path('icon.ico')
+            text_color = ft.Colors.WHITE
             theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
+            border_color = "#46678F"
+            versioncolor = ft.Colors.GREY
         else:
             icon_color = "black"
             logo_src = get_asset_path('logo_white.png')
+            topbar_logo = get_asset_path('iconblack.ico')
+            text_color = ft.Colors.BLACK
             theme_icon = ft.Icons.BRIGHTNESS_3
+            border_color = "#000000"
+            versioncolor = ft.Colors.BLACK
 
         help_btn.content.icon_color = icon_color
         language_btn.content.icon_color = icon_color
@@ -86,10 +94,48 @@ def create_ui(page: ft.Page):
         yt_btn.content.color = icon_color
         title_image.src = logo_src
         rev_btn.icon_color = icon_color
+        save_metadata_checkbox.active_color = icon_color
+        icon_help_title.color = text_color
+        text_help_title.color = text_color
+        meta_dlg_titleicon.color = text_color
+        meta_dlg_titletext.color = text_color
+        minimize_btn.icon_color = icon_color
+        close_btn.icon_color = icon_color
+        topbarico.src = topbar_logo
+        output_size.border_color = border_color
+        file_name.border_color = border_color
+        select_button.style.color = icon_color
+        process_button.style.color = icon_color
+        version_text.color = versioncolor
+
+        for btn in lang_buttons:
+            btn.style = ft.ButtonStyle(color=icon_color)
 
         page.update()
 
     logo = get_asset_path('icon.ico')
+
+    minimize_btn = ft.IconButton(
+        icon=ft.Icons.REMOVE,
+        icon_size=14,
+        tooltip=lang["min"],
+        on_click=helper.minimize,
+        padding=4,
+        width=28,
+        height=27,
+    )
+
+    close_btn = ft.IconButton(
+        icon=ft.Icons.CLOSE,
+        icon_size=14,
+        tooltip=lang["exit"],
+        on_click=helper.close,
+        padding=4,
+        width=28,
+        height=27,
+    )
+
+    topbarico = ft.Image(src=logo, width=16, height=16)
 
     top_bar = ft.Container(
         height=27,
@@ -100,7 +146,7 @@ def create_ui(page: ft.Page):
                 [
                     ft.Row(
                         [
-                            ft.Image(src=logo, width=16, height=16),
+                            topbarico,
                             ft.Text(
                                 f"{lang['title']} {VERSION}",
                                 size=12,
@@ -112,24 +158,8 @@ def create_ui(page: ft.Page):
                     ),
                     ft.Row(
                         [
-                            ft.IconButton(
-                                icon=ft.Icons.REMOVE,
-                                icon_size=14,
-                                tooltip=lang["min"],
-                                on_click=helper.minimize,
-                                padding=4,
-                                width=28,
-                                height=27,
-                            ),
-                            ft.IconButton(
-                                icon=ft.Icons.CLOSE,
-                                icon_size=14,
-                                tooltip=lang["exit"],
-                                on_click=helper.close,
-                                padding=4,
-                                width=28,
-                                height=27,
-                            ),
+                            minimize_btn,
+                            close_btn
                         ],
                         spacing=4,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -194,9 +224,17 @@ def create_ui(page: ft.Page):
 
         error_dialog = ft.AlertDialog(
             open=True,
-            title=ft.Text(title),
-            content=ft.Text(message),
-            actions=[ft.TextButton("OK", on_click=close_error_dialog)],
+            bgcolor=ft.Colors.RED_900,
+            title=ft.Row(
+                [
+                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                    ft.Text(title, color=ft.Colors.WHITE)
+                ],
+                spacing=10,
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            content=ft.Text(message, color=ft.Colors.WHITE),
+            actions=[ft.TextButton("OK", on_click=close_error_dialog, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
             actions_alignment=ft.MainAxisAlignment.END,
         )
         page.overlay.append(error_dialog)
@@ -207,6 +245,9 @@ def create_ui(page: ft.Page):
 
     def select_file(e):
         file_picker.pick_files()
+
+    meta_dlg_titleicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+    meta_dlg_titletext = ft.Text(lang["metadatainfo"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
 
     def metadata_info_dialog(e):
         def close_dlgmeta(e):
@@ -219,8 +260,8 @@ def create_ui(page: ft.Page):
             open=True,
             title=ft.Row(
                 [
-                    ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE),
-                    ft.Text(lang["metadatainfo"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                    meta_dlg_titleicon,
+                    meta_dlg_titletext
                 ],
             ),
             content=ft.Text(lang["meta_text"]),
@@ -231,6 +272,9 @@ def create_ui(page: ft.Page):
         )
         page.overlay.append(meta_dlg)
         page.update()
+
+    icon_help_title = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+    text_help_title = ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
 
     def helpdialog(e):
         def close_dlghelp(e):
@@ -243,8 +287,8 @@ def create_ui(page: ft.Page):
             open=True,
             title=ft.Row(
                 [
-                    ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE),
-                    ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                    icon_help_title,
+                    text_help_title,
                 ],
             ),
             content=ft.Text(lang["help_text"]),
@@ -418,6 +462,14 @@ def create_ui(page: ft.Page):
         save_metadata_checkbox.label = lang["metadatacheckbox"]
         page.update()
 
+    lang_buttons = [
+        ft.TextButton("Русский", on_click=lambda e: change_language("Ru"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("English", on_click=lambda e: change_language("En"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Українська", on_click=lambda e: change_language("Uk"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Беларуская", on_click=lambda e: change_language("Be"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Polski", on_click=lambda e: change_language("Pl"), style=ft.ButtonStyle(color="#9ecaff"))
+    ]
+
     def show_language_dialog(e):
         def close_language_dialog(e):
             language_dialog.open = False
@@ -428,19 +480,13 @@ def create_ui(page: ft.Page):
             title=ft.Text(lang["sel_lang"]),
             content=ft.Container(
                 content=ft.Column(
-                    [
-                        ft.TextButton("Русский", on_click=lambda e: change_language("Ru")),
-                        ft.TextButton("English", on_click=lambda e: change_language("En")),
-                        ft.TextButton("Українська", on_click=lambda e: change_language("Uk")),
-                        ft.TextButton("Беларуская", on_click=lambda e: change_language("Be")),
-                        ft.TextButton("Polski", on_click=lambda e: change_language("Pl"))
-                    ],
+                    lang_buttons,
                     spacing=10,
                 ),
                 width=250,
                 height=200,
             ),
-            actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog)],
+            actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog, style=ft.ButtonStyle(color="#9ecaff"))],
             actions_alignment=ft.MainAxisAlignment.END,
         )
         page.overlay.append(language_dialog)
@@ -458,7 +504,7 @@ def create_ui(page: ft.Page):
         border_color="#46678F"
     )
 
-    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
+    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
 
     output_format_text = ft.Text(
         lang["select_format"],
@@ -487,7 +533,7 @@ def create_ui(page: ft.Page):
         border_color="#46678F"
     )
 
-    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
+    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=30, top=10, right=30, bottom=10)))
 
     save_metadata_checkbox = ft.Checkbox(
         label=lang["metadatacheckbox"],
@@ -641,7 +687,7 @@ def create_ui(page: ft.Page):
     )
 
     version_text = ft.Text(
-        "Python 2.0 [250602y]",
+        "Python 2.0 [250603d]",
         size=10,
         color=ft.Colors.GREY,
     )

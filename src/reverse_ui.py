@@ -47,6 +47,16 @@ class PageHelper:
 def create_back_ui(page: ft.Page):
     global lang
 
+    page.title = lang["title"]
+    page.theme_mode = "dark"
+    page.window.maximizable = False
+    page.window.height = 810
+    page.window.width = 640
+    page.window.resizable = False
+    page.window.title_bar_hidden = True
+    page.window.title_bar_buttons_hidden = True
+    page.window.icon = get_asset_path('icon.ico')
+
     helper = PageHelper(page)
     logging.info("Switched to \".raw to .bin\" mode")
 
@@ -61,10 +71,18 @@ def create_back_ui(page: ft.Page):
             icon_color = "#9ecaff"
             logo_src = get_asset_path('logo.png')
             theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
+            topbar_logo = get_asset_path('icon.ico')
+            text_color = ft.Colors.WHITE
+            border_color = "#46678F"
+            versioncolor = ft.Colors.GREY
         else:
             icon_color = "black"
             logo_src = get_asset_path('logo_white.png')
             theme_icon = ft.Icons.BRIGHTNESS_3
+            topbar_logo = get_asset_path('iconblack.ico')
+            text_color = ft.Colors.BLACK
+            border_color = "#000000"
+            versioncolor = ft.Colors.BLACK
 
         help_btn.content.icon_color = icon_color
         language_btn.content.icon_color = icon_color
@@ -76,9 +94,45 @@ def create_back_ui(page: ft.Page):
         yt_btn.content.color = icon_color
         title_image.src = logo_src
         rev_btn.icon_color = icon_color
+        minimize_btn.icon_color = icon_color
+        close_btn.icon_color = icon_color
+        topbarico.src = topbar_logo
+        icon_help_title.color = text_color
+        text_help_title.color = text_color
+        json_field.border_color = border_color
+        select_button.style.color = icon_color
+        process_button.style.color = icon_color
+        version_text.color = versioncolor
+        select_json_button.style.color = icon_color
+
+        for btn in lang_buttons:
+            btn.style = ft.ButtonStyle(color=icon_color)
+
         page.update()
 
     logo = get_asset_path('icon.ico')
+
+    minimize_btn = ft.IconButton(
+        icon=ft.Icons.REMOVE,
+        icon_size=14,
+        tooltip=lang["min"],
+        on_click=helper.minimize,
+        padding=4,
+        width=28,
+        height=27,
+    )
+
+    close_btn = ft.IconButton(
+        icon=ft.Icons.CLOSE,
+        icon_size=14,
+        tooltip=lang["exit"],
+        on_click=helper.close,
+        padding=4,
+        width=28,
+        height=27,
+    )
+
+    topbarico = ft.Image(src=logo, width=16, height=16)
 
     top_bar = ft.Container(
         height=27,
@@ -89,7 +143,7 @@ def create_back_ui(page: ft.Page):
                 [
                     ft.Row(
                         [
-                            ft.Image(src=logo, width=16, height=16),
+                            topbarico,
                             ft.Text(
                                 f"{lang['title']} {VERSION}",
                                 size=12,
@@ -101,24 +155,8 @@ def create_back_ui(page: ft.Page):
                     ),
                     ft.Row(
                         [
-                            ft.IconButton(
-                                icon=ft.Icons.REMOVE,
-                                icon_size=14,
-                                tooltip=lang["min"],
-                                on_click=helper.minimize,
-                                padding=4,
-                                width=28,
-                                height=27,
-                            ),
-                            ft.IconButton(
-                                icon=ft.Icons.CLOSE,
-                                icon_size=14,
-                                tooltip=lang["exit"],
-                                on_click=helper.close,
-                                padding=4,
-                                width=28,
-                                height=27,
-                            ),
+                            minimize_btn,
+                            close_btn
                         ],
                         spacing=4,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -192,12 +230,12 @@ def create_back_ui(page: ft.Page):
             title=ft.Row(
                 [
                     ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
-                    ft.Text(title)
+                    ft.Text(title, color=ft.Colors.WHITE)
                 ],
                 spacing=10,
                 alignment=ft.MainAxisAlignment.START,
             ),
-            content=ft.Text(message),
+            content=ft.Text(message, color=ft.Colors.WHITE),
             actions=[ft.TextButton("OK", on_click=close_error_dialog, style=ft.ButtonStyle(color=ft.Colors.WHITE))],
             actions_alignment=ft.MainAxisAlignment.END,
         )
@@ -245,6 +283,9 @@ def create_back_ui(page: ft.Page):
     def select_file(e):
         file_picker.pick_files()
 
+    icon_help_title = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+    text_help_title = ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
+
     def helpdialog(e):
         def close_dlghelp(e):
             global dialog_open
@@ -256,8 +297,8 @@ def create_back_ui(page: ft.Page):
             open=True,
             title=ft.Row(
                 [
-                    ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE),
-                    ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                    icon_help_title,
+                    text_help_title,
                 ],
             ),
             content=ft.Text(lang["reversehelp_text"]),
@@ -479,6 +520,14 @@ def create_back_ui(page: ft.Page):
         select_json_button.text = lang["sel_button"]
         page.update()
 
+    lang_buttons = [
+        ft.TextButton("Русский", on_click=lambda e: change_language("Ru"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("English", on_click=lambda e: change_language("En"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Українська", on_click=lambda e: change_language("Uk"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Беларуская", on_click=lambda e: change_language("Be"), style=ft.ButtonStyle(color="#9ecaff")),
+        ft.TextButton("Polski", on_click=lambda e: change_language("Pl"), style=ft.ButtonStyle(color="#9ecaff"))
+    ]
+
     def show_language_dialog(e):
         def close_language_dialog(e):
             language_dialog.open = False
@@ -489,13 +538,7 @@ def create_back_ui(page: ft.Page):
             title=ft.Text(lang["sel_lang"]),
             content=ft.Container(
                 content=ft.Column(
-                    [
-                        ft.TextButton("Русский", on_click=lambda e: change_language("Ru")),
-                        ft.TextButton("English", on_click=lambda e: change_language("En")),
-                        ft.TextButton("Українська", on_click=lambda e: change_language("Uk")),
-                        ft.TextButton("Беларуская", on_click=lambda e: change_language("Be")),
-                        ft.TextButton("Polski", on_click=lambda e: change_language("Pl"))
-                    ],
+                    lang_buttons,
                     spacing=10,
                 ),
                 width=250,
@@ -519,7 +562,7 @@ def create_back_ui(page: ft.Page):
         border_color="#46678F"
     )
 
-    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file)
+    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
 
     json_field = ft.TextField(
         value="",
@@ -528,9 +571,10 @@ def create_back_ui(page: ft.Page):
         width=550,
         border_color="#46678F"
     )
-    select_json_button = ft.ElevatedButton(lang["sel_button"], on_click=lambda _: json_picker.pick_files())
 
-    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file)
+    select_json_button = ft.ElevatedButton(lang["sel_button"], on_click=lambda _: json_picker.pick_files(), style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
+
+    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=30, top=10, right=30, bottom=10)))
 
     help_icon = ft.Icons.HELP_OUTLINE
     hover_icon = ft.Icons.HELP
