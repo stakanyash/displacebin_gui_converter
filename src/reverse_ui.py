@@ -102,8 +102,11 @@ def create_back_ui(page: ft.Page):
         json_field.border_color = border_color
         select_button.style.color = icon_color
         process_button.style.color = icon_color
-        version_text.color = versioncolor
+        vertext.color = versioncolor
         select_json_button.style.color = icon_color
+        langdlgicon.color = icon_color
+        langdlgtext.color = text_color
+        infoicon.color = text_color
 
         for btn in lang_buttons:
             btn.style = ft.ButtonStyle(color=icon_color)
@@ -518,6 +521,7 @@ def create_back_ui(page: ft.Page):
         rev_btn.tooltip = lang["modeswitch1"]
         json_field.label = lang["json"]
         select_json_button.text = lang["sel_button"]
+        langdlgtext.value = lang["sel_lang"]
         page.update()
 
     lang_buttons = [
@@ -528,6 +532,9 @@ def create_back_ui(page: ft.Page):
         ft.TextButton("Polski", on_click=lambda e: change_language("Pl"), style=ft.ButtonStyle(color="#9ecaff"))
     ]
 
+    langdlgicon = ft.Icon(ft.Icons.LANGUAGE, size=30, color=ft.Colors.WHITE)
+    langdlgtext = ft.Text(lang["sel_lang"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
+
     def show_language_dialog(e):
         def close_language_dialog(e):
             language_dialog.open = False
@@ -535,7 +542,12 @@ def create_back_ui(page: ft.Page):
 
         language_dialog = ft.AlertDialog(
             open=True,
-            title=ft.Text(lang["sel_lang"]),
+            title=ft.Row(
+                [
+                    langdlgicon,
+                    langdlgtext
+                ],
+            ),
             content=ft.Container(
                 content=ft.Column(
                     lang_buttons,
@@ -717,10 +729,81 @@ def create_back_ui(page: ft.Page):
         )
     )
 
-    version_text = ft.Text(
-        "Python 2.0 [250602y]\n.raw/.png to .bin mode",
-        size=10,
-        color=ft.Colors.GREY,
+    infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+
+    content_column = ft.Container(
+        content=ft.Column([
+            ft.Text(
+                spans=[
+                    ft.TextSpan("powered by "),
+                    ft.TextSpan("Python", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://www.python.org/"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("Flet", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://flet.dev/"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("Pillow", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://pillow.readthedocs.io/en/stable/"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("locale", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/locale.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("logging", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/logging.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("datetime", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/datetime.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("traceback", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/traceback.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("pathlib", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/pathlib.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("math", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/math.html"), 
+                    ft.TextSpan(", "),
+                    ft.TextSpan("struct", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/struct.html"),
+                ],
+                selectable=True,
+                no_wrap=False,
+            ),
+            ft.Text(
+                spans=[
+                    ft.TextSpan("Authors: "),
+                    ft.TextSpan("stakan ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/stakanyash"),
+                    ft.TextSpan("(GUI), "),
+                    ft.TextSpan("ThePlain ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/ThePlain"),
+                    ft.TextSpan("(conversion script)"),
+                ],
+                selectable=True,
+                no_wrap=False,
+            )
+        ]),
+        height=80,
+        padding=10
+    )
+
+    def show_version_info(e):
+        def close_dialog(e):
+            dialog.open = False
+            page.update()
+
+        content_text = content_column
+
+        dialog = ft.AlertDialog(
+            open=True,
+            title=ft.Row(
+                [
+                    infoicon,
+                    ft.Text(lang["info"], style=ft.TextThemeStyle.TITLE_MEDIUM)
+                ],
+            ),
+            content=content_text,
+            actions=[
+                ft.TextButton("OK", on_click=close_dialog)
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.overlay.append(dialog)
+        page.update()
+
+    vertext = ft.Text("Python 2.0 [250603d]", size=10, color=ft.Colors.GREY)
+    
+    version_text = ft.GestureDetector(
+        content=vertext,
+        on_tap=show_version_info
     )
 
     version_container = ft.Container(

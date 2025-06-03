@@ -1,5 +1,3 @@
-import locale
-
 translations = {
     "En": {
         "title": "displace.bin converter",
@@ -33,9 +31,6 @@ translations = {
             "You can find the levelsize value by opening the .ssl file of your map in text mode (for example via VS Code).\n"
             "\n"
             "If you want to use \"reverse\" conversion in the future, enable the \"Save metadata\" checkbox.\n"
-            "\n"
-            "Program author: stakan\n"
-            "Conversion script author: ThePlain\n"
         ),
         "help_print": "Help dialog closed",
         "struct_error": (
@@ -85,10 +80,6 @@ translations = {
             "\n"
             "Q: What is this useful for?\n"
             "A: For cases where you want to manually edit the map terrain outside of M3D Editor.\n"
-            "\n"
-            "\n"
-            "Program author: stakan\n"
-            "Conversion script author: ThePlain\n"
         ),
         "unsupportedfile": (
             "Oops! It looks like you're trying to convert a file that is not supported!\n"
@@ -107,7 +98,8 @@ translations = {
             "\n"
             "Therefore, if you plan to use \"reverse\" conversion, saving metadata is mandatory.\n"
             "Metadata is saved in .json format inside the folder where the source .bin file is located."
-        )
+        ),
+        "info": "Info"
     },
 
     # Russian language
@@ -143,9 +135,6 @@ translations = {
             "Узнать значение levelsize можно открыв .ssl файл вашей карты в текстовом режиме (например через VS Code).\n"
             "\n"
             "Если вы хотите использовать \"обратную\" конвертацию в будущем, активируете галочку \"Сохранить метаданные\".\n"
-            "\n"
-            "Автор программы: стакан\n"
-            "Автор скрипта конвертирования: ThePlain"
         ),
         "help_print": "Закрыто диалоговое окно помощи",
         "struct_error": (
@@ -195,10 +184,6 @@ translations = {
             "\n"
             "В: Для чего это может быть полезно?\n"
             "О: Для случаев, если вы захотели вручную изменить ландшафт карты за пределами M3D Editor."
-            "\n"
-            "\n"
-            "Автор программы: стакан\n"
-            "Автор скрипта конвертирования: ThePlain\n"
         ),
         "unsupportedfile": (
             "Упс! Кажется, вы пытаетесь сконвертировать файл, который не поддерживается!\n"
@@ -217,7 +202,8 @@ translations = {
             "\n"
             "Поэтому если вы планируете использовать \"обратную\" конвертацию, то сохранение метаданных является обязательным.\n"
             "Метаданные сохраняются в формате .json в папке в которой распологается исходный .bin файл."
-        )
+        ),
+        "info": "Инфо"
     },
 
     # Ukrainian language
@@ -253,9 +239,6 @@ translations = {
             "Дізнатися значення levelsize можна відкривши .ssl файл вашої карти в текстовому режимі (наприклад через VS Code).\n"
             "\n"
             "Якщо ви хочете використовувати \"зворотню\" конвертацію у майбутньому, активуйте прапорець \"Зберігати метадані\".\n"
-            "\n"
-            "Автор програми: стакан\n"
-            "Автор скрипта перетворення: ThePlain\n"
         ),
         "help_print": "Діалогове вікно допомоги закрито",
         "struct_error": (
@@ -305,10 +288,6 @@ translations = {
             "\n"
             "П: Для чого це може бути корисно?\n"
             "В: Для випадків, коли ви хочете вручну змінити рельєф карти поза межами M3D Editor.\n"
-            "\n"
-            "\n"
-            "Автор програми: стакан\n"
-            "Автор скрипта конвертації: ThePlain\n"
         ),
         "unsupportedfile": (
             "Ой! Схоже, ви намагаєтеся конвертувати файл, який не підтримується!\n"
@@ -327,7 +306,8 @@ translations = {
             "\n"
             "Тому якщо ви плануєте використовувати «зворотню» конвертацію, збереження метаданих є обов’язковим.\n"
             "Метадані зберігаються у форматі .json у папці, де розташований вихідний файл .bin."
-        )
+        ),
+        "info": "Інфо"
     },
 
     # Polish language
@@ -363,9 +343,6 @@ translations = {
             "Wartość levelsize można znaleźć otwierając plik .ssl twojej mapy w trybie tekstowym (np. przez VS Code).\n"
             "\n"
             "Jeśli chcesz używać \"odwrotnej\" konwersji w przyszłości, zaznacz pole \"Zapisz metadane\".\n"
-            "\n"
-            "Autor programu: stakan\n"
-            "Autor skryptu konwersji: ThePlain\n"
         ),
         "help_print": "Zamknięto okno dialogowe pomocy",
         "struct_error": (
@@ -415,10 +392,6 @@ translations = {
             "\n"
             "P: Do czego może się to przydać?\n"
             "O: W przypadkach, gdy chcesz ręcznie edytować teren mapy poza M3D Editor.\n"
-            "\n"
-            "\n"
-            "Autor programu: stakan\n"
-            "Autor skryptu konwersji: ThePlain\n"
         ),
         "unsupportedfile": (
             "Ups! Wygląda na to, że próbujesz przekonwertować plik, który nie jest obsługiwany!\n"
@@ -437,7 +410,8 @@ translations = {
             "\n"
             "Dlatego jeśli planujesz używać konwersji \"odwrotnej\", zapisywanie metadanych jest obowiązkowe.\n"
             "Metadane zapisywane są w formacie .json w folderze, w którym znajduje się plik źródłowy .bin."
-        )
+        ),
+        "info": "Info"
     },
 
     # Belarusian language
@@ -474,8 +448,6 @@ translations = {
             "\n"
             "Калі вы хочаце выкарыстоўваць \"зваротную\" канверсію ў майбуднім, актывуйце праверачок \"Захаваць метаданыя\".\n"
             "\n"
-            "Аўтар праграмы: стакан\n"
-            "Аўтар скрыпта канвертавання: ThePlain\n"
             "Праверка перакладу: nEmPoBu4, MrKirov\n"
         ),
         "help_print": "Закрытае дыялогавае акно дапамогі",
@@ -526,10 +498,6 @@ translations = {
             "\n"
             "П: Навошта гэта можа быць карысна?\n"
             "А: Для выпадкаў, калі вы хочаце ўручную змяніць ландшафт карты па-за межамі M3D Editor.\n"
-            "\n"
-            "\n"
-            "Аўтар праграмы: стакан\n"
-            "Аўтар скрыпта канвертацыі: ThePlain\n"
         ),
         "unsupportedfile": (
             "Упс! Падаецца, што вы спрабуеце сканвертаваць файл, які не падтрымліваецца!\n"
@@ -548,6 +516,7 @@ translations = {
             "\n"
             "Таму калі вы плануеце выкарыстоўваць \"зваротную\" канвертацыю, захаванне метаданых абавязковае.\n"
             "Метаданыя захоўваюцца ў фармаце .json у тэчцы, дзе размяшчаецца зыходны файл .bin."
-        )
+        ),
+        "info": "Інфа"
     }
 }
