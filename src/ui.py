@@ -309,14 +309,25 @@ def create_ui(page: ft.Page):
 
     def process_file(e):
         if input_file_path and output_format.value and output_size.value:
-            size = int(output_size.value)
+            size_key = int(output_size.value)
+
+            selected_key = output_size.value
+            selected_text = "64x64"
+            for option in output_size.options:
+                if option.key == selected_key:
+                    selected_text = option.text
+                    break
+
+            size_value = ''.join(filter(str.isdigit, selected_text.split('x')[0].split('х')[0]))
+            size_metadata = int(size_value) if size_value else 64
+
             output_path = os.path.splitext(input_file_path)[0] + (".raw" if output_format.value == "RAW" else ".png")
 
             try:
                 if output_format.value == "RAW":
-                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size, save_metadata_checkbox.value)
+                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size_key, save_metadata_checkbox.value, size_metadata)
                 else:
-                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size, save_metadata_checkbox.value)
+                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size_key, save_metadata_checkbox.value, size_metadata)
 
                 def close_dlgconvert(e):
                     convertsuc.open = False

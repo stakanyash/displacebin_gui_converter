@@ -4,6 +4,9 @@ import os
 import logging
 import math
 
+class RAWNot16BitError(Exception):
+    pass
+
 def reverse_converter(input_path, output_path, json_data):
     required_fields = ['Min', 'Max', 'Delta']
     for field in required_fields:
@@ -32,7 +35,7 @@ def reverse_converter(input_path, output_path, json_data):
                 raise ValueError("Input .raw file contains no data.")
 
             if len(data_bytes) % 2 != 0:
-                raise ValueError("Input .raw file has incomplete 16-bit data.")
+                raise RAWNot16BitError("Input .raw file has incomplete 16-bit data.")
             
             normalized_data = list(struct.unpack(f'{len(data_bytes)//2}H', data_bytes))
 

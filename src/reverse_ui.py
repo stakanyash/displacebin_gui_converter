@@ -1,7 +1,7 @@
 import flet as ft
 import locale
 from localization import translations
-from reverse_converter import reverse_converter, struct
+from reverse_converter import reverse_converter, struct, RAWNot16BitError
 import os
 from resources import get_asset_path
 import logging
@@ -235,7 +235,6 @@ def create_back_ui(page: ft.Page):
                         logging.error(f"Error reading PNG file: {ex}")
                         page.update()
                         return
-
                 elif file_ext != ".raw":
                     show_error_dialog(lang["error"], lang["wrong_extension_reverse"])
                     file_name.value = ""
@@ -243,6 +242,26 @@ def create_back_ui(page: ft.Page):
                     logging.error("Selected file is not .raw or .png!")
                     page.update()
                     return
+                elif file_ext == ".raw":
+                    try:
+                        with open(input_file_path, "rb") as f:
+                            data_bytes = f.read()
+                            if len(data_bytes) % 2 != 0:
+                                raise RAWNot16BitError("Input .raw file has incomplete 16-bit data.")
+                    except RAWNot16BitError as e:
+                        show_error_dialog(lang["error"], lang["incomplete_16bit_data"])
+                        file_name.value = ""
+                        input_file_path = None
+                        logging.error(f"RAWNot16BitError: {e}")
+                        page.update()
+                        return
+                    except Exception as e:
+                        show_error_dialog(lang["error"], lang["invalid_raw_file"])
+                        file_name.value = ""
+                        input_file_path = None
+                        logging.error(f"Error reading RAW file: {e}")
+                        page.update()
+                        return
 
             else:
                 logging.info("User closed file picker without selecting a file.")
