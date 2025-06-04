@@ -12,4 +12,4 @@ def main(page: ft.Page):
         create_main_ui(page)
         logging.info("Launching main UI...")
 
-ft.app(target=main, name="displace.bin GUI Converter")
+ft.app(target=main, name="displace.bin GUI Converter", view=ft.FLET_APP)

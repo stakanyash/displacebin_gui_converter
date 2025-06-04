@@ -58,6 +58,7 @@ def create_back_ui(page: ft.Page):
         page.window.title_bar_hidden = True
         page.window.title_bar_buttons_hidden = True
         page.window.icon = get_asset_path('icon.ico')
+        page.window.center()
 
     helper = PageHelper(page)
 
@@ -965,7 +966,7 @@ def create_back_ui(page: ft.Page):
         page.overlay.append(dialog)
         page.update()
 
-    vertext = ft.Text("Python 2.0 [250603d]", size=10, color=ft.Colors.GREY)
+    vertext = ft.Text("Python 2.0 [250604b]", size=10, color=ft.Colors.GREY)
     
     version_text = ft.GestureDetector(
         content=vertext,
