@@ -63,6 +63,7 @@ def create_ui(page: ft.Page):
 
     def switch_to_reverse_ui(page: ft.Page):
         from reverse_ui import create_back_ui
+        logging.info("Switched to \".raw/.png to .bin\" mode")
         page.clean()
         create_back_ui(page)
 
@@ -499,7 +500,7 @@ def create_ui(page: ft.Page):
                 width=250,
                 height=200,
             ),
-            actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog, style=ft.ButtonStyle(color="#4A90E2"))],
+            actions=[ft.TextButton(lang["cancel"], on_click=close_language_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
         page.overlay.append(language_dialog)
@@ -725,6 +726,8 @@ def create_ui(page: ft.Page):
                     ft.TextSpan("math", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/math.html"), 
                     ft.TextSpan(", "),
                     ft.TextSpan("struct", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/struct.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("sys", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/sys.html"),
                 ],
                 selectable=True,
                 no_wrap=False,
@@ -741,7 +744,8 @@ def create_ui(page: ft.Page):
                 no_wrap=False,
             )
         ]),
-        height=80,
+        height=120,
+        width=300,
         padding=10
     )
 

@@ -7,6 +7,7 @@ from resources import get_asset_path
 import logging
 from datetime import datetime
 import traceback
+import sys
 
 VERSION = "2.0"
 
@@ -47,18 +48,18 @@ class PageHelper:
 def create_back_ui(page: ft.Page):
     global lang
 
-    page.title = lang["title"]
-    page.theme_mode = "dark"
-    page.window.maximizable = False
-    page.window.height = 810
-    page.window.width = 640
-    page.window.resizable = False
-    page.window.title_bar_hidden = True
-    page.window.title_bar_buttons_hidden = True
-    page.window.icon = get_asset_path('icon.ico')
+    if any(arg in sys.argv for arg in ("-reverse", "--reverse")):
+        page.title = lang["title"]
+        page.theme_mode = "dark"
+        page.window.maximizable = False
+        page.window.height = 810
+        page.window.width = 640
+        page.window.resizable = False
+        page.window.title_bar_hidden = True
+        page.window.title_bar_buttons_hidden = True
+        page.window.icon = get_asset_path('icon.ico')
 
     helper = PageHelper(page)
-    logging.info("Switched to \".raw to .bin\" mode")
 
     def switch_to_ui(page: ft.Page):
         from ui import create_ui
@@ -248,8 +249,8 @@ def create_back_ui(page: ft.Page):
     file_picker = ft.FilePicker(on_result=on_file_selected)
     page.overlay.append(file_picker)
 
-    json_file_path = None  # переменная для хранения пути к JSON
-    json_data = {}  # переменная для хранения содержимого JSON
+    json_file_path = None
+    json_data = {}
 
     def on_json_selected(e: ft.FilePickerResultEvent):
         nonlocal json_file_path, json_data
@@ -268,17 +269,180 @@ def create_back_ui(page: ft.Page):
                 import json
                 with open(json_file_path, "r") as f:
                     json_data = json.load(f)
-                json_field.value = json_file_path
-                page.update()
+
+                required_keys = ["Min", "Max", "Delta"]
+                missing_keys = [key for key in required_keys if key not in json_data]
+                if missing_keys:
+                    error_msg = lang["invalid_json_missing_keys"].format(keys=", ".join(missing_keys))
+                    show_error_dialog(lang["error"], error_msg)
+                    json_file_path = None
+                    json_data = {}
+                    json_field.value = ""
+                    page.update()
+                    return
+
+                dgcver = json_data.get("DGCVer")
+                current_version = VERSION
+
+                if not dgcver or not dgcver.startswith("DisplaceGUI_"):
+                    show_error_dialog(lang["error"], lang["invalid_json_dgcver"])
+                    json_file_path = None
+                    json_data = {}
+                    json_field.value = ""
+                    page.update()
+                    return
+
+                file_version_str = dgcver[len("DisplaceGUI_"):]
+
+                try:
+                    file_major, file_minor = map(int, file_version_str.split("."))
+                    current_major, current_minor = map(int, current_version.split("."))
+                except ValueError:
+                    show_error_dialog(lang["error"], lang["invalid_json_version_format"])
+                    json_file_path = None
+                    json_data = {}
+                    json_field.value = ""
+                    page.update()
+                    return
+
+                def proceed_with_selection():
+                    json_field.value = json_file_path
+                    page.update()
+
+                def cancel_selection():
+                    nonlocal json_file_path, json_data
+                    json_file_path = None
+                    json_data = {}
+                    json_field.value = ""
+                    page.update()
+
+                if file_major < current_major:
+                    def show_confirm_dialog():
+                        def close_dialog():
+                            dlg.open = False
+                            page.update()
+
+                        dlg = ft.AlertDialog(
+                            open=True,
+                            bgcolor=ft.Colors.ORANGE_900,
+                            title=ft.Row(
+                                [
+                                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                                    ft.Text(lang["warning"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                                ],
+                            ),
+                            content=ft.Text(lang["json_from_older_version"], color=ft.Colors.WHITE),
+                            actions=[
+                                ft.TextButton(lang["yes"], on_click=lambda _: [close_dialog(), proceed_with_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                                ft.TextButton(lang["no"], on_click=lambda _: [close_dialog(), cancel_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END
+                        )
+                        
+                        page.overlay.append(dlg)
+                        page.update()
+
+                    show_confirm_dialog()
+                    return
+
+                elif file_major > current_major:
+                    def show_confirm_dialog():
+                        def close_dialog():
+                            dlg.open = False
+                            page.update()
+                        
+                        dlg = ft.AlertDialog(
+                            open=True,
+                            bgcolor=ft.Colors.ORANGE_900,
+                            title=ft.Row(
+                                [
+                                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                                    ft.Text(lang["warning"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                                ],
+                            ),
+                            content=ft.Text(lang["json_from_newer_version"], color=ft.Colors.WHITE),
+                            actions=[
+                                ft.TextButton(lang["yes"], on_click=lambda _: [close_dialog(), proceed_with_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                                ft.TextButton(lang["no"], on_click=lambda _: [close_dialog(), cancel_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END
+                        )
+                        page.overlay.append(dlg)
+                        page.update()
+
+                    show_confirm_dialog()
+                    return
+
+                elif file_minor < current_minor:
+                    def show_confirm_dialog():
+                        def close_dialog():
+                            dlg.open = False
+                            page.update()
+
+                        dlg = ft.AlertDialog(
+                            open=True,
+                            bgcolor=ft.Colors.ORANGE_900,
+                            title=ft.Row(
+                                [
+                                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                                    ft.Text(lang["warning"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                                ],
+                            ),
+                            content=ft.Text(lang["json_from_older_version"], color=ft.Colors.WHITE),
+                            actions=[
+                                ft.TextButton(lang["yes"], on_click=lambda _: [close_dialog(), proceed_with_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                                ft.TextButton(lang["no"], on_click=lambda _: [close_dialog(), cancel_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END
+                        )
+                        page.overlay.append(dlg)
+                        page.update()
+
+                    show_confirm_dialog()
+                    return
+
+                elif file_minor > current_minor:
+                    def show_confirm_dialog():
+                        def close_dialog():
+                            dlg.open = False
+                            page.update()
+
+                        dlg = ft.AlertDialog(
+                            open=True,
+                            bgcolor=ft.Colors.ORANGE_900,
+                            title=ft.Row(
+                                [
+                                    ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
+                                    ft.Text(lang["warning"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                                ],
+                            ),
+                            content=ft.Text(lang["json_from_newer_version"], color=ft.Colors.WHITE),
+                            actions=[
+                                ft.TextButton(lang["yes"], on_click=lambda _: [close_dialog(), proceed_with_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE)),
+                                ft.TextButton(lang["no"], on_click=lambda _: [close_dialog(), cancel_selection()], style=ft.ButtonStyle(color=ft.Colors.WHITE))
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END
+                        )
+                        page.overlay.append(dlg)
+                        page.update()
+
+                    show_confirm_dialog()
+                    return
+
+                else:
+                    json_field.value = json_file_path
+                    page.update()
+
             except Exception as ex:
                 logging.error(f"Ошибка чтения JSON: {ex}")
                 show_error_dialog(lang["error"], lang["invalid_json_metadata"])
                 json_file_path = None
                 json_data = {}
                 json_field.value = ""
+            page.update()
         else:
             logging.info("JSON file selection canceled.")
-        page.update()
+            page.update()
 
     json_picker = ft.FilePicker(on_result=on_json_selected)
     page.overlay.append(json_picker)
@@ -361,7 +525,6 @@ def create_back_ui(page: ft.Page):
                 page.update()
                 return
 
-            # Выходной файл всегда будет .bin
             output_path = os.path.splitext(input_file_path)[0] + ".bin"
 
             def show_success_dialog(_min, _max, _del):
@@ -662,7 +825,7 @@ def create_back_ui(page: ft.Page):
                     padding=ft.padding.all(2),
                 ),
                 ft.Divider(color="transparent"),
-                ft.Container(height=0),
+                ft.Container(height=40),
 
                 ft.Container(
                     ft.Column(
@@ -684,7 +847,7 @@ def create_back_ui(page: ft.Page):
                     ),
                     padding=ft.padding.all(2),
                 ),
-                ft.Container(height=85),
+                ft.Container(height=45),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -755,6 +918,8 @@ def create_back_ui(page: ft.Page):
                     ft.TextSpan("math", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/math.html"), 
                     ft.TextSpan(", "),
                     ft.TextSpan("struct", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/struct.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("sys", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/sys.html"),
                 ],
                 selectable=True,
                 no_wrap=False,
@@ -771,7 +936,8 @@ def create_back_ui(page: ft.Page):
                 no_wrap=False,
             )
         ]),
-        height=80,
+        height=120,
+        width=300,
         padding=10
     )
 

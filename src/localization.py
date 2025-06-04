@@ -99,7 +99,24 @@ translations = {
             "Therefore, if you plan to use \"reverse\" conversion, saving metadata is mandatory.\n"
             "Metadata is saved in .json format inside the folder where the source .bin file is located."
         ),
-        "info": "Info"
+        "info": "Info",
+        "invalid_json_dgcver": "The 'DGCVer' field is missing or has an invalid format.",
+        "invalid_json_version_format": "Version in the 'DGCVer' field is in an invalid format.",
+        "json_from_older_version": (
+            "The JSON file was generated in an older version of the program.\n"
+            "The result may be inaccurate.\n"
+            "\n"
+            "Continue?"
+        ),
+        "json_from_newer_version": (
+            "The JSON file was generated in a newer version of the program.\n"
+            "Compatibility is not guaranteed.\n"
+            "\n"
+            "Continue?"
+        ),
+        "yes": "Yes",
+        "no": "No",
+        "warning": "Warning"
     },
 
     # Russian language
@@ -203,7 +220,24 @@ translations = {
             "Поэтому если вы планируете использовать \"обратную\" конвертацию, то сохранение метаданных является обязательным.\n"
             "Метаданные сохраняются в формате .json в папке в которой распологается исходный .bin файл."
         ),
-        "info": "Инфо"
+        "info": "Инфо",
+        "invalid_json_dgcver": "Поле 'DGCVer' отсутствует или имеет неверный формат.",
+        "invalid_json_version_format": "Версия в поле 'DGCVer' указана в неверном формате.",
+        "json_from_older_version": (
+            "JSON файл был сгенерирован в более старой версии программы.\n"
+            "Результат может быть неточным.\n"
+            "\n"
+            "Продолжить?"
+        ),
+        "json_from_newer_version": (
+            "JSON файл был сгенерирован в более новой версии программы.\n"
+            "Совместимость не гарантируется.\n"
+            "\n"
+            "Продолжить?"
+        ),
+        "yes": "Да",
+        "no": "Нет",
+        "warning": "Внимание"
     },
 
     # Ukrainian language
@@ -307,7 +341,24 @@ translations = {
             "Тому якщо ви плануєте використовувати «зворотню» конвертацію, збереження метаданих є обов’язковим.\n"
             "Метадані зберігаються у форматі .json у папці, де розташований вихідний файл .bin."
         ),
-        "info": "Інфо"
+        "info": "Інфо",
+        "invalid_json_dgcver": "Поле 'DGCVer' відсутнє або має неправильний формат.",
+        "invalid_json_version_format": "Версія у полі 'DGCVer' зазначена у неправильному форматі.",
+        "json_from_older_version": (
+            "JSON-файл створено у старшій версії програми.\n"
+            "Результат може бути неточним.\n"
+            "\n"
+            "Продовжити?"
+        ),
+        "json_from_newer_version": (
+            "JSON-файл створено у новішій версії програми.\n"
+            "Сумісність не гарантовано.\n"
+            "\n"
+            "Продовжити?"
+        ),
+        "yes": "Так",
+        "no": "Ні",
+        "warning": "Увага"
     },
 
     # Polish language
@@ -411,7 +462,24 @@ translations = {
             "Dlatego jeśli planujesz używać konwersji \"odwrotnej\", zapisywanie metadanych jest obowiązkowe.\n"
             "Metadane zapisywane są w formacie .json w folderze, w którym znajduje się plik źródłowy .bin."
         ),
-        "info": "Info"
+        "info": "Info",
+        "invalid_json_dgcver": "Pole 'DGCVer' jest brakujące lub ma nieprawidłowy format.",
+        "invalid_json_version_format": "Wersja w polu 'DGCVer' jest podana w nieprawidłowym formacie.",
+        "json_from_older_version": (
+            "Plik JSON został wygenerowany w starszej wersji programu.\n"
+            "Wynik może być niedokładny.\n"
+            "\n"
+            "Kontynuować?"
+        ),
+        "json_from_newer_version": (
+            "Plik JSON został wygenerowany w nowszej wersji programu.\n"
+            "Kompatybilność nie jest zagwarantowana.\n"
+            "\n"
+            "Kontynuować?"
+        ),
+        "yes": "Tak",
+        "no": "Nie",
+        "warning": "Uwaga"
     },
 
     # Belarusian language
@@ -517,6 +585,23 @@ translations = {
             "Таму калі вы плануеце выкарыстоўваць \"зваротную\" канвертацыю, захаванне метаданых абавязковае.\n"
             "Метаданыя захоўваюцца ў фармаце .json у тэчцы, дзе размяшчаецца зыходны файл .bin."
         ),
-        "info": "Інфа"
+        "info": "Інфа",
+        "invalid_json_dgcver": "Поле 'DGCVer' адсутнічае ці мае няправільны фармат.",
+        "invalid_json_version_format": "Версія ў полі 'DGCVer' паказана ў няправільным фармаце.",
+        "json_from_older_version": (
+            "JSON-файл створаны ў старажытней версіі праграмы.\n" 
+            "Вынік можа быць недакладным.\n"
+            "\n"
+            "Працягнуць?"
+        ),
+        "json_from_newer_version": (
+            "JSON-файл створаны ў маладзей версіі праграмы.\n"
+            "Сумяшчальнасць не гарантаваная.\n"
+            "\n"
+            "Працягнуць?"
+        ),
+        "yes": "Так",
+        "no": "Не",
+        "warning": "Увага"
     }
 }

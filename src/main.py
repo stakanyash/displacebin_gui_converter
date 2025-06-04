@@ -12,5 +12,4 @@ def main(page: ft.Page):
         create_main_ui(page)
         logging.info("Launching main UI...")
 
-# Запуск приложения
 ft.app(target=main, name="displace.bin GUI Converter")
