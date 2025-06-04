@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 import traceback
 import sys
+from PIL import Image
 
 VERSION = "2.0"
 
@@ -206,13 +207,43 @@ def create_back_ui(page: ft.Page):
                 input_file_path = e.files[0].path
                 file_ext = os.path.splitext(input_file_path)[1].lower()
 
-                if file_ext not in [".raw", ".png"]:
+                if file_ext == ".png":
+                    try:
+                        with Image.open(input_file_path) as img:
+                            if img.mode != 'I' and img.mode != 'I;16':
+                                show_error_dialog(lang["error"], lang["not_16bit_grayscale"])
+                                file_name.value = ""
+                                input_file_path = None
+                                logging.error("Selected PNG is not 16-bit grayscale!")
+                                page.update()
+                                return
+                            elif img.mode == 'I' or img.mode == 'I;16':
+                                if img.getextrema()[1] > 255:
+                                    pass
+                                else:
+                                    show_error_dialog(lang["error"], lang["not_16bit_grayscale"])
+                                    file_name.value = ""
+                                    input_file_path = None
+                                    logging.error("Selected PNG is not 16-bit grayscale!")
+                                    page.update()
+                                    return
+
+                    except Exception as ex:
+                        show_error_dialog(lang["error"], lang["invalid_png_file"])
+                        file_name.value = ""
+                        input_file_path = None
+                        logging.error(f"Error reading PNG file: {ex}")
+                        page.update()
+                        return
+
+                elif file_ext != ".raw":
                     show_error_dialog(lang["error"], lang["wrong_extension_reverse"])
                     file_name.value = ""
                     input_file_path = None
-                    logging.error("Selected file is not .raw!")
+                    logging.error("Selected file is not .raw or .png!")
                     page.update()
                     return
+
             else:
                 logging.info("User closed file picker without selecting a file.")
                 return

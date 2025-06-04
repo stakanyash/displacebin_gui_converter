@@ -116,7 +116,9 @@ translations = {
         ),
         "yes": "Yes",
         "no": "No",
-        "warning": "Warning"
+        "warning": "Warning",
+        "not_16bit_grayscale": "The selected PNG file is not a 16-bit grayscale image.",
+        "invalid_png_file": "Unable to read the PNG file or it is corrupted."
     },
 
     # Russian language
@@ -205,7 +207,7 @@ translations = {
         "unsupportedfile": (
             "Упс! Кажется, вы пытаетесь сконвертировать файл, который не поддерживается!\n"
             "\n"
-            "Убедитесь, что файл является данными картами и что вы выбрали правильный файл метаданных.\n"
+            "Убедитесь, что выбранный файл является данными карты и что вы выбрали правильный файл метаданных.\n"
             "Если в качестве основного файла вы выбрали PNG, убедитесь, что он имеет глубину 16 бит и формат \"grayscale\""
         ),
         "wrong_extension_json": "Выбранный файл не является файлом формата .json!",
@@ -237,7 +239,9 @@ translations = {
         ),
         "yes": "Да",
         "no": "Нет",
-        "warning": "Внимание"
+        "warning": "Внимание",
+        "not_16bit_grayscale": "Выбранный PNG-файл не является 16-битным изображением в градациях серого.",
+        "invalid_png_file": "Невозможно прочитать файл PNG или он повреждён."
     },
 
     # Ukrainian language
@@ -358,7 +362,9 @@ translations = {
         ),
         "yes": "Так",
         "no": "Ні",
-        "warning": "Увага"
+        "warning": "Увага",
+        "not_16bit_grayscale": "Обраний PNG-файл не є 16-бітним зображенням у відтінках сірого.",
+        "invalid_png_file": "Неможливо прочитати PNG-файл або він пошкоджений."
     },
 
     # Polish language
@@ -479,7 +485,9 @@ translations = {
         ),
         "yes": "Tak",
         "no": "Nie",
-        "warning": "Uwaga"
+        "warning": "Uwaga",
+        "not_16bit_grayscale": "Wybrany plik PNG nie jest obrazem w skali szarości o głębi 16 bitów.",
+        "invalid_png_file": "Nie można odczytać pliku PNG lub jest uszkodzony."
     },
 
     # Belarusian language
@@ -602,6 +610,8 @@ translations = {
         ),
         "yes": "Так",
         "no": "Не",
-        "warning": "Увага"
+        "warning": "Увага",
+        "not_16bit_grayscale": "Абраны PNG-файл не з'яўляецца 16-бітным выявай у адценні шэрага.",
+        "invalid_png_file": "Немагчыма чытаць PNG-файл ці ён пашкоджаны."
     }
 }
