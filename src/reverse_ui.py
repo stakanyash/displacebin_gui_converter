@@ -10,7 +10,7 @@ import traceback
 import sys
 from PIL import Image
 
-VERSION = "2.0"
+VERSION = "2.0.1"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -345,10 +345,19 @@ def create_back_ui(page: ft.Page):
 
                 file_version_str = dgcver[len("DisplaceGUI_"):]
 
-                try:
-                    file_major, file_minor = map(int, file_version_str.split("."))
-                    current_major, current_minor = map(int, current_version.split("."))
-                except ValueError:
+                def parse_version(version_str):
+                    parts = version_str.split(".")
+                    try:
+                        major = int(parts[0])
+                        minor = int(parts[1]) if len(parts) > 1 else 0
+                    except (IndexError, ValueError):
+                        return None, None
+                    return major, minor
+
+                file_major, file_minor = parse_version(file_version_str)
+                current_major, current_minor = parse_version(current_version)
+
+                if file_major is None or current_major is None:
                     show_error_dialog(lang["error"], lang["invalid_json_version_format"])
                     json_file_path = None
                     json_data = {}
@@ -1016,7 +1025,7 @@ def create_back_ui(page: ft.Page):
         page.overlay.append(dialog)
         page.update()
 
-    vertext = ft.Text("Python 2.0 [250604b]", size=10, color=ft.Colors.GREY)
+    vertext = ft.Text("Python 2.0.1 [250630a]", size=10, color=ft.Colors.GREY)
     
     version_text = ft.GestureDetector(
         content=vertext,
