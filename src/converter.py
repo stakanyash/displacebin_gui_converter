@@ -4,7 +4,7 @@ import json
 import logging
 from pathlib import Path
 
-DGCVER = b'DisplaceGUI_2.0'
+DGCVER = b'DisplaceGUI_2.0.1'
 
 def process_raw(input_path, output_path, size, save_metadata=True):
     with open(input_path, 'rb') as stream:

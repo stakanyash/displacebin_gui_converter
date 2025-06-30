@@ -118,7 +118,9 @@ translations = {
         "no": "No",
         "warning": "Warning",
         "not_16bit_grayscale": "The selected PNG file is not a 16-bit grayscale image.",
-        "invalid_png_file": "Unable to read the PNG file or it is corrupted."
+        "invalid_png_file": "Unable to read the PNG file or it is corrupted.",
+        "incomplete_16bit_data": "Input .raw file has incomplete 16-bit data. Make sure you selected the correct file!",
+        "invalid_raw_file": "Unable to read the RAW file or it is corrupted."
     },
 
     # Russian language
@@ -241,7 +243,9 @@ translations = {
         "no": "Нет",
         "warning": "Внимание",
         "not_16bit_grayscale": "Выбранный PNG-файл не является 16-битным изображением в градациях серого.",
-        "invalid_png_file": "Невозможно прочитать файл PNG или он повреждён."
+        "invalid_png_file": "Невозможно прочитать файл PNG или он повреждён.",
+        "incomplete_16bit_data": "Входной .raw файл содержит неполную 16-битную информацию. Убедитесь, что вы выбрали корректный файл!",
+        "invalid_raw_file": "Невозможно прочитать файл RAW или он повреждён."
     },
 
     # Ukrainian language
@@ -364,7 +368,9 @@ translations = {
         "no": "Ні",
         "warning": "Увага",
         "not_16bit_grayscale": "Обраний PNG-файл не є 16-бітним зображенням у відтінках сірого.",
-        "invalid_png_file": "Неможливо прочитати PNG-файл або він пошкоджений."
+        "invalid_png_file": "Неможливо прочитати PNG-файл або він пошкоджений.",
+        "incomplete_16bit_data": "Вхідний файл .raw містить неповні 16-бітні дані. Переконайтеся, що вибрали правильний файл!",
+        "invalid_raw_file": "Неможливо прочитати RAW-файл або він пошкоджений.",
     },
 
     # Polish language
@@ -487,7 +493,9 @@ translations = {
         "no": "Nie",
         "warning": "Uwaga",
         "not_16bit_grayscale": "Wybrany plik PNG nie jest obrazem w skali szarości o głębi 16 bitów.",
-        "invalid_png_file": "Nie można odczytać pliku PNG lub jest uszkodzony."
+        "invalid_png_file": "Nie można odczytać pliku PNG lub jest uszkodzony.",
+        "incomplete_16bit_data": "Plik wejściowy .raw zawiera niekompletne dane 16-bitowe. Upewnij się, że wybrano poprawny plik!",
+        "invalid_raw_file": "Nie można odczytać pliku RAW lub jest uszkodzony.",
     },
 
     # Belarusian language
@@ -612,6 +620,8 @@ translations = {
         "no": "Не",
         "warning": "Увага",
         "not_16bit_grayscale": "Абраны PNG-файл не з'яўляецца 16-бітным выявай у адценні шэрага.",
-        "invalid_png_file": "Немагчыма чытаць PNG-файл ці ён пашкоджаны."
+        "invalid_png_file": "Немагчыма чытаць PNG-файл ці ён пашкоджаны.",
+        "incomplete_16bit_data": "Уваходны файл .raw мае нецалыя 16-бітныя дадзеныя. Калі ласка, пераканайцеся, што вы пазначылі правільны файл!",
+        "invalid_raw_file": "Немагчыма чытаць RAW-файл ці ён пашкоджаны.",
     }
 }

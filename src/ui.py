@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 import traceback
 
-VERSION = "2.0"
+VERSION = "2.0.1"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
@@ -774,7 +774,7 @@ def create_ui(page: ft.Page):
         page.overlay.append(dialog)
         page.update()
 
-    vertext = ft.Text("Python 2.0 [250604b]", size=10, color=ft.Colors.GREY)
+    vertext = ft.Text("Python 2.0.1 [250630a]", size=10, color=ft.Colors.GREY)
     
     version_text = ft.GestureDetector(
         content=vertext,
