@@ -1,94 +1,100 @@
-# displace.bin GUI конвертер
+# displace.bin GUI Converter
 
 ![logo](https://github.com/user-attachments/assets/f63de348-033f-4404-b24f-072d999fb998)
 
-Эта программа помогает вам конвертировать файлы `displace.bin` вашей карты в формат `.raw` или `.png`. Она разработана для упрощения процесса конвертации.
-
-**[ENGLISH README](https://github.com/stakanyash/displacebin_gui_converter/blob/main/README_EN.md)**
+This program helps you convert your map’s `displace.bin` files into `.raw` or `.png` formats. It is designed to simplify the conversion process.
 
 powered by [python](https://github.com/python/cpython) & [flet](https://github.com/flet-dev/flet)
 
-## Оглавление
+## Table of Contents
 
-- [Возможности](#возможности)
-- [Как использовать](#как-использовать)
-- [Скачать](#скачать)
-- [Скриншоты](#скриншоты)
-- [Требования](#требования)
-- [Установка](#установка)
-- [Запуск программы](#запуск-программы-из-исходного-кода)
-- [Лицензия](#лицензия)
-- [Авторы](#авторы)
+- [Features](#features)
+- [How to Use](#how-to-use)
+- [Download](#download)
+- [Screenshots](#screenshots)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Run from Source](#run-from-source)
+- [License](#license)
+- [Authors](#authors)
 
-## Возможности
+## Features
 
-- **Выбор файла**: Выберите файл `displace.bin` из папки с картой.
-- **Выбор формата**: Выберите формат выходного файла (`.raw` или `.png`).
-- **Выбор размера**: Выберите размер карты.
-- **Конвертация**: Преобразуйте выбранный файл в нужный формат и размер.
-- **Раздел помощи**: Предлагает подробные инструкции и информацию о программе.
-- **Поддержка нескольких языков**: Данная программа поддерживает следующие языки: Русский, Английский, Украинский, Беларусский, Польский.
+- **File Selection**: Choose the `displace.bin` file from your map folder.  
+- **Format Selection**: Choose the output file format (`.raw` or `.png`).  
+- **Size Selection**: Choose the map size.  
+- **Conversion**: Convert the selected file to the desired format and size.  
+- **Help Section**: Provides detailed instructions and information about the program.  
+- **Multi-language Support**: The program supports the following languages — Russian, English, Ukrainian, Belarusian, and Polish.  
 
-**ВАЖНО**: Украинская и Польская локализация имеют "непроверенный" статус и могут содержать ошибки. Если вы найдетё ошибки в переводе - создайте issue или merge request.
+**IMPORTANT**: Ukrainian and Polish localizations have an “unverified” status and may contain errors. If you find any mistakes in the translation, please create an issue or a merge request.
 
-## Как использовать
+## How to Use
 
-1. **Выбор файла**: Нажмите кнопку "Выбрать файл", чтобы выбрать файл `displace.bin` из папки с картой.
-2. **Выбор формата**: Выберите формат выходного файла (`.raw` или `.png`).
-3. **Выбор размера**: Выберите размер карты.
-4. **Конвертация файла**: Нажмите кнопку "Преобразовать файл", чтобы начать процесс конвертации.
-5. **Просмотр результата**: В случае успешной конвертации вы увидите сообщение об успехе, и преобразованный файл появится в папке.
+1. **Select File**: Click the “Select File” button to choose the `displace.bin` file from your map folder.  
+2. **Select Format**: Choose the output file format (`.raw` or `.png`).  
+3. **Select Size**: Choose the map size.  
+4. **Convert File**: Click the “Convert File” button to start the conversion process.  
+5. **View Result**: If the conversion is successful, you will see a success message, and the converted file will appear in the folder.
 
-## Скачать
+## Download
 
-**Скачать скомпилированный файл можете здесь:** https://github.com/stakanyash/displacebin_gui_converter/releases
+**You can download the compiled file here:** https://github.com/stakanyash/displacebin_gui_converter/releases
 
-## Скриншоты
+## Screenshots
 
 <div align="center">
   
-![image](https://github.com/user-attachments/assets/dda96e86-53a4-4f65-ab54-7b67c2c1d632)
-![image](https://github.com/user-attachments/assets/6158f22e-f045-4aea-a435-89900c568d43)
-![image](https://github.com/user-attachments/assets/abac6461-641e-4b9a-8f73-c9e5f69c70c1)
+![dgc1](https://github.com/user-attachments/assets/e01aa58f-9562-4b35-81ac-89299ffa47ee)
+![dgc2](https://github.com/user-attachments/assets/e893d921-6a76-490c-9730-6071a60cee47)
+![dgc3](https://github.com/user-attachments/assets/84dcbcfb-3c53-4405-a155-e2b42734679c)
+![dgc4](https://github.com/user-attachments/assets/d41006d2-a66f-4f8f-9eec-81641b134549)
+![dgc5](https://github.com/user-attachments/assets/89267f65-05ee-4637-b61e-a736320deee7)
+![dgc6](https://github.com/user-attachments/assets/114f1f46-ee03-4ce1-a5f5-392777474063)
+![dgc7](https://github.com/user-attachments/assets/fb09ef34-5532-4dce-a288-1a12a0ad65c7)
+![dgc8](https://github.com/user-attachments/assets/037856ad-c108-443b-ab88-33992a4c4022)
 
 </div>
 
-## Требования
+## Requirements
 
-- Python 3.x
-- Flet
-- PIL (Pillow)
+- Python 3.x  
+- Flet  
+- PIL (Pillow)  
 - struct
+- screeninfo
 
-## Установка
+## Installation
 
-1. Клонируйте репозиторий:
+1. Clone the repository:  
    ```bash
-   git clone https://github.com/stakanyash/displacebin_gui_converter.git
-   ```
+   git clone https://github.com/stakanyash/displacebin_gui_converter.git```
 
-2. Перейдите в директорию проекта:
+2. Navigate to the project directory:
+
    ```bash
    cd displacebin_gui_converter
    ```
 
-3. Установите необходимые зависимости:
+3. Install the required dependencies:
+
    ```bash
-   pip install requirements.txt
+   pip install -r requirements.txt
    ```
 
-## Запуск программы из исходного кода
+## Run from Source
 
-Для запуска программы выполните следующую команду:
+To run the program, execute the following command:
+
 ```bash
 python src/main.py
 ```
 
-## Лицензия
+## License
 
-Этот проект лицензирован под лицензией MIT. Подробности см. в файле [LICENSE](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Авторы
+## Authors
 
-- **Автор программы**: stakan
-- **Автор скрипта конвертации**: [ThePlain](https://github.com/ThePlain)
+* **Program Author**: stakan
+* **Conversion Script Author**: [ThePlain](https://github.com/ThePlain)
