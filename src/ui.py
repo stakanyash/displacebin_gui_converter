@@ -7,8 +7,10 @@ from resources import get_asset_path
 import logging
 from datetime import datetime
 import traceback
+from screeninfo import get_monitors
 
-VERSION = "2.0.1"
+VERSION = "2.1"
+BUILD = "[251027c]"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
@@ -28,33 +30,41 @@ system_lang = current_locale[:2] if current_locale else 'En'
 lang = translations.get(system_lang, translations["En"])
 
 class PageHelper:
-        def __init__(self, page: ft.Page):
-            self.page = page
-            self.min_btn = ft.IconButton(icon=ft.Icons.REMOVE, icon_size=16, tooltip=lang["min"], on_click=self.minimize)
-            self.close_btn = ft.IconButton(icon=ft.Icons.CLOSE, icon_size=16, tooltip=lang["exit"], on_click=self.close)
+    def __init__(self, page: ft.Page):
+        self.page = page
+        self.min_btn = ft.IconButton(icon=ft.Icons.REMOVE, icon_size=16, tooltip=lang["min"], on_click=self.minimize)
+        self.close_btn = ft.IconButton(icon=ft.Icons.CLOSE, icon_size=16, tooltip=lang["exit"], on_click=self.close)
 
-        def toggle_theme(self, e):
-            self.page.theme_mode = (
-                ft.ThemeMode.DARK if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
-            )
-            self.page.update()
+    def toggle_theme(self, e):
+        self.page.theme_mode = (
+            ft.ThemeMode.DARK if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        )
+        self.page.update()
 
-        def minimize(self, e):
-            self.page.window.minimized = True
-            self.page.update()
+    def minimize(self, e):
+        self.page.window.minimized = True
+        self.page.update()
 
-        def close(self, e):
-            self.page.window.close()
+    def close(self, e):
+        self.page.window.close()
 
 def create_ui(page: ft.Page):
     global lang
-    
+
     page.title = lang["title"]
     page.theme_mode = "dark"
-    page.window.maximizable = False
-    page.window.height = 810
-    page.window.width = 640
+
+    monitor = get_monitors()[0]
+    screen_width = monitor.width
+    screen_height = monitor.height
+
+    page.window.width = 580
+    page.window.height = 680
+    scale_factor = 1.0
+
     page.window.resizable = False
+    page.window.maximizable = False
+    page.window.minimizable = True
     page.window.title_bar_hidden = True
     page.window.title_bar_buttons_hidden = True
     page.window.icon = get_asset_path('icon.ico')
@@ -68,84 +78,37 @@ def create_ui(page: ft.Page):
         page.clean()
         create_back_ui(page)
 
-    def update_theme():
-        if page.theme_mode == "dark":
-            icon_color = "#9ecaff"
-            logo_src = get_asset_path('logo.png')
-            topbar_logo = get_asset_path('icon.ico')
-            text_color = ft.Colors.WHITE
-            theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
-            border_color = "#46678F"
-            versioncolor = ft.Colors.GREY
-        else:
-            icon_color = "black"
-            logo_src = get_asset_path('logo_white.png')
-            topbar_logo = get_asset_path('iconblack.ico')
-            text_color = ft.Colors.BLACK
-            theme_icon = ft.Icons.BRIGHTNESS_3
-            border_color = "#000000"
-            versioncolor = ft.Colors.BLACK
-
-        help_btn.content.icon_color = icon_color
-        language_btn.content.icon_color = icon_color
-        theme_btn.icon = theme_icon
-        theme_btn.icon_color = icon_color
-        git_btn.content.color = icon_color
-        dis_btn.content.color = icon_color
-        tg_btn.content.color = icon_color
-        yt_btn.content.color = icon_color
-        title_image.src = logo_src
-        rev_btn.icon_color = icon_color
-        save_metadata_checkbox.active_color = icon_color
-        icon_help_title.color = text_color
-        text_help_title.color = text_color
-        meta_dlg_titleicon.color = text_color
-        meta_dlg_titletext.color = text_color
-        minimize_btn.icon_color = icon_color
-        close_btn.icon_color = icon_color
-        topbarico.src = topbar_logo
-        output_size.border_color = border_color
-        file_name.border_color = border_color
-        select_button.style.color = icon_color
-        process_button.style.color = icon_color
-        vertext.color = versioncolor
-        langdlgicon.color = icon_color
-        langdlgtext.color = text_color
-        infoicon.color = text_color
-
-        for btn in lang_buttons:
-            btn.style = ft.ButtonStyle(color=icon_color)
-
-        page.update()
-
     logo = get_asset_path('icon.ico')
 
+    btn_size = int(28 * scale_factor)
+    icon_size = int(14 * scale_factor)
+    
     minimize_btn = ft.IconButton(
         icon=ft.Icons.REMOVE,
-        icon_size=14,
+        icon_size=icon_size,
         tooltip=lang["min"],
         on_click=helper.minimize,
-        padding=4,
-        width=28,
-        height=27,
+        padding=int(4 * scale_factor),
+        width=btn_size,
+        height=btn_size,
     )
 
     close_btn = ft.IconButton(
         icon=ft.Icons.CLOSE,
-        icon_size=14,
+        icon_size=icon_size,
         tooltip=lang["exit"],
         on_click=helper.close,
-        padding=4,
-        width=28,
-        height=27,
+        padding=int(4 * scale_factor),
+        width=btn_size,
+        height=btn_size,
     )
 
     topbarico = ft.Image(src=logo, width=16, height=16)
 
     top_bar = ft.Container(
-        height=27,
+        height=int(27 * scale_factor),
         bgcolor=ft.Colors.SURFACE,
-        padding=ft.padding.symmetric(horizontal=8),
+        padding=ft.padding.symmetric(horizontal=int(8 * scale_factor)),
         content=ft.WindowDragArea(
             ft.Row(
                 [
@@ -180,27 +143,21 @@ def create_ui(page: ft.Page):
 
     title_image = ft.Image(
         src=get_asset_path('logo.png'),
-        width=900,
-        height=155,
         fit=ft.ImageFit.CONTAIN
     )
 
     title_container = ft.Container(
         content=title_image,
-        padding=ft.padding.all(10),
-        alignment=ft.alignment.center
-    )
-
-    page.add(
-        ft.Column(
-            [title_container],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.START,
-            expand=False
-        )
+        padding=ft.padding.only(
+            top=int(10 * scale_factor),
+            bottom=int(5 * scale_factor)
+        ),
+        alignment=ft.alignment.center,
+        height=int(120 * scale_factor)
     )
 
     input_file_path = None
+    dialog_open = False
 
     def on_file_selected(e: ft.FilePickerResultEvent):
         nonlocal input_file_path
@@ -256,7 +213,7 @@ def create_ui(page: ft.Page):
 
     def metadata_info_dialog(e):
         def close_dlgmeta(e):
-            global dialog_open
+            nonlocal dialog_open
             meta_dlg.open = False
             dialog_open = False
             page.update()
@@ -283,7 +240,7 @@ def create_ui(page: ft.Page):
 
     def helpdialog(e):
         def close_dlghelp(e):
-            global dialog_open
+            nonlocal dialog_open
             help_dlg.open = False
             dialog_open = False
             page.update()
@@ -302,21 +259,309 @@ def create_ui(page: ft.Page):
                 ft.TextButton("OK", on_click=close_dlghelp)
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda e: print(lang["help_print"]),
         )
         page.overlay.append(help_dlg)
         page.update()
 
+    file_name = ft.TextField(
+        value="",
+        label=lang["select_file"],
+        read_only=True,
+        border_color="#46678F",
+        width=int(400 * scale_factor),
+        label_style=ft.TextStyle(size=int(14 * scale_factor)),
+        text_style=ft.TextStyle(size=int(14 * scale_factor)),
+        content_padding=ft.padding.symmetric(
+            horizontal=int(12 * scale_factor),
+            vertical=int(8 * scale_factor)
+        )
+    )
+
+    select_button = ft.ElevatedButton(
+        text=lang["sel_button"], 
+        on_click=select_file, 
+        style=ft.ButtonStyle(
+            color="#9ecaff",
+            padding=ft.padding.symmetric(
+                horizontal=int(20 * scale_factor),
+                vertical=int(10 * scale_factor)
+            ),
+            overlay_color=ft.Colors.with_opacity(0.1, "#9ecaff"),
+            text_style=ft.TextStyle(
+                size=int(14 * scale_factor)
+            )
+        )
+    )
+
+    output_format_text = ft.Text(
+        lang["select_format"],
+        size=int(16 * scale_factor),
+        text_align=ft.TextAlign.CENTER
+    )
+
+    output_format = ft.RadioGroup(
+        content=ft.Row([
+            ft.Radio(
+                label=".raw",
+                value="RAW",
+                scale=scale_factor,
+                label_style=ft.TextStyle(
+                    size=int(15 * scale_factor)
+                )
+            ),
+            ft.Container(width=int(20 * scale_factor)),
+            ft.Radio(
+                label=".png",
+                value="PNG",
+                scale=scale_factor,
+                label_style=ft.TextStyle(
+                    size=int(15 * scale_factor),
+                    weight=ft.FontWeight.W_500
+                )
+            )
+        ], 
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=0)
+    )
+
+    output_size = ft.Container(
+        content=ft.Dropdown(
+            options=[
+                ft.dropdown.Option(key="64", text="4x4"),
+                ft.dropdown.Option(key="128", text="8x8"),
+                ft.dropdown.Option(key="256", text="16x16"),
+                ft.dropdown.Option(key="512", text="32x32"),
+                ft.dropdown.Option(key="1024", text="64x64")
+            ],
+            label=lang["select_size"],
+            label_style=ft.TextStyle(size=int(12 * scale_factor)),
+            text_style=ft.TextStyle(size=int(12 * scale_factor)),
+            border_color="#46678F",
+            content_padding=ft.padding.symmetric(
+                horizontal=int(12 * scale_factor),
+                vertical=int(4 * scale_factor)
+            ),
+            width=int(350 * scale_factor)
+        ),
+        height=int(35 * scale_factor)
+    )
+
+    process_button = ft.ElevatedButton(
+        text=lang["convert_file"], 
+        on_click=lambda e: process_file(e), 
+        style=ft.ButtonStyle(
+            color="#9ecaff", 
+            padding=ft.padding.only(
+                left=int(16 * scale_factor),
+                top=int(6 * scale_factor),
+                right=int(16 * scale_factor),
+                bottom=int(6 * scale_factor)
+            ),
+            overlay_color=ft.Colors.with_opacity(0.1, "#9ecaff"),
+            text_style=ft.TextStyle(
+                size=int(12 * scale_factor)
+            )
+        )
+    )
+
+    help_icon = ft.Icons.HELP_OUTLINE
+    hover_icon = ft.Icons.HELP
+    icon_size = int(24 * scale_factor)
+
+    help_btn = ft.Container(
+        content=ft.IconButton(
+            icon=help_icon,
+            on_click=helpdialog,
+            icon_color="#9ecaff",
+            tooltip=lang["help"],
+            icon_size=icon_size,
+            width=int(40 * scale_factor),
+            height=int(40 * scale_factor)
+        ),
+        on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
+    )
+
+    language_icon = ft.Icons.LANGUAGE
+    language_hover_icon = ft.Icons.LANGUAGE_OUTLINED
+
+    language_btn = ft.Container(
+        content=ft.IconButton(
+            icon=language_icon,
+            on_click=lambda e: show_language_dialog(e),
+            icon_color="#9ecaff",
+            tooltip=lang["cnglang"],
+            icon_size=icon_size,
+            width=int(40 * scale_factor),
+            height=int(40 * scale_factor)
+        ),
+        on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
+    )
+
+    theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
+    theme_btn = ft.IconButton(
+        icon=theme_icon,
+        on_click=lambda e: toggle_theme(e),
+        icon_color="#9ecaff",
+        tooltip=lang["toggletheme"],
+        icon_size=icon_size,
+        width=int(40 * scale_factor),
+        height=int(40 * scale_factor)
+    )
+    git_btn = ft.IconButton(
+        content=ft.Image(
+            src=get_asset_path('git.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["github"]
+        ),
+        on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
+    )
+
+    dis_btn = ft.IconButton(
+        content=ft.Image(
+            src=get_asset_path('dis.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["discord"]
+        ),
+        on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
+    )
+
+    tg_btn = ft.IconButton(
+        content=ft.Image(
+            src=get_asset_path('tg.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["telegram"]
+        ),
+        on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
+    )
+
+    yt_btn = ft.IconButton(
+        content=ft.Image(
+            src=get_asset_path('yt.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["youtube"]
+        ),
+        on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
+    )
+
+    rev_btn = ft.IconButton(
+        icon=ft.Icons.SWAP_HORIZ,
+        icon_size=icon_size,
+        icon_color="#9ecaff",
+        tooltip=lang["modeswitch2"],
+        on_click=lambda e: switch_to_reverse_ui(page)
+    )
+
+    infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+
+    content_column = ft.Container(
+        content=ft.Column([
+            ft.Text(
+                spans=[
+                    ft.TextSpan("powered by "),
+                    ft.TextSpan("Python", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://www.python.org/"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("Flet", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://flet.dev/"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("Pillow", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://pillow.readthedocs.io/en/stable/"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("locale", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/locale.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("logging", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/logging.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("datetime", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/datetime.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("traceback", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/traceback.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("pathlib", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/pathlib.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("math", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/math.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("struct", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/struct.html"),
+                    ft.TextSpan(", "),
+                    ft.TextSpan("sys", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/sys.html"),
+                ],
+                selectable=True,
+                no_wrap=False,
+            ),
+            ft.Text(
+                spans=[
+                    ft.TextSpan("Authors: "),
+                    ft.TextSpan("stakan ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/stakanyash"),
+                    ft.TextSpan("(GUI), "),
+                    ft.TextSpan("ThePlain ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/ThePlain"),
+                    ft.TextSpan("(conversion script)"),
+                ],
+                selectable=True,
+                no_wrap=False,
+            )
+        ]),
+        height=120,
+        width=300,
+        padding=10
+    )
+
+    def show_version_info(e):
+        def close_dialog(e):
+            dialog.open = False
+            page.update()
+
+        content_text = content_column
+
+        dialog = ft.AlertDialog(
+            open=True,
+            title=ft.Row(
+                [
+                    infoicon,
+                    ft.Text(lang["info"], style=ft.TextThemeStyle.TITLE_MEDIUM)
+                ],
+            ),
+            content=content_text,
+            actions=[
+                ft.TextButton("OK", on_click=close_dialog)
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.overlay.append(dialog)
+        page.update()
+
+    vertext = ft.Text(f"{VERSION} {BUILD}", size=10, color=ft.Colors.GREY)
+
+    version_text = ft.GestureDetector(
+        content=vertext,
+        on_tap=show_version_info
+    )
+
+    version_container = ft.Container(
+        content=version_text,
+        alignment=ft.alignment.bottom_right,
+        padding=ft.padding.only(right=10, bottom=10),
+    )
+
     def process_file(e):
-        if input_file_path and output_format.value and output_size.value:
-            size = int(output_size.value)
+        if input_file_path and output_format.value and output_size.content.value:
+            try:
+                size = int(output_size.content.value)
+            except Exception:
+                try:
+                    size = int(output_size.content.options[0].key)
+                except Exception:
+                    size = 64
+
             output_path = os.path.splitext(input_file_path)[0] + (".raw" if output_format.value == "RAW" else ".png")
 
             try:
                 if output_format.value == "RAW":
-                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size, save_metadata_checkbox.value)
+                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size, True)
                 else:
-                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size, save_metadata_checkbox.value)
+                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size, True)
 
                 def close_dlgconvert(e):
                     convertsuc.open = False
@@ -411,9 +656,9 @@ def create_ui(page: ft.Page):
                 page.update()
 
         else:
-            if not input_file_path or not output_format.value or not output_size.value:
+            if not input_file_path or not output_format.value or not output_size.content.value:
                 def close_dlgpleaseselfile(e):
-                    global dialog_open
+                    nonlocal dialog_open
                     plsselfile.open = False
                     dialog_open = False
                     page.update()
@@ -444,30 +689,35 @@ def create_ui(page: ft.Page):
         show_language_dialog(None)
 
     def update_ui():
-        top_bar.content.content.controls[0].controls[1].value = f"{lang['title']} {VERSION}"
-        top_bar.content.content.controls[1].controls[0].tooltip = lang["min"]
-        top_bar.content.content.controls[1].controls[1].tooltip = lang["exit"]
-        helper.min_btn.tooltip = lang["min"]
-        helper.close_btn.tooltip = lang["exit"]
-        file_name.label = lang["select_file"]
-        select_button.text = lang["sel_button"]
-        output_format_text.value = lang["select_format"]
-        output_format.content.controls[0].label = ".raw"
-        output_format.content.controls[1].label = ".png"
-        output_size.label = lang["select_size"]
-        process_button.text = lang["convert_file"]
-        help_btn.content.tooltip = lang["help"]
-        language_btn.content.tooltip = lang["cnglang"]
-        theme_btn.tooltip = lang["toggletheme"]
-        git_btn.content.tooltip = lang["github"]
-        dis_btn.content.tooltip = lang["discord"]
-        tg_btn.content.tooltip = lang["telegram"]
-        yt_btn.content.tooltip = lang["youtube"]
-        rev_btn.tooltip = lang["modeswitch2"]
-        save_metadata_checkbox.label = lang["metadatacheckbox"]
-        langdlgtext.value = lang["sel_lang"]
-        text_help_title.value = lang["help"]
-        page.update()
+        try:
+            top_bar.content.content.controls[0].controls[1].value = f"{lang['title']} {VERSION}"
+            top_bar.content.content.controls[1].controls[0].tooltip = lang["min"]
+            top_bar.content.content.controls[1].controls[1].tooltip = lang["exit"]
+            helper.min_btn.tooltip = lang["min"]
+            helper.close_btn.tooltip = lang["exit"]
+            file_name.label = lang["select_file"]
+            select_button.text = lang["sel_button"]
+            output_format_text.value = lang["select_format"]
+            output_format.content.controls[0].label = ".raw"
+            output_format.content.controls[1].label = ".png"
+            try:
+                output_size.content.label = lang["select_size"]
+            except Exception:
+                pass
+            process_button.text = lang["convert_file"]
+            help_btn.content.tooltip = lang["help"]
+            language_btn.content.tooltip = lang["cnglang"]
+            theme_btn.tooltip = lang["toggletheme"]
+            git_btn.content.tooltip = lang["github"]
+            dis_btn.content.tooltip = lang["discord"]
+            tg_btn.content.tooltip = lang["telegram"]
+            yt_btn.content.tooltip = lang["youtube"]
+            rev_btn.tooltip = lang["modeswitch2"]
+            langdlgtext.value = lang["sel_lang"]
+            text_help_title.value = lang["help"]
+            page.update()
+        except Exception as ex:
+            logging.error("update_ui error: " + str(ex))
 
     lang_buttons = [
         ft.TextButton("Русский", on_click=lambda e: change_language("Ru"), style=ft.ButtonStyle(color="#9ecaff")),
@@ -511,283 +761,162 @@ def create_ui(page: ft.Page):
         page.theme_mode = "light" if page.theme_mode == "dark" else "dark"
         update_theme()
 
-    file_name = ft.TextField(
-        value="",
-        label=lang["select_file"],
-        read_only=True,
-        width=550,
-        border_color="#46678F"
-    )
+    def update_theme():
+        if page.theme_mode == "dark":
+            icon_color = "#9ecaff"
+            logo_src = get_asset_path('logo.png')
+            topbar_logo = get_asset_path('icon.ico')
+            text_color = ft.Colors.WHITE
+            theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
+            border_color = "#46678F"
+            versioncolor = ft.Colors.GREY
+        else:
+            icon_color = "black"
+            logo_src = get_asset_path('logo_white.png')
+            topbar_logo = get_asset_path('iconblack.ico')
+            text_color = ft.Colors.BLACK
+            theme_icon = ft.Icons.BRIGHTNESS_3
+            border_color = "#000000"
+            versioncolor = ft.Colors.BLACK
 
-    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
+        try:
+            help_btn.content.icon_color = icon_color
+            language_btn.content.icon_color = icon_color
+            theme_btn.icon = theme_icon
+            theme_btn.icon_color = icon_color
+            git_btn.content.color = icon_color
+            dis_btn.content.color = icon_color
+            tg_btn.content.color = icon_color
+            yt_btn.content.color = icon_color
+            title_image.src = logo_src
+            rev_btn.icon_color = icon_color
+            icon_help_title.color = text_color
+            text_help_title.color = text_color
+            meta_dlg_titleicon.color = text_color
+            meta_dlg_titletext.color = text_color
+            minimize_btn.icon_color = icon_color
+            close_btn.icon_color = icon_color
+            topbarico.src = topbar_logo
+            try:
+                output_size.content.border_color = border_color
+            except Exception:
+                pass
+            file_name.border_color = border_color
+            select_button.style.color = icon_color
+            process_button.style.color = icon_color
+            vertext.color = versioncolor
+            langdlgicon.color = icon_color
+            langdlgtext.color = text_color
+            infoicon.color = text_color
 
-    output_format_text = ft.Text(
-        lang["select_format"],
-        size=16,
-        text_align=ft.TextAlign.CENTER
-    )
+            for btn in lang_buttons:
+                btn.style = ft.ButtonStyle(color=icon_color)
 
-    output_format = ft.RadioGroup(
-        content=ft.Row([
-            ft.Radio(label=".raw", value="RAW"),
-            ft.Radio(label=".png", value="PNG")
-        ], alignment=ft.MainAxisAlignment.CENTER)
-    )
+            page.update()
+        except Exception as ex:
+            logging.debug("update_theme partial: " + str(ex))
 
-    output_size = ft.Dropdown(
-        width=400,
-        options=[
-            ft.dropdown.Option(key="64", text="4x4"),
-            ft.dropdown.Option(key="128", text="8x8"),
-            ft.dropdown.Option(key="256", text="16x16"),
-            ft.dropdown.Option(key="512", text="32x32"),
-            ft.dropdown.Option(key="1024", text="64x64")
-        ],
-        label=lang["select_size"],
-        label_style=ft.TextStyle(size=13),
-        border_color="#46678F"
-    )
-
-    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=30, top=10, right=30, bottom=10)))
-
-    save_metadata_checkbox = ft.Checkbox(
-        label=lang["metadatacheckbox"],
-        value=True,
-        active_color="#9ecaff"
-    )
-
-    help_icon = ft.Icons.HELP_OUTLINE
-    hover_icon = ft.Icons.HELP
-
-    help_btn = ft.Container(
-        content=ft.IconButton(
-            icon=help_icon,
-            on_click=helpdialog,
-            icon_color="#9ecaff",
-            tooltip=lang["help"]
-        ),
-        on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
-    )
-
-    language_icon = ft.Icons.LANGUAGE
-    language_hover_icon = ft.Icons.LANGUAGE_OUTLINED
-
-    language_btn = ft.Container(
-        content=ft.IconButton(
-            icon=language_icon,
-            on_click=show_language_dialog,
-            icon_color="#9ecaff",
-            tooltip=lang["cnglang"]
-        ),
-        on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
-    )
-
-    theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
-    theme_btn = ft.IconButton(
-        icon=theme_icon,
-        on_click=toggle_theme,
-        icon_color="#9ecaff",
-        tooltip=lang["toggletheme"]
-    )
-
-    git_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('git.png'), width=24, height=24, color="#9ecaff", tooltip=lang["github"]),
-        on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
-    )
-
-    dis_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('dis.png'), width=24, height=24, color="#9ecaff", tooltip=lang["discord"]),
-        on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
-    )
-
-    tg_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('tg.png'), width=24, height=24, color="#9ecaff", tooltip=lang["telegram"]),
-        on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
-    )
-
-    yt_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('yt.png'), width=24, height=24, color="#9ecaff", tooltip=lang["youtube"]),
-        on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
-    )
-
-    rev_btn = ft.IconButton(
-        icon=ft.Icons.SWAP_HORIZ,
-        icon_size=24,
-        icon_color="#9ecaff",
-        tooltip=lang["modeswitch2"],
-        on_click=lambda e: switch_to_reverse_ui(page)
-    )
-
-    page.add(
-        ft.Column(
+    main_content = ft.Container(
+        content=ft.Column(
             [
-                ft.Container(
-                    ft.Column(
-                        [file_name, select_button],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                    padding=ft.padding.all(2),
-                ),
-                ft.Divider(color="transparent"),
+                title_container,
 
+                ft.Container(height=int(10 * scale_factor)),
+                
                 ft.Container(
-                    ft.Column(
+                    content=ft.Column(
+                        [
+                            ft.Container(
+                                content=file_name,
+                                alignment=ft.alignment.center
+                            ),
+                            ft.Container(height=int(10 * scale_factor)),
+                            ft.Container(
+                                content=select_button,
+                                alignment=ft.alignment.center
+                            )
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=0
+                    ),
+                    padding=ft.padding.symmetric(
+                        horizontal=int(20 * scale_factor),
+                        vertical=int(10 * scale_factor)
+                    ),
+                ),
+                
+                ft.Container(height=int(20 * scale_factor)),
+                
+                ft.Container(
+                    content=ft.Column(
                         [
                             output_format_text,
+                            ft.Container(height=int(10 * scale_factor)),
                             output_format,
+                            ft.Container(height=int(30 * scale_factor)),
+                            ft.Container(
+                                content=output_size,
+                                width=int(300 * scale_factor),
+                                alignment=ft.alignment.center,
+                            ),
+                            ft.Container(height=int(30 * scale_factor)),
+                            process_button,
+                            ft.Container(height=int(20 * scale_factor)),
                         ],
-                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=0,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
-                    padding=ft.padding.all(2),
+                    padding=ft.padding.symmetric(horizontal=int(20 * scale_factor)),
                 ),
-                ft.Divider(color="transparent"),
-
-                ft.Container(
-                    ft.Column(
-                        [
-                            ft.Row([output_size], alignment=ft.MainAxisAlignment.CENTER),
-                            ft.Row([process_button], alignment=ft.MainAxisAlignment.CENTER),
-                            ft.Divider(color="transparent"),
-                            ft.Row([save_metadata_checkbox], alignment=ft.MainAxisAlignment.CENTER),
-                        ],
-                        spacing=10,
-                    ),
-                    padding=ft.padding.all(2),
-                ),
-                ft.Container(height=20),
             ],
-            alignment=ft.MainAxisAlignment.CENTER,
+            alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        )
+            spacing=0,
+        ),
+        expand=True,
     )
 
-    page.add(
-        ft.Container(
-            ft.Column(
-                [
-                    ft.Row(
-                        [
-                            help_btn,
-                            ft.Container(width=5),
-                            language_btn,
-                            ft.Container(width=5),
-                            theme_btn,
-                            ft.Container(width=5),
-                            rev_btn,
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        vertical_alignment=ft.CrossAxisAlignment.END,
-                    ),
-                    ft.Container(height=1),
-                    ft.Row(
-                        [
-                            git_btn,
-                            ft.Container(width=5),
-                            dis_btn,
-                            ft.Container(width=5),
-                            tg_btn,
-                            ft.Container(width=5),
-                            yt_btn,
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        vertical_alignment=ft.CrossAxisAlignment.END,
-                    ),
-                ],
-                spacing=2,
-            ),
-            padding=ft.padding.all(2),
-        )
-    )
+    page.add(main_content)
 
-    infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
-
-    content_column = ft.Container(
-        content=ft.Column([
-            ft.Text(
-                spans=[
-                    ft.TextSpan("powered by "),
-                    ft.TextSpan("Python", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://www.python.org/"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("Flet", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://flet.dev/"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("Pillow", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://pillow.readthedocs.io/en/stable/"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("locale", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/locale.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("logging", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/logging.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("datetime", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/datetime.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("traceback", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/traceback.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("pathlib", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/pathlib.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("math", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/math.html"), 
-                    ft.TextSpan(", "),
-                    ft.TextSpan("struct", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/struct.html"),
-                    ft.TextSpan(", "),
-                    ft.TextSpan("sys", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://docs.python.org/3/library/sys.html"),
-                ],
-                selectable=True,
-                no_wrap=False,
-            ),
-            ft.Text(
-                spans=[
-                    ft.TextSpan("Authors: "),
-                    ft.TextSpan("stakan ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/stakanyash"),
-                    ft.TextSpan("(GUI), "),
-                    ft.TextSpan("ThePlain ", style=ft.TextStyle(color=ft.Colors.BLUE_400), url="https://github.com/ThePlain"),
-                    ft.TextSpan("(conversion script)"),
-                ],
-                selectable=True,
-                no_wrap=False,
-            )
-        ]),
-        height=120,
-        width=300,
-        padding=10
-    )
-
-    def show_version_info(e):
-        def close_dialog(e):
-            dialog.open = False
-            page.update()
-
-        content_text = content_column
-
-        dialog = ft.AlertDialog(
-            open=True,
-            title=ft.Row(
-                [
-                    infoicon,
-                    ft.Text(lang["info"], style=ft.TextThemeStyle.TITLE_MEDIUM)
-                ],
-            ),
-            content=content_text,
-            actions=[
-                ft.TextButton("OK", on_click=close_dialog)
+    toolbar_container = ft.Container(
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        help_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        language_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        theme_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        rev_btn,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.Container(height=int(10 * scale_factor)),
+                ft.Row(
+                    [
+                        git_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        dis_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        tg_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        yt_btn,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
             ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.overlay.append(dialog)
-        page.update()
-
-    vertext = ft.Text("Python 2.0.1 [250630a]", size=10, color=ft.Colors.GREY)
-    
-    version_text = ft.GestureDetector(
-        content=vertext,
-        on_tap=show_version_info
+            spacing=0,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        padding=ft.padding.only(bottom=int(10 * scale_factor)),
     )
 
-    version_container = ft.Container(
-        content=version_text,
-        alignment=ft.alignment.bottom_right,
-        padding=ft.padding.only(right=10, bottom=10),
-    )
-
+    page.add(toolbar_container)
     page.add(version_container)
 
-
     update_theme()
+    update_ui()
