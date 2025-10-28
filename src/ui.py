@@ -10,7 +10,7 @@ import traceback
 from screeninfo import get_monitors
 
 VERSION = "2.1"
-BUILD = "[251027c]"
+BUILD = "[251028a]"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"

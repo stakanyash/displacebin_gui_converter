@@ -11,7 +11,7 @@ import sys
 from PIL import Image
 
 VERSION = "2.1"
-BUILD = "[251027c]"
+BUILD = "[251028a]"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
