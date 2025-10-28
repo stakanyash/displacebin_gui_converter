@@ -259,7 +259,6 @@ def create_ui(page: ft.Page):
                 ft.TextButton("OK", on_click=close_dlghelp)
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda e: print(lang["help_print"]),
         )
         page.overlay.append(help_dlg)
         page.update()

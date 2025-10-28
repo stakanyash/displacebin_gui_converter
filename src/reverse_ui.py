@@ -533,12 +533,26 @@ def create_back_ui(page: ft.Page):
                     text_help_title,
                 ],
             ),
-            content=ft.Text(lang["reversehelp_text"]),
+            content=ft.Container(
+                content=ft.ListView(
+                    [ft.Text(
+                        lang["reversehelp_text"],
+                        selectable=True,
+                        no_wrap=False,
+                        expand=True
+                    )],
+                    spacing=10,
+                    height=300,
+                    expand=True
+                ),
+                width=450,
+                height=400,
+                padding=10,
+            ),
             actions=[
                 ft.TextButton("OK", on_click=close_dlghelp)
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda e: print(lang["help_print"]),
         )
         page.overlay.append(help_dlg)
         page.update()

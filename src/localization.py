@@ -29,10 +29,7 @@ translations = {
             "64x64 - map with levelsize value '64'.\n"
             "\n"
             "You can find the levelsize value by opening the .ssl file of your map in text mode (for example via VS Code).\n"
-            "\n"
-            "If you want to use \"reverse\" conversion in the future, enable the \"Save metadata\" checkbox.\n"
         ),
-        "help_print": "Help dialog closed",
         "struct_error": (
             "An error occurred while converting the file. Please check the selected map size.\n"
             "\n"
@@ -73,7 +70,7 @@ translations = {
             "\n"
             "FAQ:\n"
             "Q: Can I use this to enlarge the map?\n"
-            "A: No, you can't. This feature will be implemented in version 3.0.\n"
+            "A: No, you can’t. Increasing the map size is not limited to just increasing the heightmap size.\n"
             "\n"
             "Q: Can I perform reverse conversion without the metadata file?\n"
             "A: No, you can't. The metadata file contains critical information about the minimum and maximum terrain height.\n"
@@ -96,7 +93,6 @@ translations = {
             "Metadata contains information about the minimum and maximum height of the landscape.\n"
             "Without this data, reverse conversion is IMPOSSIBLE!\n"
             "\n"
-            "Therefore, if you plan to use \"reverse\" conversion, saving metadata is mandatory.\n"
             "Metadata is saved in .json format inside the folder where the source .bin file is located."
         ),
         "info": "Info",
@@ -154,10 +150,7 @@ translations = {
             "64x64 - карта со значением levelsize '64'.\n"
             "\n"
             "Узнать значение levelsize можно открыв .ssl файл вашей карты в текстовом режиме (например через VS Code).\n"
-            "\n"
-            "Если вы хотите использовать \"обратную\" конвертацию в будущем, активируете галочку \"Сохранить метаданные\".\n"
         ),
-        "help_print": "Закрыто диалоговое окно помощи",
         "struct_error": (
             "Произошла ошибка при конвертации файла. Пожалуйста, проверьте выбранный размер карты.\n"
             "\n"
@@ -198,7 +191,7 @@ translations = {
             "\n"
             "FAQ:\n"
             "В: Можно ли таким образом увеличить карту?\n"
-            "О: Нет, нельзя. Данный функционал будет реализован отдельно в 3.0\n"
+            "О: Нет, нельзя. Увеличение размера карты не ограничивается только лишь увеличением размера карты высот.\n"
             "\n"
             "В: Можно ли произвести обратную конвертацию без файла метаданных?\n"
             "О: Нет, нельзя. Файл метаданных содержит критически необходимую информацию о минимальной и максимальной высоте ландшафта.\n"
@@ -221,7 +214,6 @@ translations = {
             "Метаданные содержат в себе данные о минимальной и максимальной высоте ландшафта.\n"
             "При отсутствии этих данных обратное конвертирование НЕВОЗМОЖНО!\n"
             "\n"
-            "Поэтому если вы планируете использовать \"обратную\" конвертацию, то сохранение метаданных является обязательным.\n"
             "Метаданные сохраняются в формате .json в папке в которой распологается исходный .bin файл."
         ),
         "info": "Инфо",
@@ -279,10 +271,7 @@ translations = {
             "64x64 - карта з значенням levelsize '64'.\n"
             "\n"
             "Дізнатися значення levelsize можна відкривши .ssl файл вашої карти в текстовому режимі (наприклад через VS Code).\n"
-            "\n"
-            "Якщо ви хочете використовувати \"зворотню\" конвертацію у майбутньому, активуйте прапорець \"Зберігати метадані\".\n"
         ),
-        "help_print": "Діалогове вікно допомоги закрито",
         "struct_error": (
             "Сталася помилка під час конвертації файлу. Будь ласка, перевірте обраний розмір карти.\n"
             "\n"
@@ -323,7 +312,7 @@ translations = {
             "\n"
             "FAQ:\n"
             "П: Чи можна таким чином збільшити карту?\n"
-            "В: Ні, не можна. Цей функціонал буде реалізовано окремо у версії 3.0.\n"
+            "В: Ні, не можна. Збільшення розміру карти не обмежується лише збільшенням розміру карти висот.\n"
             "\n"
             "П: Чи можна зробити зворотне перетворення без файлу метаданих?\n"
             "В: Ні, не можна. Файл метаданих містить критично важливу інформацію про мінімальну та максимальну висоту рельєфу.\n"
@@ -346,7 +335,6 @@ translations = {
             "Метадані містять інформацію про мінімальну та максимальну висоту ландшафту.\n"
             "Без цих даних зворотне перетворення НЕМОЖЛИВЕ!\n"
             "\n"
-            "Тому якщо ви плануєте використовувати «зворотню» конвертацію, збереження метаданих є обов’язковим.\n"
             "Метадані зберігаються у форматі .json у папці, де розташований вихідний файл .bin."
         ),
         "info": "Інфо",
@@ -404,10 +392,7 @@ translations = {
             "64x64 - mapa z wartością levelsize '64'.\n"
             "\n"
             "Wartość levelsize można znaleźć otwierając plik .ssl twojej mapy w trybie tekstowym (np. przez VS Code).\n"
-            "\n"
-            "Jeśli chcesz używać \"odwrotnej\" konwersji w przyszłości, zaznacz pole \"Zapisz metadane\".\n"
         ),
-        "help_print": "Zamknięto okno dialogowe pomocy",
         "struct_error": (
             "Wystąpił błąd podczas konwersji pliku. Proszę sprawdzić wybrany rozmiar mapy.\n"
             "\n"
@@ -448,7 +433,7 @@ translations = {
             "\n"
             "FAQ:\n"
             "P: Czy w ten sposób można powiększyć mapę?\n"
-            "O: Nie, nie można. Ta funkcjonalność będzie dostępna oddzielnie w wersji 3.0.\n"
+            "O: Nie, nie można. Zwiększenie rozmiaru mapy nie ogranicza się tylko do zwiększenia rozmiaru mapy wysokości.\n"
             "\n"
             "P: Czy można przeprowadzić konwersję wsteczną bez pliku metadanych?\n"
             "O: Nie, nie można. Plik metadanych zawiera krytyczne informacje o minimalnej i maksymalnej wysokości terenu.\n"
@@ -471,7 +456,6 @@ translations = {
             "Metadane zawierają informacje o minimalnej i maksymalnej wysokości krajobrazu.\n"
             "Bez tych danych konwersja odwrotna jest NIEMOŻLIWA!\n"
             "\n"
-            "Dlatego jeśli planujesz używać konwersji \"odwrotnej\", zapisywanie metadanych jest obowiązkowe.\n"
             "Metadane zapisywane są w formacie .json w folderze, w którym znajduje się plik źródłowy .bin."
         ),
         "info": "Info",
@@ -530,11 +514,8 @@ translations = {
             "\n"
             "Даведацца значэнне levelsize можна адкрыўшы .ssl файл вашай карты ў тэкставым рэжыме (напрыклад праз VS Code).\n"
             "\n"
-            "Калі вы хочаце выкарыстоўваць \"зваротную\" канверсію ў майбуднім, актывуйце праверачок \"Захаваць метаданыя\".\n"
-            "\n"
             "Праверка перакладу: nEmPoBu4, MrKirov\n"
         ),
-        "help_print": "Закрытае дыялогавае акно дапамогі",
         "struct_error": (
             "Адбылася памылка пры канвертаванні файла. Калі ласка, праверце выбраны памер карты.\n"
             "\n"
@@ -575,7 +556,7 @@ translations = {
             "\n"
             "FAQ:\n"
             "П: Ці можна такім чынам павялічыць карту?\n"
-            "А: Не, нельга. Гэты функцыянал будзе рэалізаваны асобна ў версіі 3.0.\n"
+            "А: Не, нельга. Павелічэнне памеру карты не абмяжоўваецца толькі павелічэннем памеру карты вышынь.\n"
             "\n"
             "П: Ці можна выканаць зваротную канвертацыю без файла метаданых?\n"
             "А: Не, нельга. Файл метаданых утрымлівае крытычна важную інфармацыю аб мінімальнай і максімальнай вышыні ландшафту.\n"
@@ -598,7 +579,6 @@ translations = {
             "Метаданыя ўтрымліваюць інфармацыю пра мінімальную і максімальную вышыню ландшафту.\n"
             "Без гэтых даных зваротнае пераўтварэнне НЯМОЖНАЕ!\n"
             "\n"
-            "Таму калі вы плануеце выкарыстоўваць \"зваротную\" канвертацыю, захаванне метаданых абавязковае.\n"
             "Метаданыя захоўваюцца ў фармаце .json у тэчцы, дзе размяшчаецца зыходны файл .bin."
         ),
         "info": "Інфа",
