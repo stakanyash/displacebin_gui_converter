@@ -10,7 +10,8 @@ import traceback
 import sys
 from PIL import Image
 
-VERSION = "2.0.1"
+VERSION = "2.1"
+BUILD = "[251027c]"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -49,12 +50,14 @@ class PageHelper:
 def create_back_ui(page: ft.Page):
     global lang
 
+    scale_factor = 1.0
+
     if any(arg in sys.argv for arg in ("-reverse", "--reverse")):
         page.title = lang["title"]
         page.theme_mode = "dark"
         page.window.maximizable = False
-        page.window.height = 810
-        page.window.width = 640
+        page.window.width = 580 
+        page.window.height = 680
         page.window.resizable = False
         page.window.title_bar_hidden = True
         page.window.title_bar_buttons_hidden = True
@@ -120,30 +123,30 @@ def create_back_ui(page: ft.Page):
 
     minimize_btn = ft.IconButton(
         icon=ft.Icons.REMOVE,
-        icon_size=14,
+        icon_size=int(14 * scale_factor),
         tooltip=lang["min"],
         on_click=helper.minimize,
-        padding=4,
-        width=28,
-        height=27,
+        padding=int(4 * scale_factor),
+        width=int(28 * scale_factor),
+        height=int(27 * scale_factor),
     )
 
     close_btn = ft.IconButton(
         icon=ft.Icons.CLOSE,
-        icon_size=14,
+        icon_size=int(14 * scale_factor),
         tooltip=lang["exit"],
         on_click=helper.close,
-        padding=4,
-        width=28,
-        height=27,
+        padding=int(4 * scale_factor),
+        width=int(28 * scale_factor),
+        height=int(27 * scale_factor),
     )
 
-    topbarico = ft.Image(src=logo, width=16, height=16)
+    topbarico = ft.Image(src=logo, width=int(16 * scale_factor), height=int(16 * scale_factor))
 
     top_bar = ft.Container(
-        height=27,
+        height=int(27 * scale_factor),
         bgcolor=ft.Colors.SURFACE,
-        padding=ft.padding.symmetric(horizontal=8),
+        padding=ft.padding.symmetric(horizontal=int(8 * scale_factor)),
         content=ft.WindowDragArea(
             ft.Row(
                 [
@@ -178,15 +181,17 @@ def create_back_ui(page: ft.Page):
 
     title_image = ft.Image(
         src=get_asset_path('logo.png'),
-        width=900,
-        height=155,
         fit=ft.ImageFit.CONTAIN
     )
 
     title_container = ft.Container(
         content=title_image,
-        padding=ft.padding.all(10),
-        alignment=ft.alignment.center
+        padding=ft.padding.only(
+            top=int(10 * scale_factor),
+            bottom=int(5 * scale_factor)
+        ),
+        alignment=ft.alignment.center,
+        height=int(120 * scale_factor)
     )
 
     page.add(
@@ -793,81 +798,166 @@ def create_back_ui(page: ft.Page):
         value="",
         label=lang["select_file"],
         read_only=True,
-        width=550,
+        width=int(400 * scale_factor),
+        label_style=ft.TextStyle(size=int(14 * scale_factor)),
+        text_style=ft.TextStyle(size=int(14 * scale_factor)),
+        content_padding=ft.padding.symmetric(
+            horizontal=int(12 * scale_factor),
+            vertical=int(8 * scale_factor)
+        ),
         border_color="#46678F"
     )
 
-    select_button = ft.ElevatedButton(lang["sel_button"], on_click=select_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
+    select_button = ft.ElevatedButton(
+        text=lang["sel_button"],
+        on_click=select_file,
+        style=ft.ButtonStyle(
+            color="#9ecaff",
+            padding=ft.padding.symmetric(
+                horizontal=int(20 * scale_factor),
+                vertical=int(10 * scale_factor)
+            ),
+            text_style=ft.TextStyle(
+                size=int(14 * scale_factor)
+            )
+        )
+    )
 
     json_field = ft.TextField(
         value="",
         label=lang["json"],
         read_only=True,
-        width=550,
+        width=int(400 * scale_factor),
+        label_style=ft.TextStyle(size=int(14 * scale_factor)),
+        text_style=ft.TextStyle(size=int(14 * scale_factor)),
+        content_padding=ft.padding.symmetric(
+            horizontal=int(12 * scale_factor),
+            vertical=int(8 * scale_factor)
+        ),
         border_color="#46678F"
     )
 
-    select_json_button = ft.ElevatedButton(lang["sel_button"], on_click=lambda _: json_picker.pick_files(), style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=20, top=10, right=20, bottom=10)))
+    select_json_button = ft.ElevatedButton(
+        text=lang["sel_button"],
+        on_click=lambda _: json_picker.pick_files(),
+        style=ft.ButtonStyle(
+            color="#9ecaff",
+            padding=ft.padding.symmetric(
+                horizontal=int(20 * scale_factor),
+                vertical=int(10 * scale_factor)
+            ),
+            text_style=ft.TextStyle(
+                size=int(14 * scale_factor)
+            )
+        )
+    )
 
-    process_button = ft.ElevatedButton(lang["convert_file"], on_click=process_file, style=ft.ButtonStyle(color="#9ecaff", padding=ft.padding.only(left=30, top=10, right=30, bottom=10)))
+    process_button = ft.ElevatedButton(
+        text=lang["convert_file"],
+        on_click=process_file,
+        style=ft.ButtonStyle(
+            color="#9ecaff",
+            padding=ft.padding.symmetric(
+                horizontal=int(30 * scale_factor),
+                vertical=int(10 * scale_factor)
+            ),
+            text_style=ft.TextStyle(
+                size=int(14 * scale_factor)
+            )
+        )
+    )
 
     help_icon = ft.Icons.HELP_OUTLINE
     hover_icon = ft.Icons.HELP
+    language_icon = ft.Icons.LANGUAGE
+    language_hover_icon = ft.Icons.LANGUAGE_OUTLINED
+    theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
+    
+    icon_size = int(24 * scale_factor)
 
     help_btn = ft.Container(
         content=ft.IconButton(
             icon=help_icon,
             on_click=helpdialog,
             icon_color="#9ecaff",
-            tooltip=lang["help"]
+            tooltip=lang["help"],
+            icon_size=icon_size,
+            width=int(40 * scale_factor),
+            height=int(40 * scale_factor)
         ),
         on_hover=lambda e: setattr(help_btn.content, 'icon', hover_icon if e.data == 'true' else help_icon)
     )
-
-    language_icon = ft.Icons.LANGUAGE
-    language_hover_icon = ft.Icons.LANGUAGE_OUTLINED
 
     language_btn = ft.Container(
         content=ft.IconButton(
             icon=language_icon,
             on_click=show_language_dialog,
             icon_color="#9ecaff",
-            tooltip=lang["cnglang"]
+            tooltip=lang["cnglang"],
+            icon_size=icon_size,
+            width=int(40 * scale_factor),
+            height=int(40 * scale_factor)
         ),
         on_hover=lambda e: setattr(language_btn.content, 'icon', language_hover_icon if e.data == 'true' else language_icon)
     )
 
-    theme_icon = ft.Icons.BRIGHTNESS_MEDIUM
     theme_btn = ft.IconButton(
         icon=theme_icon,
         on_click=toggle_theme,
         icon_color="#9ecaff",
-        tooltip=lang["toggletheme"]
+        tooltip=lang["toggletheme"],
+        icon_size=icon_size,
+        width=int(40 * scale_factor),
+        height=int(40 * scale_factor)
     )
 
     git_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('git.png'), width=24, height=24, color="#9ecaff", tooltip=lang["github"]),
+        content=ft.Image(
+            src=get_asset_path('git.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["github"]
+        ),
         on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter"),
     )
 
     dis_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('dis.png'), width=24, height=24, color="#9ecaff", tooltip=lang["discord"]),
+        content=ft.Image(
+            src=get_asset_path('dis.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["discord"]
+        ),
         on_click=lambda e: page.launch_url("https://discord.com/invite/Cd5GanuYud"),
     )
 
     tg_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('tg.png'), width=24, height=24, color="#9ecaff", tooltip=lang["telegram"]),
+        content=ft.Image(
+            src=get_asset_path('tg.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["telegram"]
+        ),
         on_click=lambda e: page.launch_url("https://t.me/stakanyasher"),
     )
 
     yt_btn = ft.IconButton(
-        content=ft.Image(src=get_asset_path('yt.png'), width=24, height=24, color="#9ecaff", tooltip=lang["youtube"]),
+        content=ft.Image(
+            src=get_asset_path('yt.png'),
+            width=icon_size,
+            height=icon_size,
+            color="#9ecaff",
+            tooltip=lang["youtube"]
+        ),
         on_click=lambda e: page.launch_url("https://www.youtube.com/@stakanyash"),
     )
 
     rev_btn = ft.IconButton(
         icon=ft.Icons.SWAP_HORIZONTAL_CIRCLE_OUTLINED,
-        icon_size=24,
+        icon_size=icon_size,
         icon_color="#9ecaff",
         tooltip=lang["modeswitch1"],
         on_click=lambda e: switch_to_ui(page)
@@ -882,10 +972,9 @@ def create_back_ui(page: ft.Page):
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
-                    padding=ft.padding.all(2),
+                    padding=ft.padding.all(int(1 * scale_factor)),
                 ),
-                ft.Divider(color="transparent"),
-                ft.Container(height=40),
+                ft.Container(height=int(20 * scale_factor)),  # Увеличен отступ с 10 до 20
 
                 ft.Container(
                     ft.Column(
@@ -893,63 +982,61 @@ def create_back_ui(page: ft.Page):
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
-                    padding=ft.padding.all(2),
+                    padding=ft.padding.all(int(1 * scale_factor)),
                 ),
-                ft.Divider(color="transparent"),
-                ft.Container(height=11.5),
+                ft.Container(height=int(20 * scale_factor)),  # Увеличен отступ с 10 до 20
 
                 ft.Container(
                     ft.Column(
                         [
                             ft.Row([process_button], alignment=ft.MainAxisAlignment.CENTER)
                         ],
-                        spacing=10,
+                        spacing=int(10 * scale_factor),  # Увеличен spacing с 5 до 10
                     ),
-                    padding=ft.padding.all(2),
+                    padding=ft.padding.all(int(1 * scale_factor)),
                 ),
-                ft.Container(height=45),
+                ft.Container(height=int(30 * scale_factor)),  # Увеличен отступ с 20 до 30
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
 
-    page.add(
-        ft.Container(
-            ft.Column(
-                [
-                    ft.Row(
-                        [
-                            help_btn,
-                            ft.Container(width=5),
-                            language_btn,
-                            ft.Container(width=5),
-                            theme_btn,
-                            ft.Container(width=5),
-                            rev_btn,
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        vertical_alignment=ft.CrossAxisAlignment.END,
-                    ),
-                    ft.Container(height=1),
-                    ft.Row(
-                        [
-                            git_btn,
-                            ft.Container(width=5),
-                            dis_btn,
-                            ft.Container(width=5),
-                            tg_btn,
-                            ft.Container(width=5),
-                            yt_btn,
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        vertical_alignment=ft.CrossAxisAlignment.END,
-                    ),
-                ],
-                spacing=2,
-            ),
-            padding=ft.padding.all(2),
-        )
+    toolbar_container = ft.Container(
+        content=ft.Column(
+            [
+                ft.Row(
+                    [
+                        help_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        language_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        theme_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        rev_btn,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.Container(height=int(10 * scale_factor)),
+                ft.Row(
+                    [
+                        git_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        dis_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        tg_btn,
+                        ft.Container(width=int(10 * scale_factor)),
+                        yt_btn,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+            ],
+            spacing=0,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        padding=ft.padding.only(bottom=int(10 * scale_factor)),
     )
 
     infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
@@ -1025,7 +1112,7 @@ def create_back_ui(page: ft.Page):
         page.overlay.append(dialog)
         page.update()
 
-    vertext = ft.Text("Python 2.0.1 [250630a]", size=10, color=ft.Colors.GREY)
+    vertext = ft.Text(f"{VERSION} {BUILD}", size=10, color=ft.Colors.GREY)
     
     version_text = ft.GestureDetector(
         content=vertext,
@@ -1038,6 +1125,7 @@ def create_back_ui(page: ft.Page):
         padding=ft.padding.only(right=10, bottom=10),
     )
 
+    page.add(toolbar_container)
     page.add(version_container)
 
     update_theme()
