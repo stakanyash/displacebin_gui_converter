@@ -116,7 +116,13 @@ translations = {
         "not_16bit_grayscale": "The selected PNG file is not a 16-bit grayscale image.",
         "invalid_png_file": "Unable to read the PNG file or it is corrupted.",
         "incomplete_16bit_data": "Input .raw file has incomplete 16-bit data. Make sure you selected the correct file!",
-        "invalid_raw_file": "Unable to read the RAW file or it is corrupted."
+        "invalid_raw_file": "Unable to read the RAW file or it is corrupted.",
+        "update_available": "Update available",
+        "version_for_download": "Version available for download:",
+        "update_now": "Update now",
+        "update_downloaded": "Update downloaded",
+        "restart": "The application will restart.",
+        "downloading": "Downloading..."
     },
 
     # Russian language
@@ -237,7 +243,13 @@ translations = {
         "not_16bit_grayscale": "Выбранный PNG-файл не является 16-битным изображением в градациях серого.",
         "invalid_png_file": "Невозможно прочитать файл PNG или он повреждён.",
         "incomplete_16bit_data": "Входной .raw файл содержит неполную 16-битную информацию. Убедитесь, что вы выбрали корректный файл!",
-        "invalid_raw_file": "Невозможно прочитать файл RAW или он повреждён."
+        "invalid_raw_file": "Невозможно прочитать файл RAW или он повреждён.",
+        "update_available": "Доступно обновление",
+        "version_for_download": "Для загрузки доступна версия:",
+        "update_now": "Обновить",
+        "update_downloaded": "Обновление загружено",
+        "restart": "Приложение будет перезапущено.",
+        "downloading": "Загрузка..."
     },
 
     # Ukrainian language
@@ -359,6 +371,12 @@ translations = {
         "invalid_png_file": "Неможливо прочитати PNG-файл або він пошкоджений.",
         "incomplete_16bit_data": "Вхідний файл .raw містить неповні 16-бітні дані. Переконайтеся, що вибрали правильний файл!",
         "invalid_raw_file": "Неможливо прочитати RAW-файл або він пошкоджений.",
+        "update_available": "Доступне оновлення",
+        "version_for_download": "Для завантаження доступна версія:",
+        "update_now": "Оновити",
+        "update_downloaded": "Оновлення завантажено",
+        "restart": "Програма буде перезапущена.",
+        "downloading": "Завантаження..."
     },
 
     # Polish language
@@ -480,6 +498,12 @@ translations = {
         "invalid_png_file": "Nie można odczytać pliku PNG lub jest uszkodzony.",
         "incomplete_16bit_data": "Plik wejściowy .raw zawiera niekompletne dane 16-bitowe. Upewnij się, że wybrano poprawny plik!",
         "invalid_raw_file": "Nie można odczytać pliku RAW lub jest uszkodzony.",
+        "update_available": "Dostępna aktualizacja",
+        "version_for_download": "Dostępna wersja do pobrania:",
+        "update_now": "Zaktualizuj teraz",
+        "update_downloaded": "Aktualizacja pobrana",
+        "restart": "Aplikacja zostanie ponownie uruchomiona.",
+        "downloading": "Pobieranie..."
     },
 
     # Belarusian language
@@ -603,5 +627,11 @@ translations = {
         "invalid_png_file": "Немагчыма чытаць PNG-файл ці ён пашкоджаны.",
         "incomplete_16bit_data": "Уваходны файл .raw мае нецалыя 16-бітныя дадзеныя. Калі ласка, пераканайцеся, што вы пазначылі правільны файл!",
         "invalid_raw_file": "Немагчыма чытаць RAW-файл ці ён пашкоджаны.",
+        "update_available": "Даступна абнаўленне",
+        "version_for_download": "Для спампоўкі даступная версія:",
+        "update_now": "Абнавіць",
+        "update_downloaded": "Абнаўленне спампавана",
+        "restart": "Праграма будзе перазапушчана.",
+        "downloading": "Спампоўка..."
     }
 }

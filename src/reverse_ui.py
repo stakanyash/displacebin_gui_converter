@@ -11,7 +11,7 @@ import sys
 from PIL import Image
 
 VERSION = "2.1"
-BUILD = "[251028a]"
+BUILD = "[251028c]"
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -47,8 +47,13 @@ class PageHelper:
         def close(self, e):
             self.page.window.close()
 
-def create_back_ui(page: ft.Page):
+def create_back_ui(page: ft.Page, lang_code="En"):
     global lang
+    if lang_code in translations:
+        lang = translations[lang_code]
+    else:
+        logging.warning(f"Unsupported language code '{lang_code}', defaulting to English.")
+        lang = translations["En"]
 
     scale_factor = 1.0
 

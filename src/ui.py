@@ -1,16 +1,21 @@
 import flet as ft
 import locale
 from localization import translations
-from converter import process_raw, process_png, struct, _write_metadata
 import os
 from resources import get_asset_path
 import logging
 from datetime import datetime
 import traceback
 from screeninfo import get_monitors
+from updater import check_for_updates, download_update
+from converter import process_raw, process_png, struct, _write_metadata
+import subprocess
+import threading
+import time
 
 VERSION = "2.1"
-BUILD = "[251028a]"
+BUILD = "[251028c]"
+CHECKED_FOR_UPDATES = False
 
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
@@ -48,8 +53,13 @@ class PageHelper:
     def close(self, e):
         self.page.window.close()
 
-def create_ui(page: ft.Page):
+def create_ui(page: ft.Page, lang_code="En"):
     global lang
+    if lang_code in translations:
+        lang = translations[lang_code]
+    else:
+        logging.warning(f"Unsupported language code '{lang_code}', defaulting to English.")
+        lang = translations["En"]
 
     page.title = lang["title"]
     page.theme_mode = "dark"
@@ -917,6 +927,182 @@ def create_ui(page: ft.Page):
 
     page.add(toolbar_container)
     page.add(version_container)
+
+    def check_updates():
+        try:
+            update_info = check_for_updates(VERSION)
+            
+            if update_info.get('update_available'):
+                def close_update_dialog(e):
+                    update_dlg.open = False
+                    page.update()
+                    logging.info("Update dialog closed by user")
+                    
+                def start_update(e):
+                    try:
+                        update_dlg.open = False
+                        page.update()
+                        logging.info("Starting update process")
+
+                        download_cancelled = False
+                        
+                        def close_download_dialog(e):
+                            nonlocal download_cancelled
+                            download_cancelled = True
+                            download_dlg.open = False
+                            page.update()
+                            logging.info("Download cancelled by user")
+
+                        progress_bar = ft.ProgressBar(width=400, color="PRIMARY")
+                        progress_text = ft.Text("0.0mb/0.0mb", size=12, color=ft.Colors.GREY_500)
+                        
+                        download_dlg = ft.AlertDialog(
+                            modal=True,
+                            title=ft.Row([
+                                ft.Icon(ft.Icons.DOWNLOAD, color=ft.Colors.BLUE_400),
+                                ft.Text(lang["downloading"]),
+                            ]),
+                            content=ft.Column([
+                                progress_bar,
+                                ft.Container(
+                                    content=progress_text,
+                                    alignment=ft.alignment.center_right,
+                                    padding=ft.padding.only(top=5)
+                                )
+                            ], tight=True),
+                            actions=[
+                                ft.TextButton(
+                                    lang["cancel"],
+                                    on_click=close_download_dialog,
+                                )
+                            ],
+                            actions_alignment=ft.MainAxisAlignment.END,
+                        )
+
+                        page.overlay.append(download_dlg)
+                        download_dlg.open = True
+                        page.update()
+                        
+                        def update_progress(value, current_size, total_size, cancel_fn):
+                            if download_cancelled:
+                                cancel_fn()
+                            progress_bar.value = value / 100
+                            progress_text.value = f"{current_size:.1f}mb/{total_size:.1f}mb"
+                            page.update()
+                        
+                        try:
+                            save_path = download_update(update_info['download_url'], update_progress)
+                            if save_path:
+                                download_dlg.open = False
+                                logging.info("Download completed successfully")
+                                
+                                success_dlg = ft.AlertDialog(
+                                    title=ft.Row([
+                                        ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_400),
+                                        ft.Text(lang["update_downloaded"]),
+                                    ]),
+                                    content=ft.Text(lang["restart"]),
+                                )
+                                page.overlay.append(success_dlg)
+                                success_dlg.open = True
+                                page.update()
+                                
+                                logging.info("Preparing to restart application")
+                                
+                                def restart_app():
+                                    try:
+                                        time.sleep(1)
+                                        logging.info(f"Starting new version from: {save_path}")
+                                        subprocess.Popen([save_path])
+                                        logging.info("New version started successfully")
+                                        page.window.destroy()
+                                    except Exception as e:
+                                        logging.error(f"Failed to start new version: {e}")
+                                
+                                threading.Thread(target=restart_app, daemon=True).start()
+                                
+                        except Exception as e:
+                            logging.error(f"Update error: {str(e)}")
+                            if not download_cancelled:
+                                download_dlg.content = ft.Column([
+                                    ft.Text("Error downloading update:", color=ft.Colors.RED_400),
+                                    ft.Text(str(e), size=12),
+                                ])
+                                download_dlg.actions = [
+                                    ft.TextButton("OK", on_click=lambda _: close_download_dialog(None))
+                                ]
+                                page.update()
+                    except Exception as e:
+                        logging.error(f"Error in start_update: {str(e)}")
+                        page.update()
+
+                changelog_text = update_info['description']
+                changelog_text = changelog_text.replace('###', '')
+                changelog_text = changelog_text.replace('##', '')
+                changelog_text = changelog_text.replace('#', '')
+                changelog_text = changelog_text.replace('*', '')
+                changelog_text = changelog_text.replace('`', '')
+                changelog_text = changelog_text.replace('>', '')
+                changelog_text = changelog_text.replace('-', '•')
+                changelog_text = '\n'.join(line.strip() for line in changelog_text.split('\n') if line.strip())
+                
+                update_dlg = ft.AlertDialog(
+                    title=ft.Row([
+                        ft.Icon(ft.Icons.SYSTEM_UPDATE, color=ft.Colors.BLUE_400),
+                        ft.Text(lang["update_available"]),
+                    ]),
+                    content=ft.Container(
+                        width=550,
+                        content=ft.Column([
+                            ft.Text(
+                                f"{lang['version_for_download']} {update_info['version']}",
+                                size=16,
+                                weight=ft.FontWeight.BOLD
+                            ),
+                            ft.Divider(),
+                            ft.Container(
+                                content=ft.ListView(
+                                    [
+                                        ft.Text(
+                                            changelog_text,
+                                            selectable=True,
+                                            size=14,
+                                        )
+                                    ],
+                                    spacing=10,
+                                    height=350,
+                                ),
+                                padding=10,
+                                height=350,
+                            )
+                        ], tight=True, spacing=10),
+                    ),
+                    actions=[
+                        ft.TextButton(
+                            lang["update_now"],
+                            on_click=start_update,
+                            style=ft.ButtonStyle(color=ft.Colors.BLUE_400)
+                        ),
+                        ft.TextButton(
+                            lang["cancel"],
+                            on_click=close_update_dialog
+                        )
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                
+                page.overlay.append(update_dlg)
+                update_dlg.open = True
+                logging.info(f"{update_info['version']} update available.")
+                page.update()
+        except Exception as e:
+            logging.error(f"Error checking for updates: {str(e)}")
+
+    global CHECKED_FOR_UPDATES
+
+    if not CHECKED_FOR_UPDATES:
+        check_updates()
+        CHECKED_FOR_UPDATES = True
 
     update_theme()
     update_ui()
