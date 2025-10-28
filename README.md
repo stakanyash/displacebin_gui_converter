@@ -53,6 +53,7 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 ![dgc6](https://github.com/user-attachments/assets/114f1f46-ee03-4ce1-a5f5-392777474063)
 ![dgc7](https://github.com/user-attachments/assets/fb09ef34-5532-4dce-a288-1a12a0ad65c7)
 ![dgc8](https://github.com/user-attachments/assets/037856ad-c108-443b-ab88-33992a4c4022)
+![dgc9](https://github.com/user-attachments/assets/5d255745-002d-4fa2-9522-3a5056ca7a26)
 
 </div>
 
