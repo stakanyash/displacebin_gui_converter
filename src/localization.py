@@ -1,6 +1,5 @@
 translations = {
     "En": {
-        "title": "displace.bin converter",
         "error": "Error",
         "sel_file": "Please select a file",
         "select_file": "Selected file",
@@ -60,7 +59,7 @@ translations = {
         "modeswitch1": "Switch to \".bin to .raw/.png\" converter",
         "modeswitch2": "Switch to \".raw/.png to .bin\" converter",
         "reversehelp_text": (
-            "This mode of the \"displace.bin GUI Converter\" program helps you convert a raw or png format file back to bin format.\n"
+            "This mode of the \"DisplaceBox\" program helps you convert a raw or png format file back to bin format.\n"
             "\n"
             "To convert a file, you need to select a file with a .raw or .png extension and choose a JSON metadata file (see Help in the main mode for details).\n"
             "\n"
@@ -122,12 +121,17 @@ translations = {
         "update_now": "Update now",
         "update_downloaded": "Update downloaded",
         "restart": "The application will restart.",
-        "downloading": "Downloading..."
+        "downloading": "Downloading...",
+        "update_error": "Update Error",
+        "unexpected_error": "Unexpected error",
+        "try_manual": "You can download the update manually from GitHub",
+        "open_github": "Open GitHub",
+        "file_size": "File size",
+        "speed": "Speed",
     },
 
     # Russian language
     "Ru": {
-        "title": "displace.bin конвертер",
         "error": "Ошибка",
         "sel_file": "Пожалуйста, выберите файл",
         "select_file": "Выбранный файл",
@@ -187,7 +191,7 @@ translations = {
         "modeswitch1": "Переключиться на конвертер \".bin в .raw/.png\"",
         "modeswitch2": "Переключиться на конвертер \".raw/.png в .bin\"",
         "reversehelp_text": (
-            "Данный режим программы \"displace.bin GUI Converter\" поможет вам сконвертировать файл формата raw или png обратно в bin формат.\n"
+            "Данный режим программы \"DisplaceBox\" поможет вам сконвертировать файл формата raw или png обратно в bin формат.\n"
             "\n"
             "Для конвертирования файла вам необходимо выбрать файл с расширением raw или png и выбрать JSON файл метаданных (подробнее см. Помощь в режиме основной конвертации).\n"
             "\n"
@@ -249,12 +253,21 @@ translations = {
         "update_now": "Обновить",
         "update_downloaded": "Обновление загружено",
         "restart": "Приложение будет перезапущено.",
-        "downloading": "Загрузка..."
+        "downloading": "Загрузка...",
+        "update_error": "Ошибка обновления",
+        "unexpected_error": "Неожиданная ошибка",
+        "try_manual": "Вы можете скачать обновление вручную с GitHub",
+        "open_github": "Открыть GitHub",
+        "file_size": "Размер файла",
+        "speed": "Скорость",
+        "smediat": "Социальные сети",
+        "sm_text": (
+            ""
+        )
     },
 
     # Ukrainian language
     "Uk": {
-        "title": "displace.bin конвертер",
         "error": "Помилка",
         "sel_file": "Будь ласка, виберіть файл",
         "select_file": "Вибраний файл",
@@ -314,7 +327,7 @@ translations = {
         "modeswitch1": "Перемкнутися на конвертер \".bin у .raw/.png\"",
         "modeswitch2": "Перемкнутися на конвертер \".raw/.png у .bin\"",
         "reversehelp_text": (
-            "Цей режим програми \"displace.bin GUI Converter\" допоможе вам сконвертувати файл у форматі raw або png назад у формат bin.\n"
+            "Цей режим програми \"DisplaceBox\" допоможе вам сконвертувати файл у форматі raw або png назад у формат bin.\n"
             "\n"
             "Щоб конвертувати файл, потрібно обрати файл з розширенням raw або png і обрати JSON-файл метаданих (детальніше див. Допомогу в основному режимі конвертації).\n"
             "\n"
@@ -376,12 +389,17 @@ translations = {
         "update_now": "Оновити",
         "update_downloaded": "Оновлення завантажено",
         "restart": "Програма буде перезапущена.",
-        "downloading": "Завантаження..."
+        "downloading": "Завантаження...",
+        "update_error": "Помилка оновлення",
+        "unexpected_error": "Неочікувана помилка",
+        "try_manual": "Ви можете завантажити оновлення вручну з GitHub",
+        "open_github": "Відкрити GitHub",
+        "file_size": "Розмір файлу",
+        "speed": "Швидкість",
     },
 
     # Polish language
     "Pl": {
-        "title": "Konwerter displace.bin",
         "error": "Błąd",
         "sel_file": "Proszę wybrać plik",
         "select_file": "Wybrany plik",
@@ -441,7 +459,7 @@ translations = {
         "modeswitch1": "Przełącz na konwerter \".bin do .raw/.png\"",
         "modeswitch2": "Przełącz na konwerter \".raw/.png do .bin\"",
         "reversehelp_text": (
-            "Ten tryb programu \"displace.bin GUI Converter\" pomoże ci przekonwertować plik w formacie raw lub png z powrotem na format bin.\n"
+            "Ten tryb programu \"DisplaceBox\" pomoże ci przekonwertować plik w formacie raw lub png z powrotem na format bin.\n"
             "\n"
             "Aby przekonwertować plik, należy wybrać plik z rozszerzeniem raw lub png oraz plik metadanych JSON (więcej informacji w Pomocy trybu głównego konwertowania).\n"
             "\n"
@@ -503,12 +521,17 @@ translations = {
         "update_now": "Zaktualizuj teraz",
         "update_downloaded": "Aktualizacja pobrana",
         "restart": "Aplikacja zostanie ponownie uruchomiona.",
-        "downloading": "Pobieranie..."
+        "downloading": "Pobieranie...",
+        "update_error": "Błąd aktualizacji",
+        "unexpected_error": "Nieoczekiwany błąd",
+        "try_manual": "Możesz pobrać aktualizację ręcznie z GitHub",
+        "open_github": "Otwórz GitHub",
+        "file_size": "Rozmiar pliku",
+        "speed": "Prędkość",
     },
 
     # Belarusian language
     "Be": {
-        "title": "displace.bin канвертар",
         "error": "Памылка",
         "sel_file": "Калі ласка, выберыце файл",
         "select_file": "Выбраны файл",
@@ -570,7 +593,7 @@ translations = {
         "modeswitch1": "Пераключыцца на канвертар \".bin у .raw/.png\"",
         "modeswitch2": "Пераключыцца на канвертар \".raw/.png у .bin\"",
         "reversehelp_text": (
-            "Гэты рэжым праграмы \"displace.bin GUI Converter\" дапаможа вам сканвертаваць файл фармату raw або png назад у фармат bin.\n"
+            "Гэты рэжым праграмы \"DisplaceBox\" дапаможа вам сканвертаваць файл фармату raw або png назад у фармат bin.\n"
             "\n"
             "Каб сканвертаваць файл, неабходна выбраць файл з пашырэннем raw або png і выбраць JSON-файл метаданых (падрабязней гл. Дапамога ў асноўным рэжыме канвертацыі).\n"
             "\n"
@@ -632,6 +655,12 @@ translations = {
         "update_now": "Абнавіць",
         "update_downloaded": "Абнаўленне спампавана",
         "restart": "Праграма будзе перазапушчана.",
-        "downloading": "Спампоўка..."
+        "downloading": "Спампоўка...",
+        "update_error": "Памылка абнаўлення",
+        "unexpected_error": "Нечаканая памылка",
+        "try_manual": "Вы можаце спампаваць абнаўленне ўручную з GitHub",
+        "open_github": "Адкрыць GitHub",
+        "file_size": "Памер файла",
+        "speed": "Хуткасць",
     }
 }

@@ -3,8 +3,7 @@ from PIL import Image
 import json
 import logging
 from pathlib import Path
-
-DGCVER = b'DisplaceGUI_2.1'
+from config import DGCVER
 
 def process_raw(input_path, output_path, size, save_metadata=True):
     with open(input_path, 'rb') as stream:

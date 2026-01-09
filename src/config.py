@@ -1,0 +1,3 @@
+VERSION = "2.2"
+BUILD = "[260109b]"
+DGCVER = b'DisplaceGUI_2.2'

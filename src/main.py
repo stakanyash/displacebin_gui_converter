@@ -2,6 +2,7 @@ import flet as ft
 import sys
 import logging
 from screeninfo import get_monitors
+from lang_manager import LanguageManager
 
 try:
     import tkinter as tk
