@@ -1,6 +1,6 @@
-# displace.bin GUI Converter
+# DisplaceBox
 
-![logo](https://github.com/user-attachments/assets/f63de348-033f-4404-b24f-072d999fb998)
+![logo](src/src_assets/logo.png)
 
 This program helps you convert your map’s `displace.bin` files into `.raw` or `.png` formats. It is designed to simplify the conversion process.
 
@@ -40,6 +40,9 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 ## Download
 
 **You can download the compiled file here:** https://github.com/stakanyash/displacebin_gui_converter/releases
+
+> [!WARNING]
+> The executable compiled with Nuitka may trigger false positives in some antivirus software. This is a common issue with Python applications compiled to .exe files. The application does not contain any malicious code - it only downloads videos using yt-dlp and accesses browser cookies for authentication. If your antivirus flags the file, you may need to add it to your exceptions list.
 
 ## Screenshots
 
