@@ -55,7 +55,6 @@ def create_back_ui(page: ft.Page, lang_code="En"):
 
     if any(arg in sys.argv for arg in ("-reverse", "--reverse")):
         page.title = "DisplaceBox"
-        page.theme_mode = "dark"
         page.window.maximizable = False
         page.window.width = 580 
         page.window.height = 680

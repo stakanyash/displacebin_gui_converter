@@ -78,6 +78,8 @@ def get_language_from_args():
     return get_system_language()
 
 def main(page: ft.Page):
+    page.theme_mode = "dark"
+    
     lang_code = get_language_from_args()
     
     LanguageManager.set_language(lang_code)
@@ -92,4 +94,4 @@ def main(page: ft.Page):
 
 if __name__ == "__main__":
     check_min_resolution_or_exit()
-    ft.app(target=main, name="displace.bin GUI Converter", view=ft.FLET_APP)
+    ft.app(target=main, name="DisplaceBox", view=ft.FLET_APP)

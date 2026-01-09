@@ -53,7 +53,6 @@ def create_ui(page: ft.Page, lang_code="En"):
         lang = translations["En"]
 
     page.title = "DisplaceBox"
-    page.theme_mode = "dark"
 
     monitor = get_monitors()[0]
     screen_width = monitor.width
@@ -212,7 +211,8 @@ def create_ui(page: ft.Page, lang_code="En"):
                 value="RAW",
                 scale=scale_factor,
                 label_style=ft.TextStyle(
-                    size=int(15 * scale_factor)
+                    size=int(15 * scale_factor),
+                    weight=ft.FontWeight.W_500
                 )
             ),
             ft.Container(width=int(20 * scale_factor)),
