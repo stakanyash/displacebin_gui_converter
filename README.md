@@ -42,7 +42,11 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 **You can download the compiled file here:** https://github.com/stakanyash/displacebin_gui_converter/releases
 
 > [!WARNING]
-> The executable compiled with Nuitka may trigger false positives in some antivirus software. This is a common issue with Python applications compiled to .exe files. The application does not contain any malicious code - it only downloads videos using yt-dlp and accesses browser cookies for authentication. If your antivirus flags the file, you may need to add it to your exceptions list.
+> The DisplaceBox executable may trigger false positives in some antivirus software. This is a known issue with Python applications compiled into `.exe` files.
+>
+> DisplaceBox does **not** contain any malicious code. The application only processes local files, performs format conversions, checks for updates, and downloads update packages from the official GitHub repository.
+>
+> If your antivirus software flags the executable, you may need to add it to the exceptions list.
 
 ## Screenshots
 
