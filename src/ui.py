@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 import traceback
 from screeninfo import get_monitors
-from updater import check_for_updates, download_update
+from updater import UpdateDownloader, check_for_updates, download_update
 from converter import process_raw, process_png, struct, _write_metadata
 import subprocess
 import threading
@@ -30,12 +30,6 @@ logging.basicConfig(
     ]
 )
 
-locale.setlocale(locale.LC_ALL, '')
-current_locale = locale.getlocale()[0]
-system_lang = current_locale[:2] if current_locale else 'En'
-
-lang = LanguageManager.set_language(system_lang if system_lang in translations else 'En')
-
 class PageHelper:
     def __init__(self, page: ft.Page):
         self.page = page
@@ -49,17 +43,14 @@ class PageHelper:
 
 def create_ui(page: ft.Page, lang_code="En"):
     global lang
-
+    
     if lang_code is None:
         lang_code = LanguageManager.get_language()
     
     if lang_code in translations:
         lang = translations[lang_code]
-        LanguageManager.set_language(lang_code)
     else:
-        logging.warning(f"Unsupported language code '{lang_code}', defaulting to English.")
         lang = translations["En"]
-        LanguageManager.set_language("En")
 
     page.title = "DisplaceBox"
     page.theme_mode = "dark"
@@ -85,15 +76,13 @@ def create_ui(page: ft.Page, lang_code="En"):
 
     def switch_to_reverse_ui(page: ft.Page):
         from reverse_ui import create_back_ui
-        logging.info("Switched to \".raw/.png to .bin\" mode")
+        logging.info("Switched to \".raw/.png --> .bin\" mode")
         page.clean()
         create_back_ui(page, LanguageManager.get_language())
 
-    # Создаем верхнюю панель
     top_bar, minimize_btn, close_btn, topbarico = ui_components.create_top_bar(helper)
     page.add(top_bar)
 
-    # Создаем заголовок
     title_container, title_image = ui_components.create_title_container()
 
     input_file_path = None
@@ -503,7 +492,6 @@ def create_ui(page: ft.Page, lang_code="En"):
         except Exception as ex:
             logging.debug("update_theme partial: " + str(ex))
 
-    # Создаем кнопки тулбара
     toolbar_buttons = ui_components.create_toolbar_buttons(
         on_help=helpdialog,
         on_language=show_language_dialog,
@@ -512,13 +500,10 @@ def create_ui(page: ft.Page, lang_code="En"):
         mode_tooltip_key="modeswitch2"
     )
 
-    # Создаем социальные кнопки
     social_buttons = ui_components.create_social_buttons()
 
-    # Создаем контейнер тулбара
     toolbar_container = ui_components.create_toolbar_container(toolbar_buttons, social_buttons)
 
-    # Создаем контейнер версии
     version_container, vertext = ui_components.create_version_container(
         on_click=ui_components.show_version_info
     )
@@ -586,12 +571,11 @@ def create_ui(page: ft.Page, lang_code="En"):
     page.add(toolbar_container)
     page.add(version_container)
 
-    # Код проверки обновлений остаётся без изменений...
     def check_updates():
         try:
             update_info = check_for_updates(VERSION)
             
-            if update_info.get('update_available'):
+            if update_info.update_available:
                 def close_update_dialog(e):
                     update_dlg.open = False
                     page.update()
@@ -603,11 +587,10 @@ def create_ui(page: ft.Page, lang_code="En"):
                         page.update()
                         logging.info("Starting update process")
 
-                        # Thread-safe флаг отмены
-                        cancel_event = threading.Event()
+                        downloader = UpdateDownloader()
                         
                         def close_download_dialog(e):
-                            cancel_event.set()
+                            downloader.cancel()
                             logging.info("Download cancellation requested")
 
                         progress_bar = ft.ProgressBar(width=400, color="PRIMARY")
@@ -642,23 +625,17 @@ def create_ui(page: ft.Page, lang_code="En"):
                         download_dlg.open = True
                         page.update()
                         
-                        last_update_time = [0]  # Используем список для изменяемости
+                        last_update_time = [0]
                         
                         def update_progress(value, current_size, total_size, cancel_fn):
-                            # Ограничиваем частоту обновлений UI (не чаще 10 раз в секунду)
                             current_time = time.time()
                             if current_time - last_update_time[0] < 0.1 and value < 99:
                                 return
                             last_update_time[0] = current_time
                             
-                            if cancel_event.is_set():
-                                cancel_fn()
-                                return
-                                
                             progress_bar.value = value / 100
                             progress_text.value = f"{current_size:.1f} MB / {total_size:.1f} MB"
                             
-                            # Показываем скорость
                             if hasattr(update_progress, 'last_size') and hasattr(update_progress, 'last_time'):
                                 time_diff = current_time - update_progress.last_time
                                 if time_diff > 0:
@@ -671,11 +648,11 @@ def create_ui(page: ft.Page, lang_code="En"):
                             page.update()
                         
                         try:
-                            # Извлекаем checksum если доступен
-                            expected_checksum = update_info.get('checksum')
+                            expected_checksum = update_info.checksum
                             
                             save_path = download_update(
-                                update_info['download_url'], 
+                                update_info.download_url,
+                                downloader,
                                 update_progress,
                                 expected_checksum
                             )
@@ -709,7 +686,6 @@ def create_ui(page: ft.Page, lang_code="En"):
                                 
                                 threading.Thread(target=restart_app, daemon=True).start()
                             else:
-                                # Скачивание отменено
                                 download_dlg.open = False
                                 page.update()
                                 logging.info("Download was cancelled")
@@ -720,14 +696,11 @@ def create_ui(page: ft.Page, lang_code="En"):
                             logging.error(f"Update error: {str(e)}")
                             download_dlg.open = False
                             
-                            # Различаем типы ошибок
                             if isinstance(e, DownloadCancelled):
                                 logging.info("Download cancelled by user")
-                                # Не показываем ошибку при отмене пользователем
                                 page.update()
                                 return
                             
-                            # Показываем понятную ошибку
                             error_title = lang.get("update_error", "Update Error")
                             if isinstance(e, UpdateError):
                                 error_msg = str(e)
@@ -766,8 +739,7 @@ def create_ui(page: ft.Page, lang_code="En"):
                         logging.error(traceback.format_exc())
                         page.update()
 
-                # Обработка changelog
-                changelog_text = update_info.get('description', '')
+                changelog_text = update_info.description or ''
                 changelog_text = changelog_text.replace('###', '')
                 changelog_text = changelog_text.replace('##', '')
                 changelog_text = changelog_text.replace('#', '')
@@ -777,8 +749,7 @@ def create_ui(page: ft.Page, lang_code="En"):
                 changelog_text = changelog_text.replace('-', '•')
                 changelog_text = '\n'.join(line.strip() for line in changelog_text.split('\n') if line.strip())
                 
-                # Информация о размере файла
-                file_size_mb = update_info.get('file_size', 0) / (1024 * 1024)
+                file_size_mb = update_info.file_size / (1024 * 1024)
                 size_info = f"\n{lang.get('file_size', 'File size')}: {file_size_mb:.1f} MB" if file_size_mb > 0 else ""
                 
                 update_dlg = ft.AlertDialog(
@@ -790,7 +761,7 @@ def create_ui(page: ft.Page, lang_code="En"):
                         width=550,
                         content=ft.Column([
                             ft.Text(
-                                f"{lang['version_for_download']} {update_info['version']}{size_info}",
+                                f"{lang['version_for_download']} {update_info.version}{size_info}",
                                 size=16,
                                 weight=ft.FontWeight.BOLD
                             ),
@@ -828,7 +799,7 @@ def create_ui(page: ft.Page, lang_code="En"):
                 
                 page.overlay.append(update_dlg)
                 update_dlg.open = True
-                logging.info(f"{update_info['version']} update available.")
+                logging.info(f"{update_info.version} update available.")
                 page.update()
                 
         except Exception as e:

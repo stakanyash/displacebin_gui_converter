@@ -304,7 +304,7 @@ class UIComponents:
         
         return version_container, vertext
 
-    def show_version_info(self):
+    def show_version_info(self, e):
         def close_dialog(e):
             dialog.open = False
             self.page.update()

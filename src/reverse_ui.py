@@ -48,11 +48,8 @@ def create_back_ui(page: ft.Page, lang_code="En"):
     
     if lang_code in translations:
         lang = translations[lang_code]
-        LanguageManager.set_language(lang_code)
     else:
-        logging.warning(f"Unsupported language code '{lang_code}', defaulting to English.")
         lang = translations["En"]
-        LanguageManager.set_language("En")
 
     scale_factor = 1.0
 
@@ -74,14 +71,12 @@ def create_back_ui(page: ft.Page, lang_code="En"):
     def switch_to_ui(page: ft.Page):
         from ui import create_ui
         page.clean()
-        logging.info("Switched to \".bin to .raw/.png\" mode")
+        logging.info("Switched to \".bin --> .raw/.png\" mode")
         create_ui(page, LanguageManager.get_language())
 
-    # Создаем верхнюю панель
     top_bar, minimize_btn, close_btn, topbarico = ui_components.create_top_bar(helper)
     page.add(top_bar)
 
-    # Создаем заголовок
     title_container, title_image = ui_components.create_title_container()
 
     page.add(
@@ -690,7 +685,6 @@ def create_back_ui(page: ft.Page, lang_code="En"):
         )
     )
 
-    # Создаем кнопки тулбара
     toolbar_buttons = ui_components.create_toolbar_buttons(
         on_help=helpdialog,
         on_language=show_language_dialog,
@@ -699,13 +693,10 @@ def create_back_ui(page: ft.Page, lang_code="En"):
         mode_tooltip_key="modeswitch1"
     )
 
-    # Создаем социальные кнопки
     social_buttons = ui_components.create_social_buttons()
 
-    # Создаем контейнер тулбара
     toolbar_container = ui_components.create_toolbar_container(toolbar_buttons, social_buttons)
 
-    # Создаем контейнер версии
     version_container, vertext = ui_components.create_version_container(
         on_click=ui_components.show_version_info
     )
