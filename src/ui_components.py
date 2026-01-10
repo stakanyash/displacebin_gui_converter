@@ -121,6 +121,8 @@ class UIComponents:
         self.page.update()
 
     def create_toolbar_buttons(self, on_help, on_language, on_theme, on_mode_switch, mode_tooltip_key="modeswitch2"):
+        icon_color = ThemeManager.get_theme_colors(self.page.theme_mode)['icon_color']
+        
         help_icon = ft.Icons.HELP_OUTLINE
         hover_icon = ft.Icons.HELP
         
@@ -128,7 +130,7 @@ class UIComponents:
             content=ft.IconButton(
                 icon=help_icon,
                 on_click=on_help,
-                icon_color="#9ecaff",
+                icon_color=icon_color,
                 tooltip=self.lang["help"],
                 icon_size=self.icon_size,
                 width=int(40 * self.scale_factor),
@@ -148,7 +150,7 @@ class UIComponents:
             content=ft.IconButton(
                 icon=language_icon,
                 on_click=on_language,
-                icon_color="#9ecaff",
+                icon_color=icon_color,
                 tooltip=self.lang["cnglang"],
                 icon_size=self.icon_size,
                 width=int(40 * self.scale_factor),
@@ -164,7 +166,7 @@ class UIComponents:
         theme_btn = ft.IconButton(
             icon=ft.Icons.BRIGHTNESS_MEDIUM,
             on_click=on_theme,
-            icon_color="#9ecaff",
+            icon_color=icon_color,
             tooltip=self.lang["toggletheme"],
             icon_size=self.icon_size,
             width=int(40 * self.scale_factor),
@@ -174,7 +176,7 @@ class UIComponents:
         rev_btn = ft.IconButton(
             icon=ft.Icons.SWAP_HORIZ,
             icon_size=self.icon_size,
-            icon_color="#9ecaff",
+            icon_color=icon_color,
             tooltip=self.lang.get(mode_tooltip_key, "Switch mode"),
             on_click=on_mode_switch
         )
@@ -187,12 +189,14 @@ class UIComponents:
         }
 
     def create_social_buttons(self):
+        icon_color = ThemeManager.get_theme_colors(self.page.theme_mode)['icon_color']
+        
         git_btn = ft.IconButton(
             content=ft.Image(
                 src=get_asset_path('git.png'),
                 width=self.icon_size,
                 height=self.icon_size,
-                color="#9ecaff",
+                color=icon_color,
                 tooltip=self.lang["github"]
             ),
             on_click=lambda e: self.page.launch_url(
@@ -205,7 +209,7 @@ class UIComponents:
                 src=get_asset_path('dis.png'),
                 width=self.icon_size,
                 height=self.icon_size,
-                color="#9ecaff",
+                color=icon_color,
                 tooltip=self.lang["discord"]
             ),
             on_click=lambda e: self.page.launch_url(
@@ -218,7 +222,7 @@ class UIComponents:
                 src=get_asset_path('tg.png'),
                 width=self.icon_size,
                 height=self.icon_size,
-                color="#9ecaff",
+                color=icon_color,
                 tooltip=self.lang["telegram"]
             ),
             on_click=lambda e: self.page.launch_url(
@@ -231,7 +235,7 @@ class UIComponents:
                 src=get_asset_path('yt.png'),
                 width=self.icon_size,
                 height=self.icon_size,
-                color="#9ecaff",
+                color=icon_color,
                 tooltip=self.lang["youtube"]
             ),
             on_click=lambda e: self.page.launch_url(
@@ -309,7 +313,10 @@ class UIComponents:
             dialog.open = False
             self.page.update()
 
-        infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
+        colors = ThemeManager.get_theme_colors(self.page.theme_mode)
+        text_color = colors['text_color']
+        
+        infoicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=text_color)
 
         content_column = ft.Container(
             content=ft.Column([
@@ -340,6 +347,7 @@ class UIComponents:
                     ],
                     selectable=True,
                     no_wrap=False,
+                    color=text_color,
                 ),
                 ft.Text(
                     spans=[
@@ -351,6 +359,7 @@ class UIComponents:
                     ],
                     selectable=True,
                     no_wrap=False,
+                    color=text_color,
                 )
             ]),
             height=120,
@@ -363,7 +372,7 @@ class UIComponents:
             title=ft.Row(
                 [
                     infoicon,
-                    ft.Text(self.lang["info"], style=ft.TextThemeStyle.TITLE_MEDIUM)
+                    ft.Text(self.lang["info"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=text_color)
                 ],
             ),
             content=content_column,
@@ -374,7 +383,6 @@ class UIComponents:
         )
         self.page.overlay.append(dialog)
         self.page.update()
-
 
 class ThemeManager:
     @staticmethod
@@ -387,7 +395,8 @@ class ThemeManager:
                 'text_color': ft.Colors.WHITE,
                 'theme_icon': ft.Icons.BRIGHTNESS_MEDIUM,
                 'border_color': "#46678F",
-                'version_color': ft.Colors.GREY
+                'version_color': ft.Colors.GREY,
+                'button_color': "#9ecaff"
             }
         else:
             return {
@@ -397,9 +406,9 @@ class ThemeManager:
                 'text_color': ft.Colors.BLACK,
                 'theme_icon': ft.Icons.BRIGHTNESS_3,
                 'border_color': "#000000",
-                'version_color': ft.Colors.BLACK
+                'version_color': ft.Colors.BLACK,
+                'button_color': "#1976D2"
             }
-
 
 class LanguageDialog:
     def __init__(self, page: ft.Page, lang: dict, on_language_change):
@@ -408,20 +417,24 @@ class LanguageDialog:
         self.on_language_change = on_language_change
         
     def show(self):
+        colors = ThemeManager.get_theme_colors(self.page.theme_mode)
+        text_color = colors['text_color']
+        button_color = colors['button_color']
+        
         def close_language_dialog(e):
             language_dialog.open = False
             self.page.update()
 
         lang_buttons = [
-            ft.TextButton("Русский", on_click=lambda e: self.on_language_change("Ru"), style=ft.ButtonStyle(color="#9ecaff")),
-            ft.TextButton("English", on_click=lambda e: self.on_language_change("En"), style=ft.ButtonStyle(color="#9ecaff")),
-            ft.TextButton("Українська", on_click=lambda e: self.on_language_change("Uk"), style=ft.ButtonStyle(color="#9ecaff")),
-            ft.TextButton("Беларуская", on_click=lambda e: self.on_language_change("Be"), style=ft.ButtonStyle(color="#9ecaff")),
-            ft.TextButton("Polski", on_click=lambda e: self.on_language_change("Pl"), style=ft.ButtonStyle(color="#9ecaff"))
+            ft.TextButton("Русский", on_click=lambda e: self.on_language_change("Ru"), style=ft.ButtonStyle(color=button_color)),
+            ft.TextButton("English", on_click=lambda e: self.on_language_change("En"), style=ft.ButtonStyle(color=button_color)),
+            ft.TextButton("Українська", on_click=lambda e: self.on_language_change("Uk"), style=ft.ButtonStyle(color=button_color)),
+            ft.TextButton("Беларуская", on_click=lambda e: self.on_language_change("Be"), style=ft.ButtonStyle(color=button_color)),
+            ft.TextButton("Polski", on_click=lambda e: self.on_language_change("Pl"), style=ft.ButtonStyle(color=button_color))
         ]
 
-        langdlgicon = ft.Icon(ft.Icons.LANGUAGE, size=30, color=ft.Colors.WHITE)
-        langdlgtext = ft.Text(self.lang["sel_lang"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
+        langdlgicon = ft.Icon(ft.Icons.LANGUAGE, size=30, color=text_color)
+        langdlgtext = ft.Text(self.lang["sel_lang"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=text_color)
 
         language_dialog = ft.AlertDialog(
             open=True,
@@ -440,7 +453,7 @@ class LanguageDialog:
                 height=200,
             ),
             actions=[
-                ft.TextButton(self.lang["cancel"], on_click=close_language_dialog)
+                ft.TextButton(self.lang["cancel"], on_click=close_language_dialog, style=ft.ButtonStyle(color=button_color))
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )

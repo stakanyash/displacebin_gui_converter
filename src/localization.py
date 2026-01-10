@@ -260,10 +260,6 @@ translations = {
         "open_github": "Открыть GitHub",
         "file_size": "Размер файла",
         "speed": "Скорость",
-        "smediat": "Социальные сети",
-        "sm_text": (
-            ""
-        )
     },
 
     # Ukrainian language
