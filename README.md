@@ -11,7 +11,6 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 - [Features](#features)
 - [How to Use](#how-to-use)
 - [Download](#download)
-- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Run from Source](#run-from-source)
@@ -48,7 +47,7 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 >
 > If your antivirus software flags the executable, you may need to add it to the exceptions list.
 
-## Screenshots
+## Screenshots (will be updated later)
 
 <div align="center">
   
