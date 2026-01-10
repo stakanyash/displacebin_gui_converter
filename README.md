@@ -1,6 +1,6 @@
-# displace.bin GUI Converter
+# DisplaceBox
 
-![logo](https://github.com/user-attachments/assets/f63de348-033f-4404-b24f-072d999fb998)
+![logo](src/src_assets/logo.png)
 
 This program helps you convert your map’s `displace.bin` files into `.raw` or `.png` formats. It is designed to simplify the conversion process.
 
@@ -11,7 +11,6 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 - [Features](#features)
 - [How to Use](#how-to-use)
 - [Download](#download)
-- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Run from Source](#run-from-source)
@@ -41,7 +40,14 @@ powered by [python](https://github.com/python/cpython) & [flet](https://github.c
 
 **You can download the compiled file here:** https://github.com/stakanyash/displacebin_gui_converter/releases
 
-## Screenshots
+> [!WARNING]
+> The DisplaceBox executable may trigger false positives in some antivirus software. This is a known issue with Python applications compiled into `.exe` files.
+>
+> DisplaceBox does **not** contain any malicious code. The application only processes local files, performs format conversions, checks for updates, and downloads update packages from the official GitHub repository.
+>
+> If your antivirus software flags the executable, you may need to add it to the exceptions list.
+
+## Screenshots (will be updated later)
 
 <div align="center">
   
