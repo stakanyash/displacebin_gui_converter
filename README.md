@@ -60,6 +60,7 @@ powered by [Python](https://github.com/python/cpython) & [PyQt6](https://www.riv
 ![dgc3](assets/screen3.png)
 ![dgc4](assets/screen4.png)
 ![dgc5](assets/screen5.png)
+![dgc6](assets/screen6.png)
 
 </div>
 
