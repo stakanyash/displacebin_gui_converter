@@ -2,6 +2,8 @@ import struct
 from PIL import Image
 import json
 import logging
+import base64
+import zlib
 from pathlib import Path
 from config import DGCVER
 
@@ -22,14 +24,14 @@ def process_raw(input_path, output_path, size, save_metadata=True):
             rel /= _del
             rel *= 0xFFFF
             return int(rel)
-        
+
         normalized_data = list(map(mut, raw))
 
     with open(output_path, 'wb') as stream:
         data = struct.pack(f'{size ** 2}H', *normalized_data)
         stream.write(data)
 
-    json_path = _write_metadata(output_path, _min, _max, _del) if save_metadata else None
+    json_path = _write_metadata(output_path, _min, _max, _del, raw_values=raw) if save_metadata else None
 
     return _min, _max, _del, json_path
 
@@ -57,11 +59,11 @@ def process_png(input_path, output_path, size, save_metadata=True):
     image.putdata(normalized_data)
     image.save(output_path, format="png")
 
-    json_path = _write_metadata(output_path, _min, _max, _del) if save_metadata else None
+    json_path = _write_metadata(output_path, _min, _max, _del, raw_values=raw) if save_metadata else None
 
     return _min, _max, _del, json_path
 
-def _write_metadata(base_path, _min, _max, _del):
+def _write_metadata(base_path, _min, _max, _del, raw_values=None):
     output_dir = Path(base_path).parent
 
     mapname = output_dir.name
@@ -75,6 +77,19 @@ def _write_metadata(base_path, _min, _max, _del):
         'Delta': _del,
         'DGCVer': DGCVER.decode('utf-8', errors='ignore')
     }
+
+    if raw_values is not None:
+        try:
+            packed = struct.pack(f'{len(raw_values)}f', *raw_values)
+            compressed = zlib.compress(packed, level=9)
+            encoded = base64.b64encode(compressed).decode('ascii')
+            meta['OriginalValues'] = encoded
+            logging.info(
+                f"OriginalValues saved: {len(raw_values)} floats, "
+                f"{len(encoded)} bytes base64"
+            )
+        except Exception as e:
+            logging.warning(f"Failed to encode OriginalValues: {e}")
 
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(meta, f, indent=2)

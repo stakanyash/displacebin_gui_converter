@@ -1,20 +1,26 @@
-import flet as ft
-import locale
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt6.QtGui import QPixmap, QFont
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFileDialog, QProgressBar, QTextEdit, QButtonGroup, QPushButton
+)
 from localization import translations
 import os
 from resources import get_asset_path
 import logging
 from datetime import datetime
 import traceback
-from screeninfo import get_monitors
 from updater import UpdateDownloader, check_for_updates, download_update
-from converter import process_raw, process_png, struct, _write_metadata
+from converter import process_raw, process_png, struct
 import subprocess
-import threading
 import time
 from config import VERSION, BUILD
-from ui_components import UIComponents, ThemeManager, LanguageDialog
+from ui_components import (
+    UIComponents, ThemeManager, LanguageDialog, AppWindow, OutlinedLineEdit, OutlinedComboBox,
+    PillButton, _wrap_text, make_card, dialog_title_row, material_icon, AnimatedRadioButton,
+    ConversionThread
+)
 from lang_manager import LanguageManager
+from settings_manager import settings
 
 CHECKED_FOR_UPDATES = False
 
@@ -22,473 +28,379 @@ log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(log_filename),
         logging.StreamHandler()
     ]
 )
 
-class PageHelper:
-    def __init__(self, page: ft.Page):
-        self.page = page
 
-    def minimize(self, e):
-        self.page.window.minimized = True
-        self.page.update()
+class UpdateCheckThread(QThread):
+    result = pyqtSignal(object)
 
-    def close(self, e):
-        self.page.window.close()
+    def __init__(self, version):
+        super().__init__()
+        self.version = version
 
-def create_ui(page: ft.Page, lang_code="En"):
+    def run(self):
+        try:
+            self.result.emit(check_for_updates(self.version))
+        except Exception as e:
+            logging.error(f"Error checking for updates: {str(e)}")
+            logging.error(traceback.format_exc())
+            self.result.emit(None)
+
+
+class DownloadThread(QThread):
+    progress = pyqtSignal(float, float, float)
+    succeeded = pyqtSignal(str)
+    cancelled = pyqtSignal()
+    failed = pyqtSignal(object)
+
+    def __init__(self, url, downloader, checksum):
+        super().__init__()
+        self.url = url
+        self.downloader = downloader
+        self.checksum = checksum
+
+    def run(self):
+        from updater import DownloadCancelled, UpdateError
+        try:
+            save_path = download_update(
+                self.url,
+                self.downloader,
+                lambda value, current_size, total_size, cancel_fn: self.progress.emit(value, current_size, total_size),
+                self.checksum,
+            )
+            if save_path:
+                self.succeeded.emit(save_path)
+            else:
+                self.cancelled.emit()
+        except Exception as e:
+            self.failed.emit(e)
+
+
+def create_ui(window: AppWindow, lang_code="En"):
     global lang
-    
+
     if lang_code is None:
         lang_code = LanguageManager.get_language()
-    
+
     if lang_code in translations:
         lang = translations[lang_code]
     else:
         lang = translations["En"]
 
-    page.title = "DisplaceBox"
+    window.window_title_text = "DisplaceBox"
+    window.setWindowTitle("DisplaceBox")
+    window.clear_ui()
 
-    monitor = get_monitors()[0]
-    screen_width = monitor.width
-    screen_height = monitor.height
-
-    page.window.width = 580
-    page.window.height = 680
     scale_factor = 1.0
+    ui_components = UIComponents(window, lang, scale_factor)
 
-    page.window.resizable = False
-    page.window.maximizable = False
-    page.window.minimizable = True
-    page.window.title_bar_hidden = True
-    page.window.title_bar_buttons_hidden = True
-    page.window.icon = get_asset_path('icon.ico')
-    page.window.center()
-
-    helper = PageHelper(page)
-    ui_components = UIComponents(page, lang, scale_factor)
-
-    def switch_to_reverse_ui(page: ft.Page):
+    def switch_to_reverse_ui(_page=None):
         from reverse_ui import create_back_ui
-        logging.info("Switched to \".raw/.png --> .bin\" mode")
-        page.clean()
-        create_back_ui(page, LanguageManager.get_language())
 
-    top_bar, minimize_btn, close_btn, topbarico = ui_components.create_top_bar(helper)
-    page.add(top_bar)
+        def do_switch():
+            logging.info("Switched to \".raw/.png --> .bin\" mode")
+            create_back_ui(window, LanguageManager.get_language())
+
+        window.smooth_transition(do_switch)
+
+    top_bar, minimize_btn, close_btn, topbarico = ui_components.create_top_bar()
+    window.add_ui(top_bar)
 
     title_container, title_image = ui_components.create_title_container()
+    window.add_ui(title_container)
 
-    input_file_path = None
-    dialog_open = False
+    input_file_path = {"value": None}
 
-    def on_file_selected(e: ft.FilePickerResultEvent):
-        nonlocal input_file_path
+    def try_autodetect_size(filepath):
         try:
-            if e.files:
-                input_file_path = e.files[0].path
+            dir_path = os.path.dirname(filepath)
+            map_name = os.path.basename(dir_path)
+            parent_dir = os.path.dirname(dir_path)
 
-            if not input_file_path.lower().endswith('.bin'):
+            ssl_path = os.path.join(parent_dir, f"{map_name}.ssl")
+
+            if not os.path.exists(ssl_path):
+                raise FileNotFoundError("SSL file not found")
+
+            import xml.etree.ElementTree as ET
+            tree = ET.parse(ssl_path)
+            root = tree.getroot()
+
+            levelsize = None
+            for key in root.findall(".//Key"):
+                if key.get("name") == "LEVELSIZE":
+                    levelsize = key.text.strip()
+                    break
+
+            if not levelsize:
+                raise ValueError("LEVELSIZE not found in SSL")
+
+            expected_text = f"{levelsize}x{levelsize}"
+
+            for key, text in [("64", "4x4"), ("128", "8x8"), ("256", "16x16"), ("512", "32x32"), ("1024", "64x64")]:
+                if text == expected_text:
+                    output_size.set_current_key(key)
+                    return
+
+            raise ValueError(f"Unsupported level size: {levelsize}")
+
+        except Exception as e:
+            logging.warning(f"Auto-size detection failed: {e}")
+            ui_components.show_colored_dialog(
+                "#E65100",
+                "warning",
+                lang["warning"],
+                lang.get("autosizedetect_error", "Failed to automatically determine map size. Please select it manually."),
+                [("OK", None)]
+            )
+
+    def on_file_selected(path):
+        try:
+            if not path:
+                logging.info("User closed file picker.")
+                return False
+            if not path.lower().endswith(".bin"):
                 ui_components.show_error_dialog(lang["error"], lang["wrong_extension"])
-                file_name.value = ""
-                input_file_path = None
+                file_name.set_value("")
+                input_file_path["value"] = None
                 logging.error("Selected file is not .bin file!")
-                page.update()
-                return
+                return False
         except AttributeError:
             logging.info("User closed file picker.")
+            return False
+
+        input_file_path["value"] = path
+        file_name.set_value(path)
+        return True
+
+    def select_file(_e=None):
+        last_dir = settings.get("last_dir", "")
+        path, _ = QFileDialog.getOpenFileName(window, lang["sel_button"], last_dir, "BIN (*.bin);;All files (*.*)")
+        if on_file_selected(path):
+            settings.set("last_dir", os.path.dirname(path))
+            try_autodetect_size(path)
+
+    def helpdialog(_e=None):
+        colors = ThemeManager.get_theme_colors(window.theme_mode)
+        ui_components.show_themed_dialog(
+            "info_outline",
+            lang["help"],
+            _wrap_text(lang["help_text"], colors["text_color"]),
+            [("OK", None, None)],
+            width=480,
+        )
+
+    file_name = OutlinedLineEdit(lang["select_file"], width=int(400 * scale_factor))
+
+    select_button = PillButton(lang["sel_button"], hpad=int(20 * scale_factor), vpad=int(10 * scale_factor), font_size=int(14 * scale_factor))
+    select_button.clicked.connect(select_file)
+
+    output_format_text = QLabel(lang["select_format"])
+    output_format_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    font = QFont()
+    font.setPointSize(11)
+    output_format_text.setFont(font)
+
+    radio_raw = AnimatedRadioButton(".raw")
+    radio_png = AnimatedRadioButton(".png")
+    format_group = QButtonGroup(window)
+    format_group.setExclusive(True)
+    format_group.addButton(radio_raw)
+    format_group.addButton(radio_png)
+    window._format_group = format_group
+
+    def current_format():
+        if radio_raw.isChecked():
+            return "RAW"
+        if radio_png.isChecked():
+            return "PNG"
+        return None
+
+    output_size = OutlinedComboBox(
+        lang["select_size"],
+        [("64", "4x4"), ("128", "8x8"), ("256", "16x16"), ("512", "32x32"), ("1024", "64x64")],
+        width=int(350 * scale_factor),
+    )
+
+    process_button = PillButton(lang["convert_file"], hpad=int(16 * scale_factor), vpad=int(6 * scale_factor), font_size=int(12 * scale_factor))
+
+    def process_file(_e=None):
+        fmt = current_format()
+        size_key = output_size.current_key()
+        if not (input_file_path["value"] and fmt and size_key):
+            ui_components.show_colored_dialog(
+                "#B71C1C",
+                "warning",
+                lang["error"],
+                lang["plssel_file"],
+                [("OK", None)],
+            )
+            logging.warning("File is not selected!")
             return
 
-        file_name.value = input_file_path
-        page.update()
+        try:
+            size = int(size_key)
+        except Exception:
+            size = 64
 
-    file_picker = ft.FilePicker(on_result=on_file_selected)
-    page.overlay.append(file_picker)
+        output_path = os.path.splitext(input_file_path["value"])[0] + (".raw" if fmt == "RAW" else ".png")
 
-    def select_file(e):
-        file_picker.pick_files()
+        process_button.setEnabled(False)
+        window.show_loading_snackbar(lang.get("converting", "Converting..."))
 
-    meta_dlg_titleicon = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
-    meta_dlg_titletext = ft.Text(lang["metadatainfo"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
+        func = process_raw if fmt == "RAW" else process_png
+        thread = ConversionThread(func, input_file_path["value"], output_path, size, True)
+        window._conversion_thread = thread
 
-    def metadata_info_dialog(e):
-        def close_dlgmeta(e):
-            nonlocal dialog_open
-            meta_dlg.open = False
-            dialog_open = False
-            page.update()
+        def on_success(result):
+            _min, _max, _del, json_path = result
 
-        meta_dlg = ft.AlertDialog(
-            open=True,
-            title=ft.Row(
-                [
-                    meta_dlg_titleicon,
-                    meta_dlg_titletext
-                ],
-            ),
-            content=ft.Text(lang["meta_text"]),
-            actions=[
-                ft.TextButton("OK", on_click=close_dlgmeta)
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.overlay.append(meta_dlg)
-        page.update()
+            extra = []
+            extra.append(_wrap_text(f"{lang['file_saved']}:", "#FFFFFF", 14, bold=True))
+            extra.append(_wrap_text(output_path, "#FFFFFF", 12))
+            if json_path:
+                extra.append(_wrap_text(f"{lang['meta_path']}", "#FFFFFF", 14, bold=True))
+                extra.append(_wrap_text(json_path, "#FFFFFF", 12))
 
-    icon_help_title = ft.Icon(ft.Icons.INFO_OUTLINE, size=30, color=ft.Colors.WHITE)
-    text_help_title = ft.Text(lang["help"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE)
+            def log_stats():
+                logging.info(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}")
 
-    def helpdialog(e):
-        def close_dlghelp(e):
-            nonlocal dialog_open
-            help_dlg.open = False
-            dialog_open = False
-            page.update()
-
-        help_dlg = ft.AlertDialog(
-            open=True,
-            title=ft.Row(
-                [
-                    icon_help_title,
-                    text_help_title,
-                ],
-            ),
-            content=ft.Text(lang["help_text"]),
-            actions=[
-                ft.TextButton(lang["metadatainfo"], on_click=lambda e: [close_dlghelp(e), metadata_info_dialog(e)]),
-                ft.TextButton("OK", on_click=close_dlghelp)
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
-        page.overlay.append(help_dlg)
-        page.update()
-
-    file_name = ft.TextField(
-        value="",
-        label=lang["select_file"],
-        read_only=True,
-        border_color="#46678F",
-        width=int(400 * scale_factor),
-        label_style=ft.TextStyle(size=int(14 * scale_factor)),
-        text_style=ft.TextStyle(size=int(14 * scale_factor)),
-        content_padding=ft.padding.symmetric(
-            horizontal=int(12 * scale_factor),
-            vertical=int(8 * scale_factor)
-        )
-    )
-
-    select_button = ft.ElevatedButton(
-        text=lang["sel_button"], 
-        on_click=select_file, 
-        style=ft.ButtonStyle(
-            color="#9ecaff",
-            padding=ft.padding.symmetric(
-                horizontal=int(20 * scale_factor),
-                vertical=int(10 * scale_factor)
-            ),
-            overlay_color=ft.Colors.with_opacity(0.1, "#9ecaff"),
-            text_style=ft.TextStyle(
-                size=int(14 * scale_factor)
-            )
-        )
-    )
-
-    output_format_text = ft.Text(
-        lang["select_format"],
-        size=int(16 * scale_factor),
-        text_align=ft.TextAlign.CENTER
-    )
-
-    output_format = ft.RadioGroup(
-        content=ft.Row([
-            ft.Radio(
-                label=".raw",
-                value="RAW",
-                scale=scale_factor,
-                label_style=ft.TextStyle(
-                    size=int(15 * scale_factor),
-                    weight=ft.FontWeight.W_500
+            def show_result():
+                process_button.setEnabled(True)
+                ui_components.show_colored_dialog(
+                    "#0A8A3C",
+                    "check",
+                    lang["result"],
+                    None,
+                    [("OK", None)],
+                    extra_widgets=extra,
+                    on_dismiss=log_stats,
                 )
-            ),
-            ft.Container(width=int(20 * scale_factor)),
-            ft.Radio(
-                label=".png",
-                value="PNG",
-                scale=scale_factor,
-                label_style=ft.TextStyle(
-                    size=int(15 * scale_factor),
-                    weight=ft.FontWeight.W_500
-                )
-            )
-        ], 
-        alignment=ft.MainAxisAlignment.CENTER,
-        spacing=0)
-    )
-
-    output_size = ft.Container(
-        content=ft.Dropdown(
-            options=[
-                ft.dropdown.Option(key="64", text="4x4"),
-                ft.dropdown.Option(key="128", text="8x8"),
-                ft.dropdown.Option(key="256", text="16x16"),
-                ft.dropdown.Option(key="512", text="32x32"),
-                ft.dropdown.Option(key="1024", text="64x64")
-            ],
-            label=lang["select_size"],
-            label_style=ft.TextStyle(size=int(12 * scale_factor)),
-            text_style=ft.TextStyle(size=int(12 * scale_factor)),
-            border_color="#46678F",
-            content_padding=ft.padding.symmetric(
-                horizontal=int(12 * scale_factor),
-                vertical=int(4 * scale_factor)
-            ),
-            width=int(350 * scale_factor)
-        ),
-        height=int(35 * scale_factor)
-    )
-
-    process_button = ft.ElevatedButton(
-        text=lang["convert_file"], 
-        on_click=lambda e: process_file(e), 
-        style=ft.ButtonStyle(
-            color="#9ecaff", 
-            padding=ft.padding.only(
-                left=int(16 * scale_factor),
-                top=int(6 * scale_factor),
-                right=int(16 * scale_factor),
-                bottom=int(6 * scale_factor)
-            ),
-            overlay_color=ft.Colors.with_opacity(0.1, "#9ecaff"),
-            text_style=ft.TextStyle(
-                size=int(12 * scale_factor)
-            )
-        )
-    )
-
-    def process_file(e):
-        if input_file_path and output_format.value and output_size.content.value:
-            try:
-                size = int(output_size.content.value)
-            except Exception:
-                try:
-                    size = int(output_size.content.options[0].key)
-                except Exception:
-                    size = 64
-
-            output_path = os.path.splitext(input_file_path)[0] + (".raw" if output_format.value == "RAW" else ".png")
-
-            try:
-                if output_format.value == "RAW":
-                    _min, _max, _del, json_path = process_raw(input_file_path, output_path, size, True)
-                else:
-                    _min, _max, _del, json_path = process_png(input_file_path, output_path, size, True)
-
-                def close_dlgconvert(e):
-                    convertsuc.open = False
-                    page.update()
-
-                content_controls = [
-                    ft.Text(f"{lang['file_saved']}:", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                    ft.Text(output_path, size=12, width=450, color=ft.Colors.WHITE),
-                ]
-
-                if json_path:
-                    content_controls.extend([
-                        ft.Text(f"{lang['meta_path']}", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                        ft.Text(json_path, size=12, width=450, color=ft.Colors.WHITE),
-                    ])
-
-                convertsuc = ft.AlertDialog(
-                    open=True,
-                    bgcolor=ft.Colors.GREEN_900,
-                    title=ft.Row(
-                        [
-                            ft.Icon(ft.Icons.CHECK, size=30, color=ft.Colors.WHITE),
-                            ft.Text(lang["result"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
-                        ],
-                        spacing=10,
-                        alignment=ft.MainAxisAlignment.START,
-                    ),
-                    content=ft.Column(content_controls, tight=True),
-                    actions=[
-                        ft.TextButton("OK", on_click=close_dlgconvert, style=ft.ButtonStyle(color=ft.Colors.WHITE))
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                    on_dismiss=lambda e: logging.info(f"Min: {_min:.1f}, Max: {_max:.1f}, Delta: {_del:.1f}"),
-                )
-                page.overlay.append(convertsuc)
                 logging.info(f"Converted file saved to: {output_path}")
-                page.update()
 
-            except struct.error as e:
-                def close_banner(e):
-                    errordialog.open = False
-                    page.update()
+            window.hide_loading_snackbar(min_duration_ms=1200, on_finished=show_result)
 
-                errordialog = ft.AlertDialog(
-                    open=True,
-                    bgcolor=ft.Colors.RED_900,
-                    title=ft.Row(
+        def on_fail(e):
+            def show_error():
+                process_button.setEnabled(True)
+
+                if isinstance(e, struct.error):
+                    ui_components.show_colored_dialog(
+                        "#B71C1C",
+                        "warning",
+                        lang["error"],
+                        lang["struct_error"],
+                        [("OK", None)],
+                    )
+                    logging.error(f"struct.error occurred: {e}")
+                elif isinstance(e, ZeroDivisionError):
+                    ui_components.show_colored_dialog(
+                        "#D50000",
+                        "error",
+                        lang["error"],
+                        lang["zerodiv_error"],
                         [
-                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.WHITE),
-                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
+                            ("OK", None),
+                            (lang["opengit"], lambda: window.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new")),
                         ],
-                        spacing=10,
-                        alignment=ft.MainAxisAlignment.START,
-                    ),
-                    content=ft.Text(lang["struct_error"], color=ft.Colors.WHITE),
-                    actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_banner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
-                        ft.TextButton(lang["help"], on_click=lambda e: [close_banner(e), helpdialog(e)], style=ft.ButtonStyle(color=ft.Colors.WHITE))
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
+                    )
+                    logging.error(f"ZeroDivisionError occurred: {e}")
+                else:
+                    ui_components.show_error_dialog(lang["error"], str(e))
+                    logging.error(f"Unexpected error: {e}")
 
-                logging.error(f"struct.error occurred: {e}")
                 logging.error("Traceback:\n" + traceback.format_exc())
-                page.overlay.append(errordialog)
-                page.update()
 
-            except ZeroDivisionError as e:
-                def close_zerbanner(e):
-                    zererrordialog.open = False
-                    page.update()
+            window.hide_loading_snackbar(min_duration_ms=1200, on_finished=show_error)
 
-                zererrordialog = ft.AlertDialog(
-                    open=True,
-                    bgcolor=ft.Colors.RED_ACCENT_700,
-                    title=ft.Row(
-                        [
-                            ft.Icon(ft.Icons.ERROR, size=30, color=ft.Colors.WHITE),
-                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
-                        ],
-                        spacing=10,
-                        alignment=ft.MainAxisAlignment.START,
-                    ),
-                    content=ft.Text(lang["zerodiv_error"], color=ft.Colors.WHITE),
-                    actions=[
-                        ft.TextButton("OK", on_click=lambda e: close_zerbanner(e), style=ft.ButtonStyle(color=ft.Colors.WHITE)),
-                        ft.TextButton(lang["opengit"], on_click=lambda e: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/issues/new"), style=ft.ButtonStyle(color=ft.Colors.WHITE))
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
-                logging.error(f"ZeroDivisionError occurred: {e}")
-                logging.error("Traceback:\n" + traceback.format_exc())
-                page.overlay.append(zererrordialog)
-                page.update()
+        thread.finished.connect(on_success)
+        thread.failed.connect(on_fail)
+        thread.start()
 
-        else:
-            if not input_file_path or not output_format.value or not output_size.content.value:
-                def close_dlgpleaseselfile(e):
-                    nonlocal dialog_open
-                    plsselfile.open = False
-                    dialog_open = False
-                    page.update()
-
-                plsselfile = ft.AlertDialog(
-                    open=True,
-                    bgcolor=ft.Colors.RED_900,
-                    title=ft.Row(
-                        [
-                            ft.Icon(ft.Icons.WARNING, size=30, color=ft.Colors.AMBER),
-                            ft.Text(lang["error"], style=ft.TextThemeStyle.TITLE_MEDIUM, color=ft.Colors.WHITE),
-                        ],
-                        spacing=10,
-                        alignment=ft.MainAxisAlignment.START,
-                    ),
-                    content=ft.Text(lang["plssel_file"], color=ft.Colors.WHITE),
-                    actions=[
-                        ft.TextButton("OK", on_click=close_dlgpleaseselfile, style=ft.ButtonStyle(color=ft.Colors.WHITE))
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
-                page.overlay.append(plsselfile)
-                logging.warning("File is not selected!")
-                page.update()
+    process_button.clicked.connect(process_file)
 
     def change_language(language_code):
         global lang
         lang = translations[language_code]
         LanguageManager.set_language(language_code)
+        settings.set("language", language_code)
         ui_components.lang = lang
         update_ui()
-        show_language_dialog(None)
+        window.close_overlay()
 
     def update_ui():
         try:
-            top_bar.content.content.controls[0].controls[1].value = f"{page.title} {VERSION}"
-            top_bar.content.content.controls[1].controls[0].tooltip = lang["min"]
-            top_bar.content.content.controls[1].controls[1].tooltip = lang["exit"]
-            file_name.label = lang["select_file"]
-            select_button.text = lang["sel_button"]
-            output_format_text.value = lang["select_format"]
-            output_format.content.controls[0].label = ".raw"
-            output_format.content.controls[2].label = ".png"
-            try:
-                output_size.content.label = lang["select_size"]
-            except Exception:
-                pass
-            process_button.text = lang["convert_file"]
-            toolbar_buttons['help'].content.tooltip = lang["help"]
-            toolbar_buttons['language'].content.tooltip = lang["cnglang"]
-            toolbar_buttons['theme'].tooltip = lang["toggletheme"]
-            social_buttons['github'].content.tooltip = lang["github"]
-            social_buttons['discord'].content.tooltip = lang["discord"]
-            social_buttons['telegram'].content.tooltip = lang["telegram"]
-            social_buttons['youtube'].content.tooltip = lang["youtube"]
-            toolbar_buttons['mode'].tooltip = lang["modeswitch2"]
-            text_help_title.value = lang["help"]
-            page.update()
+            top_bar.title_label.setText(f"{window.window_title_text} {VERSION}")
+            minimize_btn.setToolTip(lang["min"])
+            close_btn.setToolTip(lang["exit"])
+            file_name.set_label(lang["select_file"])
+            select_button.setText(lang["sel_button"])
+            output_format_text.setText(lang["select_format"])
+            radio_raw.setText(".raw")
+            radio_png.setText(".png")
+            output_size.set_label(lang["select_size"])
+            process_button.setText(lang["convert_file"])
+            toolbar_buttons["help"].setToolTip(lang["help"])
+            toolbar_buttons["language"].setToolTip(lang["cnglang"])
+            toolbar_buttons["theme"].setToolTip(lang["toggletheme"])
+            social_buttons["github"].setToolTip(lang["github"])
+            social_buttons["discord"].setToolTip(lang["discord"])
+            social_buttons["telegram"].setToolTip(lang["telegram"])
+            social_buttons["youtube"].setToolTip(lang["youtube"])
+            toolbar_buttons["mode"].setToolTip(lang["modeswitch2"])
         except Exception as ex:
             logging.error("update_ui error: " + str(ex))
 
-    def show_language_dialog(e):
-        lang_dialog = LanguageDialog(page, lang, change_language)
-        langdlgicon, langdlgtext, lang_buttons = lang_dialog.show()
+    def show_language_dialog(_e=None):
+        lang_dialog = LanguageDialog(window, lang, change_language)
+        lang_dialog.show()
 
-    def toggle_theme(e):
-        page.theme_mode = "light" if page.theme_mode == "dark" else "dark"
-        update_theme()
+    def toggle_theme(_e=None):
+        def do_toggle():
+            window.theme_mode = "light" if window.theme_mode == "dark" else "dark"
+            settings.set("theme", window.theme_mode)
+            update_theme()
+
+        window.fade_transition(do_toggle)
 
     def update_theme():
-        colors = ThemeManager.get_theme_colors(page.theme_mode)
-        
+        colors = ThemeManager.get_theme_colors(window.theme_mode)
         try:
-            toolbar_buttons['help'].content.icon_color = colors['icon_color']
-            toolbar_buttons['language'].content.icon_color = colors['icon_color']
-            toolbar_buttons['theme'].icon = colors['theme_icon']
-            toolbar_buttons['theme'].icon_color = colors['icon_color']
-            toolbar_buttons['mode'].icon_color = colors['icon_color']
-            
-            social_buttons['github'].content.color = colors['icon_color']
-            social_buttons['discord'].content.color = colors['icon_color']
-            social_buttons['telegram'].content.color = colors['icon_color']
-            social_buttons['youtube'].content.color = colors['icon_color']
-            
-            title_image.src = colors['logo_src']
-            icon_help_title.color = colors['text_color']
-            text_help_title.color = colors['text_color']
-            meta_dlg_titleicon.color = colors['text_color']
-            meta_dlg_titletext.color = colors['text_color']
-            minimize_btn.icon_color = colors['icon_color']
-            close_btn.icon_color = colors['icon_color']
-            topbarico.src = colors['topbar_logo']
-            
-            try:
-                output_size.content.border_color = colors['border_color']
-            except Exception:
-                pass
-            file_name.border_color = colors['border_color']
-            select_button.style.color = colors['icon_color']
-            process_button.style.color = colors['icon_color']
-            vertext.color = colors['version_color']
+            toolbar_buttons["help"].set_color(colors["icon_color"])
+            toolbar_buttons["language"].set_color(colors["icon_color"])
+            toolbar_buttons["theme"].set_icon_name(colors["theme_icon"])
+            toolbar_buttons["theme"].set_hover_icon_name(colors["theme_icon_hover"])
+            toolbar_buttons["theme"].set_color(colors["icon_color"])
+            toolbar_buttons["mode"].set_color(colors["icon_color"])
+            for key in social_buttons:
+                social_buttons[key].set_color(colors["icon_color"])
+            pix = QPixmap(colors["logo_src"])
+            title_image.setPixmap(pix.scaledToHeight(int(100 * scale_factor), Qt.TransformationMode.SmoothTransformation))
+            minimize_btn.set_color(colors["titlebar_btn"])
+            close_btn.set_color(colors["titlebar_btn"])
+            top_bar.apply_theme(colors)
+            output_size.apply_theme(colors)
+            file_name.apply_theme(colors)
+            select_button.apply_theme(colors)
+            process_button.apply_theme(colors)
+            window.version_label.setStyleSheet(f"color: {colors['version_color']}; font-size: 10px; background: transparent;")
+            output_format_text.setStyleSheet(f"color: {colors['fg']};")
 
-            page.update()
+            radio_raw.apply_theme(colors)
+            radio_png.apply_theme(colors)
+
+            if hasattr(window, '_update_snackbar') and window._update_snackbar:
+                window._update_snackbar.update_theme(colors)
+            if hasattr(window, '_loading_snackbar') and window._loading_snackbar:
+                window._loading_snackbar.update_theme(colors)
+
+            window.update()
         except Exception as ex:
             logging.debug("update_theme partial: " + str(ex))
 
@@ -496,321 +408,112 @@ def create_ui(page: ft.Page, lang_code="En"):
         on_help=helpdialog,
         on_language=show_language_dialog,
         on_theme=toggle_theme,
-        on_mode_switch=lambda e: switch_to_reverse_ui(page),
-        mode_tooltip_key="modeswitch2"
+        on_mode_switch=lambda e: switch_to_reverse_ui(window),
+        mode_tooltip_key="modeswitch2",
     )
-
     social_buttons = ui_components.create_social_buttons()
-
     toolbar_container = ui_components.create_toolbar_container(toolbar_buttons, social_buttons)
+    ui_components.create_version_container(on_click=ui_components.show_version_info)
 
-    version_container, vertext = ui_components.create_version_container(
-        on_click=ui_components.show_version_info
-    )
+    main_content = QWidget()
+    main_content.setStyleSheet("background: transparent;")
+    main_layout = QVBoxLayout(main_content)
+    main_layout.setContentsMargins(20, 0, 20, 0)
+    main_layout.setSpacing(0)
+    main_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
 
-    main_content = ft.Container(
-        content=ft.Column(
-            [
-                title_container,
-                ft.Container(height=int(10 * scale_factor)),
-                
-                ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Container(
-                                content=file_name,
-                                alignment=ft.alignment.center
-                            ),
-                            ft.Container(height=int(10 * scale_factor)),
-                            ft.Container(
-                                content=select_button,
-                                alignment=ft.alignment.center
-                            )
-                        ],
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        spacing=0
-                    ),
-                    padding=ft.padding.symmetric(
-                        horizontal=int(20 * scale_factor),
-                        vertical=int(10 * scale_factor)
-                    ),
-                ),
-                
-                ft.Container(height=int(20 * scale_factor)),
-                
-                ft.Container(
-                    content=ft.Column(
-                        [
-                            output_format_text,
-                            ft.Container(height=int(10 * scale_factor)),
-                            output_format,
-                            ft.Container(height=int(30 * scale_factor)),
-                            ft.Container(
-                                content=output_size,
-                                width=int(300 * scale_factor),
-                                alignment=ft.alignment.center,
-                            ),
-                            ft.Container(height=int(30 * scale_factor)),
-                            process_button,
-                            ft.Container(height=int(20 * scale_factor)),
-                        ],
-                        spacing=0,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                    padding=ft.padding.symmetric(horizontal=int(20 * scale_factor)),
-                ),
-            ],
-            alignment=ft.MainAxisAlignment.START,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=0,
-        ),
-        expand=True,
-    )
+    spacer = QWidget()
+    spacer.setFixedHeight(10)
+    main_layout.addWidget(spacer)
 
-    page.add(main_content)
-    page.add(toolbar_container)
-    page.add(version_container)
+    file_col = QVBoxLayout()
+    file_col.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+    file_col.addWidget(file_name, alignment=Qt.AlignmentFlag.AlignHCenter)
+    gap = QWidget()
+    gap.setFixedHeight(10)
+    file_col.addWidget(gap)
+    file_col.addWidget(select_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+    main_layout.addLayout(file_col)
+
+    gap2 = QWidget()
+    gap2.setFixedHeight(20)
+    main_layout.addWidget(gap2)
+
+    form = QVBoxLayout()
+    form.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+    form.addWidget(output_format_text)
+    gap3 = QWidget()
+    gap3.setFixedHeight(10)
+    form.addWidget(gap3)
+    radios = QHBoxLayout()
+    radios.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+    radios.addWidget(radio_raw)
+    radios.addSpacing(20)
+    radios.addWidget(radio_png)
+    form.addLayout(radios)
+    gap4 = QWidget()
+    gap4.setFixedHeight(30)
+    form.addWidget(gap4)
+    form.addWidget(output_size, alignment=Qt.AlignmentFlag.AlignHCenter)
+    gap5 = QWidget()
+    gap5.setFixedHeight(30)
+    form.addWidget(gap5)
+    form.addWidget(process_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+    gap6 = QWidget()
+    gap6.setFixedHeight(20)
+    form.addWidget(gap6)
+    main_layout.addLayout(form)
+    main_layout.addStretch()
+
+    window.add_ui(main_content, stretch=1)
+    window.add_ui(toolbar_container)
 
     def check_updates():
-        try:
-            update_info = check_for_updates(VERSION)
-            
-            if update_info.update_available:
-                def close_update_dialog(e):
-                    update_dlg.open = False
-                    page.update()
-                    logging.info("Update dialog closed by user")
-                    
-                def start_update(e):
-                    try:
-                        update_dlg.open = False
-                        page.update()
-                        logging.info("Starting update process")
+        thread = UpdateCheckThread(VERSION)
+        window._update_check_thread = thread
 
-                        downloader = UpdateDownloader()
-                        
-                        def close_download_dialog(e):
-                            downloader.cancel()
-                            logging.info("Download cancellation requested")
+        def on_info(update_info):
+            if not update_info:
+                return
+            if getattr(update_info, "error", None):
+                logging.warning(f"Update check error: {update_info.error}")
+                return
+            if not getattr(update_info, "update_available", False):
+                logging.info(f"No update available. Current: {VERSION}")
+                return
 
-                        progress_bar = ft.ProgressBar(width=400, color="PRIMARY")
-                        progress_text = ft.Text("0.0 MB / 0.0 MB", size=12, color=ft.Colors.GREY_500)
-                        status_text = ft.Text("", size=11, color=ft.Colors.GREY_400)
-                        
-                        download_dlg = ft.AlertDialog(
-                            modal=True,
-                            title=ft.Row([
-                                ft.Icon(ft.Icons.DOWNLOAD, color=ft.Colors.BLUE_400),
-                                ft.Text(lang["downloading"]),
-                            ]),
-                            content=ft.Column([
-                                progress_bar,
-                                ft.Container(
-                                    content=progress_text,
-                                    alignment=ft.alignment.center_right,
-                                    padding=ft.padding.only(top=5)
-                                ),
-                                status_text
-                            ], tight=True),
-                            actions=[
-                                ft.TextButton(
-                                    lang["cancel"],
-                                    on_click=close_download_dialog,
-                                )
-                            ],
-                            actions_alignment=ft.MainAxisAlignment.END,
-                        )
+            logging.info(f"Update available: {update_info.version}")
+            window.show_update_snackbar(update_info, lang)
 
-                        page.overlay.append(download_dlg)
-                        download_dlg.open = True
-                        page.update()
-                        
-                        last_update_time = [0]
-                        
-                        def update_progress(value, current_size, total_size, cancel_fn):
-                            current_time = time.time()
-                            if current_time - last_update_time[0] < 0.1 and value < 99:
-                                return
-                            last_update_time[0] = current_time
-                            
-                            progress_bar.value = value / 100
-                            progress_text.value = f"{current_size:.1f} MB / {total_size:.1f} MB"
-                            
-                            if hasattr(update_progress, 'last_size') and hasattr(update_progress, 'last_time'):
-                                time_diff = current_time - update_progress.last_time
-                                if time_diff > 0:
-                                    size_diff = current_size - update_progress.last_size
-                                    speed = size_diff / time_diff
-                                    status_text.value = f"{lang.get('speed', 'Speed')}: {speed:.2f} MB/s"
-                            
-                            update_progress.last_size = current_size
-                            update_progress.last_time = current_time
-                            page.update()
-                        
-                        try:
-                            expected_checksum = update_info.checksum
-                            
-                            save_path = download_update(
-                                update_info.download_url,
-                                downloader,
-                                update_progress,
-                                expected_checksum
-                            )
-                            
-                            if save_path:
-                                download_dlg.open = False
-                                logging.info("Download completed successfully")
-                                
-                                success_dlg = ft.AlertDialog(
-                                    title=ft.Row([
-                                        ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_400),
-                                        ft.Text(lang["update_downloaded"]),
-                                    ]),
-                                    content=ft.Text(lang["restart"]),
-                                )
-                                page.overlay.append(success_dlg)
-                                success_dlg.open = True
-                                page.update()
-                                
-                                logging.info("Preparing to restart application")
-                                
-                                def restart_app():
-                                    try:
-                                        time.sleep(1)
-                                        logging.info(f"Starting new version from: {save_path}")
-                                        subprocess.Popen([save_path])
-                                        logging.info("New version started successfully")
-                                        page.window.destroy()
-                                    except Exception as e:
-                                        logging.error(f"Failed to start new version: {e}")
-                                
-                                threading.Thread(target=restart_app, daemon=True).start()
-                            else:
-                                download_dlg.open = False
-                                page.update()
-                                logging.info("Download was cancelled")
-                        
-                        except Exception as e:
-                            from updater import DownloadCancelled, UpdateError
-                            
-                            logging.error(f"Update error: {str(e)}")
-                            download_dlg.open = False
-                            
-                            if isinstance(e, DownloadCancelled):
-                                logging.info("Download cancelled by user")
-                                page.update()
-                                return
-                            
-                            error_title = lang.get("update_error", "Update Error")
-                            if isinstance(e, UpdateError):
-                                error_msg = str(e)
-                            else:
-                                error_msg = f"{lang.get('unexpected_error', 'Unexpected error')}: {str(e)}"
-                            
-                            error_dlg = ft.AlertDialog(
-                                title=ft.Row([
-                                    ft.Icon(ft.Icons.ERROR, color=ft.Colors.RED_400),
-                                    ft.Text(error_title),
-                                ]),
-                                content=ft.Column([
-                                    ft.Text(error_msg, size=14),
-                                    ft.Container(height=10),
-                                    ft.Text(
-                                        lang.get("try_manual", "You can download the update manually from GitHub"),
-                                        size=12,
-                                        color=ft.Colors.GREY_500
-                                    )
-                                ], tight=True),
-                                actions=[
-                                    ft.TextButton(
-                                        lang.get("open_github", "Open GitHub"),
-                                        on_click=lambda _: page.launch_url("https://github.com/stakanyash/displacebin_gui_converter/releases")
-                                    ),
-                                    ft.TextButton("OK", on_click=lambda _: (setattr(error_dlg, 'open', False), page.update()))
-                                ],
-                                actions_alignment=ft.MainAxisAlignment.END,
-                            )
-                            page.overlay.append(error_dlg)
-                            error_dlg.open = True
-                            page.update()
-                            
-                    except Exception as e:
-                        logging.error(f"Error in start_update: {str(e)}")
-                        logging.error(traceback.format_exc())
-                        page.update()
-
-                changelog_text = update_info.description or ''
-                changelog_text = changelog_text.replace('###', '')
-                changelog_text = changelog_text.replace('##', '')
-                changelog_text = changelog_text.replace('#', '')
-                changelog_text = changelog_text.replace('*', '')
-                changelog_text = changelog_text.replace('`', '')
-                changelog_text = changelog_text.replace('>', '')
-                changelog_text = changelog_text.replace('-', '•')
-                changelog_text = '\n'.join(line.strip() for line in changelog_text.split('\n') if line.strip())
-                
-                file_size_mb = update_info.file_size / (1024 * 1024)
-                size_info = f"\n{lang.get('file_size', 'File size')}: {file_size_mb:.1f} MB" if file_size_mb > 0 else ""
-                
-                update_dlg = ft.AlertDialog(
-                    title=ft.Row([
-                        ft.Icon(ft.Icons.SYSTEM_UPDATE, color=ft.Colors.BLUE_400),
-                        ft.Text(lang["update_available"]),
-                    ]),
-                    content=ft.Container(
-                        width=550,
-                        content=ft.Column([
-                            ft.Text(
-                                f"{lang['version_for_download']} {update_info.version}{size_info}",
-                                size=16,
-                                weight=ft.FontWeight.BOLD
-                            ),
-                            ft.Divider(),
-                            ft.Container(
-                                content=ft.ListView(
-                                    [
-                                        ft.Text(
-                                            changelog_text,
-                                            selectable=True,
-                                            size=14,
-                                        )
-                                    ],
-                                    spacing=10,
-                                    height=350,
-                                ),
-                                padding=10,
-                                height=350,
-                            )
-                        ], tight=True, spacing=10),
-                    ),
-                    actions=[
-                        ft.TextButton(
-                            lang["update_now"],
-                            on_click=start_update,
-                            style=ft.ButtonStyle(color=ft.Colors.BLUE_400)
-                        ),
-                        ft.TextButton(
-                            lang["cancel"],
-                            on_click=close_update_dialog
-                        )
-                    ],
-                    actions_alignment=ft.MainAxisAlignment.END,
-                )
-                
-                page.overlay.append(update_dlg)
-                update_dlg.open = True
-                logging.info(f"{update_info.version} update available.")
-                page.update()
-                
-        except Exception as e:
-            logging.error(f"Error checking for updates: {str(e)}")
-            logging.error(traceback.format_exc())
+        thread.result.connect(on_info)
+        thread.start()
 
     global CHECKED_FOR_UPDATES
-
     if not CHECKED_FOR_UPDATES:
-        check_updates()
+        QTimer.singleShot(200, check_updates)
         CHECKED_FOR_UPDATES = True
 
     update_theme()
     update_ui()
+
+    if settings.get("first_run", True):
+        def show_welcome():
+            settings.set("first_run", False)
+
+            colors = ThemeManager.get_theme_colors(window.theme_mode)
+
+            text_label = QLabel(lang["welcome_text"])
+            text_label.setTextFormat(Qt.TextFormat.RichText)
+            text_label.setWordWrap(True)
+            text_label.setStyleSheet(f"color: {colors['text_color']}; font-family: 'Inter'; font-size: 13px; background: transparent;")
+            text_label.setFixedWidth(420)
+
+            ui_components.show_themed_dialog(
+                "info_outline",
+                lang["welcome_title"],
+                text_label,
+                [(lang["start"], None, colors["button_color"])],
+                width=480,
+            )
+
+        QTimer.singleShot(600, show_welcome)

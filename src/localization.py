@@ -52,7 +52,7 @@ translations = {
         "opengit": "Open Github",
         "min": "Minimize",
         "exit": "Exit",
-        "wrong_extension_reverse": "Selected file is not .raw!",
+        "wrong_extension_reverse": "Selected file is not .raw or .png!",
         "invalid_json_metadata": "JSON file is not selected or contains invalid data. Make sure you selected the correct file!",
         "meta_path": "Metadata file saved to:",
         "json": "JSON metadata file",
@@ -128,6 +128,36 @@ translations = {
         "open_github": "Open GitHub",
         "file_size": "File size",
         "speed": "Speed",
+        "autosizedetect_error": "Failed to automatically determine the map size.\nPlease select the size manually.",
+        "update_details": "Details",
+        "close": "Close",
+        "restart_failed": "Failed to restart the application. The update file may have been moved or blocked.",
+        "restart_error": "Restart Error",
+        "welcome_title": "Welcome to DisplaceBox 2.3!",
+        "welcome_text": (
+            "This update brings massive changes.<br><br>"
+            "<b>Changelog:</b><br>"
+            "- <b>PyQt6 Migration:</b> Complete abandonment of Flet, as well as <b>tkinter</b> and <b>screeninfo</b> libraries in favor of <b>PyQt6</b>.<br><br>"
+            "- <b>Settings Persistence:</b> Added <b>settings.json</b> file. Language, theme, and last opened folder are now saved between launches. Located in %LOCALAPPDATA%/DisplaceBox/.<br><br>"
+            "- <b>Auto-size detection:</b> The app automatically reads the <b>LEVELSIZE</b> parameter from the map's <b>.ssl</b> file. Manual selection remains as a fallback if auto-detection fails.<br><br>"
+            "- <b>Height range extension:</b> The reverse converter now allows extending the height range via sliders (Min/Max). Lets you draw mountains higher than the map's original maximum. The limit is determined by <b>MAXHEIGHT</b> in the <b>.ssl</b> file.<br><br>"
+            "- <b>Update Manager:</b> Redesigned update manager interface. It no longer takes up the whole screen, but slides up from the bottom.<br><br>"
+            "- <b>Fixes:</b> Fixed some bugs from the previous version."
+        ),
+        "start": "Start",
+        "range_editor_title": "Height Range",
+        "range_editor_edit": "Edit",
+        "range_editor_current": "Current range",
+        "range_editor_original": "Original range",
+        "range_editor_ssl_hint": "Map limit (MAXHEIGHT)",
+        "range_editor_min": "Min height (black)",
+        "range_editor_max": "Max height (white)",
+        "range_editor_invalid": "Invalid range. Min must be less than or equal to Max.",
+        "range_editor_over_limit": "Value exceeds map limit. Terrain may be clipped in-game.",
+        "range_editor_reset": "Reset",
+        "range_editor_apply": "Apply",
+        "range_editor_no_original": "This JSON has no original values. Expanding the range will affect the entire map.",
+        "converting": "Converting...",
     },
 
     # Russian language
@@ -260,6 +290,36 @@ translations = {
         "open_github": "Открыть GitHub",
         "file_size": "Размер файла",
         "speed": "Скорость",
+        "autosizedetect_error": "Не удалось автоматически определить размер карты.\nПожалуйста, выберите размер вручную.",
+        "update_details": "Подробнее",
+        "close": "Закрыть",
+        "restart_failed": "Не удалось перезапустить приложение. Возможно, файл обновления был перемещён или заблокирован.",
+        "restart_error": "Ошибка перезапуска",
+        "welcome_title": "Добро пожаловать в DisplaceBox 2.3!",
+        "welcome_text": (
+            "Данное обновление привносит с собой масштабные изменения.<br><br>"
+            "<b>Список изменений:</b><br>"
+            "- <b>Миграция на PyQt6:</b> Полный отказ от Flet, а также библиотек <b>tkinter</b> и <b>screeninfo</b> в пользу <b>PyQt6</b>.<br><br>"
+            "- <b>Сохранение настроек:</b> Появился файл <b>settings.json</b>. Язык, тема и последняя открытая папка теперь запоминаются между запусками. Расположен в %LOCALAPPDATA%/DisplaceBox/.<br><br>"
+            "- <b>Автоопределение размера:</b> Программа автоматически считывает параметр <b>LEVELSIZE</b> из <b>.ssl</b> файла карты. Ручной выбор оставлен как вариант на случай невозможности определить размер автоматически.<br><br>"
+            "- <b>Расширение диапазона высот:</b> В обратном конвертере появилась возможность расширить диапазон высот через слайдеры (Min/Max). Позволяет рисовать горы выше оригинального максимума карты. Лимит определяется из <b>MAXHEIGHT</b> в <b>.ssl</b> файле.<br><br>"
+            "- <b>Менеджер обновлений:</b> Обновлен интерфейс менеджера обновлений. Теперь он показывается не на весь экран, а вылезает снизу.<br><br>"
+            "- <b>Исправления:</b> Устранены некоторые баги прошлой версии."
+        ),
+        "start": "Начать",
+        "range_editor_title": "Диапазон высот",
+        "range_editor_edit": "Изменить",
+        "range_editor_current": "Текущий диапазон",
+        "range_editor_original": "Оригинальный диапазон",
+        "range_editor_ssl_hint": "Лимит карты (MAXHEIGHT)",
+        "range_editor_min": "Минимальная высота (чёрный)",
+        "range_editor_max": "Максимальная высота (белый)",
+        "range_editor_invalid": "Некорректный диапазон. Min должен быть меньше или равен Max.",
+        "range_editor_over_limit": "Значение превышает лимит карты. Ландшафт может быть обрезан в игре.",
+        "range_editor_reset": "Сбросить",
+        "range_editor_apply": "Применить",
+        "range_editor_no_original": "В этом JSON отсутствуют оригинальные значения. Расширение диапазона затронет всю карту.",
+        "converting": "Конвертация...",
     },
 
     # Ukrainian language
@@ -392,6 +452,36 @@ translations = {
         "open_github": "Відкрити GitHub",
         "file_size": "Розмір файлу",
         "speed": "Швидкість",
+        "autosizedetect_error": "Не вдалося автоматично визначити розмір карти.\nБудь ласка, виберіть розмір вручну.",
+        "update_details": "Детальніше",
+        "close": "Закрити",
+        "restart_failed": "Не вдалося перезапустити програму. Можливо, файл оновлення переміщено або заблоковано.",
+        "restart_error": "Помилка перезапуску",
+        "welcome_title": "Ласкаво просимо до DisplaceBox 2.3!",
+        "welcome_text": (
+            "Це оновлення привносить масштабні зміни.<br><br>"
+            "<b>Список змін:</b><br>"
+            "- <b>Міграція на PyQt6:</b> Повна відмова від Flet, а також бібліотек <b>tkinter</b> та <b>screeninfo</b> на користь <b>PyQt6</b>.<br><br>"
+            "- <b>Збереження налаштувань:</b> З'явився файл <b>settings.json</b>. Мова, тема та остання відкрита папка тепер запам'ятовуються між запусками. Розташований у %LOCALAPPDATA%/DisplaceBox/.<br><br>"
+            "- <b>Автовизначення розміру:</b> Програма автоматично зчитує параметр <b>LEVELSIZE</b> з <b>.ssl</b> файлу карти. Ручний вибір залишено як варіант на випадок неможливості визначити розмір автоматично.<br><br>"
+            "- <b>Розширення діапазону висот:</b> У зворотному конвертері з'явилася можливість розширити діапазон висот через слайдери (Min/Max). Дозволяє малювати гори вище оригінального максимуму карти. Ліміт визначається з <b>MAXHEIGHT</b> у <b>.ssl</b> файлі.<br><br>"
+            "- <b>Менеджер оновлень:</b> Оновлено інтерфейс менеджера оновлень. Тепер він показується не на весь екран, а виїжджає знизу.<br><br>"
+            "- <b>Виправлення:</b> Усунуто деякі баги минулої версії."
+        ),
+        "start": "Почати",
+        "range_editor_title": "Діапазон висот",
+        "range_editor_edit": "Змінити",
+        "range_editor_current": "Поточний діапазон",
+        "range_editor_original": "Оригінальний діапазон",
+        "range_editor_ssl_hint": "Ліміт карти (MAXHEIGHT)",
+        "range_editor_min": "Мінімальна висота (чорний)",
+        "range_editor_max": "Максимальна висота (білий)",
+        "range_editor_invalid": "Некоректний діапазон. Min має бути менше або дорівнювати Max.",
+        "range_editor_over_limit": "Значення перевищує ліміт карти. Ландшафт може бути обрізаний у грі.",
+        "range_editor_reset": "Скинути",
+        "range_editor_apply": "Застосувати",
+        "range_editor_no_original": "У цьому JSON відсутні оригінальні значення. Розширення діапазону вплине на всю карту.",
+        "converting": "Конвертація...",
     },
 
     # Polish language
@@ -524,6 +614,36 @@ translations = {
         "open_github": "Otwórz GitHub",
         "file_size": "Rozmiar pliku",
         "speed": "Prędkość",
+        "autosizedetect_error": "Nie udało się automatycznie określić rozmiaru mapy.\nProszę wybrać rozmiar ręcznie.",
+        "update_details": "Szczegóły",
+        "close": "Zamknij",
+        "restart_failed": "Nie udało się ponownie uruchomić aplikacji. Plik aktualizacji mógł zostać przeniesiony lub zablokowany.",
+        "restart_error": "Błąd ponownego uruchomienia",
+        "welcome_title": "Witamy w DisplaceBox 2.3!",
+        "welcome_text": (
+            "Ta aktualizacja wprowadza ogromne zmiany.<br><br>"
+            "<b>Lista zmian:</b><br>"
+            "- <b>Migracja na PyQt6:</b> Całkowite porzucenie Flet, a także bibliotek <b>tkinter</b> i <b>screeninfo</b> na rzecz <b>PyQt6</b>.<br><br>"
+            "- <b>Zapis ustawień:</b> Dodano plik <b>settings.json</b>. Język, motyw i ostatnio otwarty folder są teraz zapisywane między uruchomieniami. Znajduje się w %LOCALAPPDATA%/DisplaceBox/.<br><br>"
+            "- <b>Automatyczne wykrywanie rozmiaru:</b> Aplikacja automatycznie odczytuje parametr <b>LEVELSIZE</b> z pliku <b>.ssl</b> mapy. Ręczny wybór pozostał jako opcja zapasowa na wypadek niemożności automatycznego wykrycia.<br><br>"
+            "- <b>Rozszerzenie zakresu wysokości:</b> Konwerter wsteczny pozwala teraz rozszerzyć zakres wysokości za pomocą suwaków (Min/Max). Umożliwia rysowanie gór wyższych niż oryginalne maksimum mapy. Limit jest określany na podstawie <b>MAXHEIGHT</b> w pliku <b>.ssl</b>.<br><br>"
+            "- <b>Menedżer aktualizacji:</b> Zaktualizowano interfejs menedżera aktualizacji. Teraz nie zajmuje całego ekranu, lecz wysuwa się od dołu.<br><br>"
+            "- <b>Poprawki:</b> Naprawiono niektóre błędy z poprzedniej wersji."
+        ),
+        "start": "Rozpocznij",
+        "range_editor_title": "Zakres wysokości",
+        "range_editor_edit": "Edytuj",
+        "range_editor_current": "Bieżący zakres",
+        "range_editor_original": "Oryginalny zakres",
+        "range_editor_ssl_hint": "Limit mapy (MAXHEIGHT)",
+        "range_editor_min": "Minimalna wysokość (czarny)",
+        "range_editor_max": "Maksymalna wysokość (biały)",
+        "range_editor_invalid": "Nieprawidłowy zakres. Min musi być mniejsze lub równe Max.",
+        "range_editor_over_limit": "Wartość przekracza limit mapy. Teren może zostać przycięty w grze.",
+        "range_editor_reset": "Resetuj",
+        "range_editor_apply": "Zastosuj",
+        "range_editor_no_original": "Ten JSON nie zawiera oryginalnych wartości. Rozszerzenie zakresu wpłynie na całą mapę.",
+        "converting": "Konwersja...",
     },
 
     # Belarusian language
@@ -658,5 +778,35 @@ translations = {
         "open_github": "Адкрыць GitHub",
         "file_size": "Памер файла",
         "speed": "Хуткасць",
+        "autosizedetect_error": "Не ўдалося аўтаматычна вызначыць памер карты.\nКалі ласка, выберыце памер уручную.",
+        "update_details": "Падрабязней",
+        "close": "Закрыць",
+        "restart_failed": "Не ўдалося перазапусціць праграму. Магчыма, файл абнаўлення перамешчаны або заблакаваны.",
+        "restart_error": "Памылка перазапуску",
+        "welcome_title": "Сардэчна запрашаем у DisplaceBox 2.3!",
+        "welcome_text": (
+            "Гэтае абнаўленне прыўносіць маштабныя змены.<br><br>"
+            "<b>Спіс змен:</b><br>"
+            "- <b>Міграцыя на PyQt6:</b> Поўная адмова ад Flet, а таксама бібліятэк <b>tkinter</b> і <b>screeninfo</b> на карысць <b>PyQt6</b>.<br><br>"
+            "- <b>Захаванне налад:</b> З'явіўся файл <b>settings.json</b>. Мова, тэма і апошняя адкрытая папка цяпер запамінаюцца паміж запускамі. Размешчаны ў %LOCALAPPDATA%/DisplaceBox/.<br><br>"
+            "- <b>Аўтавызначэнне памеру:</b> Праграма аўтаматычна счытвае параметр <b>LEVELSIZE</b> з <b>.ssl</b> файла карты. Ручны выбар пакінуты як варыянт на выпадак немагчымасці вызначыць памер аўтаматычна.<br><br>"
+            "- <b>Пашырэнне дыяпазону вышынь:</b> У зваротным канвертары з'явілася магчымасць пашырыць дыяпазон вышынь праз слайдэры (Min/Max). Дазваляе маляваць горы вышэй за арыгінальны максімум карты. Ліміт вызначаецца з <b>MAXHEIGHT</b> у <b>.ssl</b> файле.<br><br>"
+            "- <b>Менеджэр абнаўленняў:</b> Абноўлены інтэрфейс менеджэра абнаўленняў. Цяпер ён паказваецца не на ўвесь экран, а выяжджае знізу.<br><br>"
+            "- <b>Выпраўленні:</b> Ухілены некаторыя багі мінулай версіі."
+        ),
+        "start": "Пачаць",
+        "range_editor_title": "Дыяпазон вышынь",
+        "range_editor_edit": "Змяніць",
+        "range_editor_current": "Бягучы дыяпазон",
+        "range_editor_original": "Арыгінальны дыяпазон",
+        "range_editor_ssl_hint": "Ліміт карты (MAXHEIGHT)",
+        "range_editor_min": "Мінімальная вышыня (чорны)",
+        "range_editor_max": "Максімальная вышыня (белы)",
+        "range_editor_invalid": "Некарэктны дыяпазон. Min павінен быць менш або роўны Max.",
+        "range_editor_over_limit": "Значэнне перавышае ліміт карты. Ландшафт можа быць абрэзаны ў гульні.",
+        "range_editor_reset": "Скінуць",
+        "range_editor_apply": "Ужыць",
+        "range_editor_no_original": "У гэтым JSON адсутнічаюць арыгінальныя значэнні. Пашырэнне дыяпазону закране ўсю карту.",
+        "converting": "Канвертацыя...",
     }
 }
