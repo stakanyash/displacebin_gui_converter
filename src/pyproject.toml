@@ -1,0 +1,29 @@
+[project]
+name = "displacebox"
+version = "2.3"
+description = "HTA map displace.bin file to raw/png GUI converter"
+requires-python = ">=3.9"
+dependencies = [
+    "PyQt6>=6.5.0",
+    "Pillow>=10.0.0",
+    "requests>=2.31.0",
+    "packaging>=23.0",
+]
+
+[project.scripts]
+displacebox = "main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.28,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+source-include = ["src_assets/**"]
+
+[dependency-groups]
+dev = [
+    "nuitka>=2.0.0",
+]
+
+[tool.uv]
+package = false

@@ -1,3 +1,0 @@
-flet
-Pillow
-screeninfo
