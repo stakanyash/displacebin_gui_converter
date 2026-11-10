@@ -1,12 +1,12 @@
 [project]
 name = "displacebox"
-version = "2.3"
+version = "2.4.0"
 description = "HTA map displace.bin file to raw/png GUI converter"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
-    "PyQt6>=6.5.0",
-    "Pillow>=10.0.0",
-    "requests>=2.31.0",
+    "PyQt6>=6.12.0",
+    "Pillow>=13.0.0",
+    "requests>=2.34.2",
     "packaging>=23.0",
 ]
 
