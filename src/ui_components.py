@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import logging
 import time
@@ -322,6 +323,7 @@ class PillButton(QPushButton):
         bg = colors["button_bg"]
         fg = colors["button_text"]
         r, g, b = _hex_to_rgb(colors["icon_color"])
+        fg_r, fg_g, fg_b = _hex_to_rgb(fg)
 
         btn_height = max(36, self._font_size + self._vpad * 2 + 8)
         self.setFixedHeight(btn_height)
@@ -345,7 +347,7 @@ class PillButton(QPushButton):
             }}
             QPushButton:disabled {{
                 background-color: rgba({r}, {g}, {b}, 0.05);
-                color: {fg}80;
+                color: rgba({fg_r}, {fg_g}, {fg_b}, 0.5);
             }}
             """
         )
@@ -756,6 +758,9 @@ class UpdateSnackbar(QWidget):
         )
 
     def _on_update_click(self):
+        if self._download_thread is not None and self._download_thread.isRunning():
+            logging.info("Snackbar: update download already in progress, ignoring click")
+            return
         logging.info("Snackbar: user clicked Update")
         self._show_downloading()
 
@@ -803,6 +808,32 @@ class UpdateSnackbar(QWidget):
 
         from updater import UpdateDownloader, download_update, DownloadCancelled
 
+        frozen = getattr(sys, "frozen", False)
+        if frozen:
+            target_dir = os.path.dirname(os.path.abspath(sys.executable))
+        else:
+            target_dir = os.getcwd()
+
+        version = self._update_info.version or "unknown"
+        new_filename = f"DisplaceBox_{version}.exe"
+
+        if frozen:
+            current_exe = os.path.abspath(sys.executable)
+            new_abs = os.path.abspath(os.path.join(target_dir, new_filename))
+            try:
+                for entry in os.listdir(target_dir):
+                    entry_abs = os.path.abspath(os.path.join(target_dir, entry))
+                    if entry_abs in (current_exe, new_abs):
+                        continue
+                    if entry == "update.exe" or (entry.startswith("DisplaceBox_") and entry.endswith(".exe")):
+                        try:
+                            os.remove(entry_abs)
+                            logging.info(f"Cleaned up old update file: {entry_abs}")
+                        except Exception as e:
+                            logging.warning(f"Failed to remove {entry_abs}: {e}")
+            except Exception as e:
+                logging.warning(f"Failed to scan target dir for cleanup: {e}")
+
         def on_progress(value, current, total):
             progress_bar.setValue(int(value))
             status.setText(f"{current:.1f} MB / {total:.1f} MB")
@@ -817,17 +848,22 @@ class UpdateSnackbar(QWidget):
             done = pyqtSignal(bool, object)
             progress = pyqtSignal(float, float, float)
 
-            def __init__(self, url, downloader, checksum):
+            def __init__(self, url, downloader, checksum, target_dir, target_filename):
                 super().__init__()
                 self.url = url
                 self.downloader = downloader
                 self.checksum = checksum
+                self.target_dir = target_dir
+                self.target_filename = target_filename
+
             def run(self):
                 try:
                     save_path = download_update(
                         self.url, self.downloader,
                         lambda v, c, t, _: self.progress.emit(v, c, t),
                         self.checksum,
+                        target_dir=self.target_dir,
+                        target_filename=self.target_filename,
                     )
                     self.done.emit(True, save_path)
                 except DownloadCancelled:
@@ -840,11 +876,18 @@ class UpdateSnackbar(QWidget):
             self._update_info.download_url,
             downloader,
             self._update_info.checksum,
+            target_dir,
+            new_filename,
         )
         worker.progress.connect(on_progress)
         worker.done.connect(on_done)
         worker.start()
         self._download_thread = worker
+
+        def _clear_thread_ref():
+            if self._download_thread is worker:
+                self._download_thread = None
+        worker.finished.connect(_clear_thread_ref)
 
         if not self.isVisible():
             self._animate_in()
@@ -885,9 +928,15 @@ class UpdateSnackbar(QWidget):
         QTimer.singleShot(2000, lambda: self._restart(save_path))
 
     def _restart(self, save_path):
+        frozen = getattr(sys, "frozen", False)
         try:
-            logging.info(f"Restarting: {save_path}")
-            subprocess.Popen([save_path])
+            if frozen:
+                old_exe = os.path.abspath(sys.executable)
+                subprocess.Popen([save_path, "--cleanup-old", old_exe, "--updated"])
+                logging.info(f"Restarting: {save_path}, will delete old: {old_exe}")
+            else:
+                subprocess.Popen([save_path, "--updated"])
+                logging.info(f"Restarting from source: {save_path}")
         except Exception as e:
             logging.error(f"Restart failed: {e}")
             error_msg = self._lang.get(
@@ -964,7 +1013,6 @@ class UpdateSnackbar(QWidget):
         painter.setPen(QPen(self._border_color, 1.5))
         painter.setBrush(self._bg_color)
         painter.drawRoundedRect(QRectF(self.rect()).adjusted(0.75, 0.75, -0.75, -0.75), 16, 16)
-
 
 class SpinnerWidget(QWidget):
     def __init__(self, color="#9ecaff", size=22, parent=None):

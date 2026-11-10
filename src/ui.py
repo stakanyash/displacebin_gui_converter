@@ -13,7 +13,7 @@ from updater import UpdateDownloader, check_for_updates, download_update
 from converter import process_raw, process_png, struct
 import subprocess
 import time
-from config import VERSION, BUILD
+from config import VERSION, BUILD, LOG_LEVEL
 from ui_components import (
     UIComponents, ThemeManager, LanguageDialog, AppWindow, OutlinedLineEdit, OutlinedComboBox,
     PillButton, _wrap_text, make_card, dialog_title_row, material_icon, AnimatedRadioButton,
@@ -28,7 +28,7 @@ log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"dgc_{log_timestamp}.log"
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=getattr(logging, LOG_LEVEL),
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(log_filename),
