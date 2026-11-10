@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, asdict
 from enum import Enum
 from datetime import datetime
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -119,9 +120,20 @@ def extract_checksum(body: str) -> Optional[str]:
 def is_github_url(url: str) -> bool:
     if not url:
         return False
+    try:
+        parsed = urlparse(url)
+    except Exception as e:
+        logger.warning(f"is_github_url: failed to parse {url!r}: {e}")
+        return False
 
-    url_lower = url.lower()
-    return any(url_lower.startswith(f'https://{domain}') for domain in ALLOWED_DOMAINS)
+    if parsed.scheme != "https":
+        return False
+
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return False
+
+    return host in ALLOWED_DOMAINS
 
 def calculate_sha256(file_path: str) -> str:
     sha256_hash = hashlib.sha256()
@@ -293,18 +305,25 @@ def download_update(
     url: str,
     downloader: UpdateDownloader,
     progress_callback: Optional[Callable[[float, float, float, Callable], None]] = None,
-    expected_checksum: Optional[str] = None
+    expected_checksum: Optional[str] = None,
+    target_dir: Optional[str] = None,
+    target_filename: Optional[str] = None
 ) -> Optional[str]:
     logger.info(f"Starting update download from {url}")
 
     if not is_github_url(url):
         raise UpdateError(f"Invalid download URL: {url}")
 
-    final_path = os.path.join(os.getcwd(), "update.exe")
+    if target_dir is None:
+        target_dir = os.getcwd()
+    if target_filename is None:
+        target_filename = "update.exe"
 
-    target_dir = os.path.dirname(final_path) or '.'
-    if not os.access(target_dir, os.W_OK):
-        raise UpdateError(f"No write permission in directory: {target_dir}")
+    final_path = os.path.join(target_dir, target_filename)
+
+    check_dir = os.path.dirname(final_path) or '.'
+    if not os.access(check_dir, os.W_OK):
+        raise UpdateError(f"No write permission in directory: {check_dir}")
 
     downloader.reset()
 

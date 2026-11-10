@@ -1,7 +1,10 @@
+import os
 import sys
 import logging
 import locale
 import ctypes
+import time
+import threading
 
 from lang_manager import LanguageManager
 from localization import translations
@@ -12,6 +15,43 @@ from settings_manager import settings
 
 from ui import create_ui as create_main_ui
 from reverse_ui import create_back_ui as create_reverse_ui
+
+
+def _handle_update_cleanup():
+    if "--updated" in sys.argv:
+        sys.argv.remove("--updated")
+        settings.set("first_run", True)
+        logging.info("Update detected: first_run reset to True")
+
+    if "--cleanup-old" not in sys.argv:
+        return
+
+    try:
+        idx = sys.argv.index("--cleanup-old")
+        if idx + 1 >= len(sys.argv):
+            return
+        old_path = sys.argv[idx + 1]
+        del sys.argv[idx:idx + 2]
+    except Exception as e:
+        logging.warning(f"Failed to parse --cleanup-old: {e}")
+        return
+
+    def _cleanup_worker():
+        for _ in range(120):
+            time.sleep(0.5)
+            if not os.path.exists(old_path):
+                return
+            try:
+                os.remove(old_path)
+                logging.info(f"Removed old executable: {old_path}")
+                return
+            except FileNotFoundError:
+                return
+            except Exception:
+                continue
+        logging.warning(f"Could not remove old executable after timeout: {old_path}")
+
+    threading.Thread(target=_cleanup_worker, daemon=True).start()
 
 
 def check_min_resolution_or_exit(app, min_w=1280, min_h=720):
@@ -71,24 +111,19 @@ def get_language_from_args():
 
 
 def main():
+    _handle_update_cleanup()
 
     if sys.platform == "win32":
         try:
-            app_id = "stakanyash.displacebox.2.3"
+            app_id = "stakanyash.displacebox.2.4"
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
         except Exception as e:
             logging.warning(f"Failed to set AppUserModelID: {e}")
-
-
 
     fmt = QSurfaceFormat()
     fmt.setSwapInterval(1)
     fmt.setSamples(4)
     QSurfaceFormat.setDefaultFormat(fmt)
-
-
-
-
 
     lang_code = get_language_from_args()
     if not lang_code:
@@ -104,7 +139,6 @@ def main():
     app.setWindowIcon(QIcon(asset_path("icon.ico")))
 
     check_min_resolution_or_exit(app)
-
 
     font_files = [
         "fonts/Inter_18pt-Regular.ttf",
@@ -126,7 +160,6 @@ def main():
 
     default_font = QFont("Inter", 10)
     app.setFont(default_font)
-
 
     window = AppWindow()
     window.theme_mode = settings.get("theme", "dark")

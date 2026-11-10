@@ -1,11 +1,9 @@
 import struct
 from PIL import Image
-import json
 import logging
-import base64
-import zlib
 from pathlib import Path
 from config import DGCVER
+from metadata import write_metadata
 
 def process_raw(input_path, output_path, size, save_metadata=True):
     with open(input_path, 'rb') as stream:
@@ -65,35 +63,24 @@ def process_png(input_path, output_path, size, save_metadata=True):
 
 def _write_metadata(base_path, _min, _max, _del, raw_values=None):
     output_dir = Path(base_path).parent
-
     mapname = output_dir.name
-
-    json_filename = f"displace_{mapname}_metadata.json"
-    json_path = output_dir / json_filename
+    meta_filename = f"displace_{mapname}_metadata.dgc"
+    meta_path = output_dir / meta_filename
 
     meta = {
         'Min': _min,
         'Max': _max,
         'Delta': _del,
-        'DGCVer': DGCVER.decode('utf-8', errors='ignore')
+        'DGCVer': DGCVER.decode('utf-8', errors='ignore'),
     }
 
     if raw_values is not None:
-        try:
-            packed = struct.pack(f'{len(raw_values)}f', *raw_values)
-            compressed = zlib.compress(packed, level=9)
-            encoded = base64.b64encode(compressed).decode('ascii')
-            meta['OriginalValues'] = encoded
-            logging.info(
-                f"OriginalValues saved: {len(raw_values)} floats, "
-                f"{len(encoded)} bytes base64"
-            )
-        except Exception as e:
-            logging.warning(f"Failed to encode OriginalValues: {e}")
+        meta['OriginalMin'] = _min
+        meta['OriginalMax'] = _max
+        meta['OriginalDelta'] = _del
+        meta['OriginalValues'] = raw_values
+        logging.info(f"OriginalValues included: {len(raw_values)} floats")
 
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(meta, f, indent=2)
-
-    logging.info(f"Metadata saved to: {json_path}")
-
-    return str(json_path)
+    write_metadata(str(meta_path), meta)
+    logging.info(f"Metadata saved to: {meta_path}")
+    return str(meta_path)

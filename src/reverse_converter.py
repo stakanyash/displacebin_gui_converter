@@ -9,18 +9,24 @@ import zlib
 class RAWNot16BitError(Exception):
     pass
 
-def _decode_original_values(json_data, expected_length):
+def _decode_original_values(json_data, expected_length=None):
     if 'OriginalValues' not in json_data:
         return None
+    ov = json_data['OriginalValues']
     try:
-        encoded = json_data['OriginalValues']
-        compressed = base64.b64decode(encoded)
+        if isinstance(ov, (bytes, bytearray)):
+            compressed = bytes(ov)
+        elif isinstance(ov, str):
+            compressed = base64.b64decode(ov)
+        else:
+            logging.warning(f"OriginalValues has unsupported type: {type(ov)}")
+            return None
         packed = zlib.decompress(compressed)
         if len(packed) % 4 != 0:
             logging.warning("OriginalValues: decompressed size is not multiple of 4")
             return None
         floats = list(struct.unpack(f'{len(packed)//4}f', packed))
-        if len(floats) != expected_length:
+        if expected_length is not None and len(floats) != expected_length:
             logging.warning(
                 f"OriginalValues length mismatch: {len(floats)} vs {expected_length}. "
                 f"Falling back to full remap."
@@ -94,8 +100,38 @@ def reverse_converter(input_path, output_path, json_data, custom_range=None):
         orig_floats = _decode_original_values(json_data, len(normalized_data))
 
     if orig_floats is not None:
-        old_min = float(json_data['Min'])
-        old_del = float(json_data['Delta'])
+        old_min = None
+        old_del = None
+        range_source = None
+
+        if 'OriginalMin' in json_data and 'OriginalDelta' in json_data:
+            try:
+                cand_min = float(json_data['OriginalMin'])
+                cand_del = float(json_data['OriginalDelta'])
+                if (math.isnan(cand_min) or math.isnan(cand_del)
+                        or math.isinf(cand_min) or math.isinf(cand_del)):
+                    logging.warning("OriginalMin/OriginalDelta contain NaN/Inf, ignoring")
+                else:
+                    old_min = cand_min
+                    old_del = cand_del
+                    range_source = "OriginalMin/OriginalDelta"
+            except (TypeError, ValueError) as e:
+                logging.warning(f"Failed to read OriginalMin/OriginalDelta: {e}")
+
+        if old_min is None and orig_floats:
+            old_min = min(orig_floats)
+            old_del = max(orig_floats) - old_min
+            range_source = "derived from OriginalValues"
+
+        if old_min is None:
+            old_min = float(json_data['Min'])
+            old_del = float(json_data['Delta'])
+            range_source = "JSON Min/Delta (fallback)"
+
+        logging.info(
+            f"OriginalValues restore range: Min={old_min:.4f}, Delta={old_del:.4f} "
+            f"[source: {range_source}]"
+        )
 
         orig_pxs = []
         for orig_float in orig_floats:

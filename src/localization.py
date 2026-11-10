@@ -133,16 +133,19 @@ translations = {
         "close": "Close",
         "restart_failed": "Failed to restart the application. The update file may have been moved or blocked.",
         "restart_error": "Restart Error",
-        "welcome_title": "Welcome to DisplaceBox 2.3!",
+        "welcome_title": "Welcome to DisplaceBox 2.4!",
         "welcome_text": (
-            "This update brings massive changes.<br><br>"
-            "<b>Changelog:</b><br>"
-            "- <b>PyQt6 Migration:</b> Complete abandonment of Flet, as well as <b>tkinter</b> and <b>screeninfo</b> libraries in favor of <b>PyQt6</b>.<br><br>"
-            "- <b>Settings Persistence:</b> Added <b>settings.json</b> file. Language, theme, and last opened folder are now saved between launches. Located in %LOCALAPPDATA%/DisplaceBox/.<br><br>"
-            "- <b>Auto-size detection:</b> The app automatically reads the <b>LEVELSIZE</b> parameter from the map's <b>.ssl</b> file. Manual selection remains as a fallback if auto-detection fails.<br><br>"
-            "- <b>Height range extension:</b> The reverse converter now allows extending the height range via sliders (Min/Max). Lets you draw mountains higher than the map's original maximum. The limit is determined by <b>MAXHEIGHT</b> in the <b>.ssl</b> file.<br><br>"
-            "- <b>Update Manager:</b> Redesigned update manager interface. It no longer takes up the whole screen, but slides up from the bottom.<br><br>"
-            "- <b>Fixes:</b> Fixed some bugs from the previous version."
+            "<b>What's new:</b><br><br>"
+            "- <b>New metadata format (.dgc):</b> ~30% smaller than JSON and opens instantly. "
+            "Old <b>.json</b> files still work and migrate automatically.<br><br>"
+            "- <b>Original heights preserved:</b> Repeated height extensions no longer "
+            "corrupt untouched pixels. The <b>Reset</b> button in the editor now restores "
+            "the true original range.<br><br>"
+            "- <b>Height editing requires 2.3+ metadata:</b> Older metadata disables the "
+            "range editor with a clear warning. Conversion still works.<br><br>"
+            "- <b>Cleaner updates:</b> Updates download as <b>DisplaceBox_{version}.exe</b>, "
+            "old update files are removed automatically.<br><br>"
+            "- <b>Fixes:</b> Other minor bug fixes."
         ),
         "start": "Start",
         "range_editor_title": "Height Range",
@@ -158,6 +161,21 @@ translations = {
         "range_editor_apply": "Apply",
         "range_editor_no_original": "This JSON has no original values. Expanding the range will affect the entire map.",
         "converting": "Converting...",
+        "legacy_json_warning": (
+            "The selected file uses the legacy JSON metadata format.\n"
+            "This format is deprecated and may produce incorrect results.\n"
+            "\n"
+            "Continue anyway?"
+        ),
+        "json_from_older_version_edit_disabled": (
+            "The metadata was created in an older version ({file_version}).\n"
+            "Height editing requires version {min_version} or newer.\n"
+            "\n"
+            "The height range editor will be disabled.\n"
+            "\n"
+            "Continue?"
+        ),
+        "invalid_json_missing_keys": "Invalid metadata: missing required keys ({keys}).",
     },
 
     # Russian language
@@ -295,16 +313,22 @@ translations = {
         "close": "Закрыть",
         "restart_failed": "Не удалось перезапустить приложение. Возможно, файл обновления был перемещён или заблокирован.",
         "restart_error": "Ошибка перезапуска",
-        "welcome_title": "Добро пожаловать в DisplaceBox 2.3!",
+        "welcome_title": "Добро пожаловать в DisplaceBox 2.4!",
         "welcome_text": (
-            "Данное обновление привносит с собой масштабные изменения.<br><br>"
-            "<b>Список изменений:</b><br>"
-            "- <b>Миграция на PyQt6:</b> Полный отказ от Flet, а также библиотек <b>tkinter</b> и <b>screeninfo</b> в пользу <b>PyQt6</b>.<br><br>"
-            "- <b>Сохранение настроек:</b> Появился файл <b>settings.json</b>. Язык, тема и последняя открытая папка теперь запоминаются между запусками. Расположен в %LOCALAPPDATA%/DisplaceBox/.<br><br>"
-            "- <b>Автоопределение размера:</b> Программа автоматически считывает параметр <b>LEVELSIZE</b> из <b>.ssl</b> файла карты. Ручной выбор оставлен как вариант на случай невозможности определить размер автоматически.<br><br>"
-            "- <b>Расширение диапазона высот:</b> В обратном конвертере появилась возможность расширить диапазон высот через слайдеры (Min/Max). Позволяет рисовать горы выше оригинального максимума карты. Лимит определяется из <b>MAXHEIGHT</b> в <b>.ssl</b> файле.<br><br>"
-            "- <b>Менеджер обновлений:</b> Обновлен интерфейс менеджера обновлений. Теперь он показывается не на весь экран, а вылезает снизу.<br><br>"
-            "- <b>Исправления:</b> Устранены некоторые баги прошлой версии."
+            "<b>Что нового:</b><br><br>"
+            "- <b>Новый формат метаданных (.dgc):</b> Примерно на 30% меньше JSON и "
+            "открывается мгновенно. Старые <b>.json</b> работают и мигрируют "
+            "автоматически.<br><br>"
+            "- <b>Оригинальные высоты сохранены:</b> Повторные расширения диапазона больше "
+            "не портят нетронутые пиксели. Кнопка <b>Сбросить</b> в редакторе теперь "
+            "восстанавливает истинный оригинальный диапазон.<br><br>"
+            "- <b>Редактирование высот требует метаданные 2.3+:</b> Для более старых "
+            "метаданных редактор диапазона отключается с понятным предупреждением. "
+            "Конвертация при этом работает.<br><br>"
+            "- <b>Более чистое обновление:</b> Обновления скачиваются как "
+            "<b>DisplaceBox_{version}.exe</b>, старые файлы обновлений удаляются "
+            "автоматически.<br><br>"
+            "- Другие мелкие исправления багов."
         ),
         "start": "Начать",
         "range_editor_title": "Диапазон высот",
@@ -320,6 +344,21 @@ translations = {
         "range_editor_apply": "Применить",
         "range_editor_no_original": "В этом JSON отсутствуют оригинальные значения. Расширение диапазона затронет всю карту.",
         "converting": "Конвертация...",
+        "legacy_json_warning": (
+            "Выбранный файл использует устаревший формат метаданных JSON.\n"
+            "Этот формат устарел и может давать некорректный результат.\n"
+            "\n"
+            "Всё равно продолжить?"
+        ),
+        "json_from_older_version_edit_disabled": (
+            "Метаданные были созданы в более старой версии ({file_version}).\n"
+            "Редактирование высот требует версии {min_version} или новее.\n"
+            "\n"
+            "Редактор диапазона высот будет недоступен.\n"
+            "\n"
+            "Продолжить?"
+        ),
+        "invalid_json_missing_keys": "Некорректные метаданные: отсутствуют обязательные ключи ({keys}).",
     },
 
     # Ukrainian language
@@ -457,16 +496,22 @@ translations = {
         "close": "Закрити",
         "restart_failed": "Не вдалося перезапустити програму. Можливо, файл оновлення переміщено або заблоковано.",
         "restart_error": "Помилка перезапуску",
-        "welcome_title": "Ласкаво просимо до DisplaceBox 2.3!",
+        "welcome_title": "Ласкаво просимо до DisplaceBox 2.4!",
         "welcome_text": (
-            "Це оновлення привносить масштабні зміни.<br><br>"
-            "<b>Список змін:</b><br>"
-            "- <b>Міграція на PyQt6:</b> Повна відмова від Flet, а також бібліотек <b>tkinter</b> та <b>screeninfo</b> на користь <b>PyQt6</b>.<br><br>"
-            "- <b>Збереження налаштувань:</b> З'явився файл <b>settings.json</b>. Мова, тема та остання відкрита папка тепер запам'ятовуються між запусками. Розташований у %LOCALAPPDATA%/DisplaceBox/.<br><br>"
-            "- <b>Автовизначення розміру:</b> Програма автоматично зчитує параметр <b>LEVELSIZE</b> з <b>.ssl</b> файлу карти. Ручний вибір залишено як варіант на випадок неможливості визначити розмір автоматично.<br><br>"
-            "- <b>Розширення діапазону висот:</b> У зворотному конвертері з'явилася можливість розширити діапазон висот через слайдери (Min/Max). Дозволяє малювати гори вище оригінального максимуму карти. Ліміт визначається з <b>MAXHEIGHT</b> у <b>.ssl</b> файлі.<br><br>"
-            "- <b>Менеджер оновлень:</b> Оновлено інтерфейс менеджера оновлень. Тепер він показується не на весь екран, а виїжджає знизу.<br><br>"
-            "- <b>Виправлення:</b> Усунуто деякі баги минулої версії."
+            "<b>Що нового:</b><br><br>"
+            "- <b>Новий формат метаданих (.dgc):</b> Приблизно на 30% менший за JSON і "
+            "відкривається миттєво. Старі <b>.json</b> працюють і мігрують "
+            "автоматично.<br><br>"
+            "- <b>Оригінальні висоти збережено:</b> Повторні розширення діапазону більше не "
+            "псують недоторкані пікселі. Кнопка <b>Скинути</b> в редакторі тепер "
+            "відновлює справжній оригінальний діапазон.<br><br>"
+            "- <b>Редагування висот вимагає метадані 2.3+:</b> Для старіших метаданих "
+            "редактор діапазону вимикається з чітким попередженням. Конвертація при цьому "
+            "працює.<br><br>"
+            "- <b>Чистіше оновлення:</b> Оновлення завантажуються як "
+            "<b>DisplaceBox_{version}.exe</b>, старі файли оновлень видаляються "
+            "автоматично.<br><br>"
+            "- <b>Виправлення:</b> Інші дрібні виправлення помилок."
         ),
         "start": "Почати",
         "range_editor_title": "Діапазон висот",
@@ -482,6 +527,21 @@ translations = {
         "range_editor_apply": "Застосувати",
         "range_editor_no_original": "У цьому JSON відсутні оригінальні значення. Розширення діапазону вплине на всю карту.",
         "converting": "Конвертація...",
+        "legacy_json_warning": (
+            "Обраний файл використовує застарілий формат метаданих JSON.\n"
+            "Цей формат застарів і може давати некоректний результат.\n"
+            "\n"
+            "Все одно продовжити?"
+        ),
+        "json_from_older_version_edit_disabled": (
+            "Метадані були створені у старішій версії ({file_version}).\n"
+            "Редагування висот вимагає версії {min_version} або новішої.\n"
+            "\n"
+            "Редактор діапазону висот буде недоступний.\n"
+            "\n"
+            "Продовжити?"
+        ),
+        "invalid_json_missing_keys": "Некоректні метадані: відсутні обов'язкові ключі ({keys}).",
     },
 
     # Polish language
@@ -619,16 +679,22 @@ translations = {
         "close": "Zamknij",
         "restart_failed": "Nie udało się ponownie uruchomić aplikacji. Plik aktualizacji mógł zostać przeniesiony lub zablokowany.",
         "restart_error": "Błąd ponownego uruchomienia",
-        "welcome_title": "Witamy w DisplaceBox 2.3!",
+        "welcome_title": "Witamy w DisplaceBox 2.4!",
         "welcome_text": (
-            "Ta aktualizacja wprowadza ogromne zmiany.<br><br>"
-            "<b>Lista zmian:</b><br>"
-            "- <b>Migracja na PyQt6:</b> Całkowite porzucenie Flet, a także bibliotek <b>tkinter</b> i <b>screeninfo</b> na rzecz <b>PyQt6</b>.<br><br>"
-            "- <b>Zapis ustawień:</b> Dodano plik <b>settings.json</b>. Język, motyw i ostatnio otwarty folder są teraz zapisywane między uruchomieniami. Znajduje się w %LOCALAPPDATA%/DisplaceBox/.<br><br>"
-            "- <b>Automatyczne wykrywanie rozmiaru:</b> Aplikacja automatycznie odczytuje parametr <b>LEVELSIZE</b> z pliku <b>.ssl</b> mapy. Ręczny wybór pozostał jako opcja zapasowa na wypadek niemożności automatycznego wykrycia.<br><br>"
-            "- <b>Rozszerzenie zakresu wysokości:</b> Konwerter wsteczny pozwala teraz rozszerzyć zakres wysokości za pomocą suwaków (Min/Max). Umożliwia rysowanie gór wyższych niż oryginalne maksimum mapy. Limit jest określany na podstawie <b>MAXHEIGHT</b> w pliku <b>.ssl</b>.<br><br>"
-            "- <b>Menedżer aktualizacji:</b> Zaktualizowano interfejs menedżera aktualizacji. Teraz nie zajmuje całego ekranu, lecz wysuwa się od dołu.<br><br>"
-            "- <b>Poprawki:</b> Naprawiono niektóre błędy z poprzedniej wersji."
+            "<b>Co nowego:</b><br><br>"
+            "- <b>Nowy format metadanych (.dgc):</b> Około 30% mniejszy niż JSON i otwiera "
+            "się natychmiast. Stare <b>.json</b> nadal działają i migrują "
+            "automatycznie.<br><br>"
+            "- <b>Oryginalne wysokości zachowane:</b> Powtórne rozszerzenia zakresu nie psują "
+            "już nietkniętych pikseli. Przycisk <b>Resetuj</b> w edytorze przywraca teraz "
+            "prawdziwy oryginalny zakres.<br><br>"
+            "- <b>Edytowanie wysokości wymaga metadanych 2.3+:</b> Dla starszych metadanych "
+            "edytor zakresu jest wyłączony z wyraźnym ostrzeżeniem. Konwersja nadal "
+            "działa.<br><br>"
+            "- <b>Czystsza aktualizacja:</b> Aktualizacje pobierane są jako "
+            "<b>DisplaceBox_{version}.exe</b>, stare pliki aktualizacji są usuwane "
+            "automatycznie.<br><br>"
+            "- <b>Poprawki:</b> Inne drobne poprawki błędów."
         ),
         "start": "Rozpocznij",
         "range_editor_title": "Zakres wysokości",
@@ -644,6 +710,21 @@ translations = {
         "range_editor_apply": "Zastosuj",
         "range_editor_no_original": "Ten JSON nie zawiera oryginalnych wartości. Rozszerzenie zakresu wpłynie na całą mapę.",
         "converting": "Konwersja...",
+        "legacy_json_warning": (
+            "Wybrany plik używa przestarzałego formatu metadanych JSON.\n"
+            "Ten format jest przestarzały i może dawać niepoprawne wyniki.\n"
+            "\n"
+            "Kontynuować mimo to?"
+        ),
+        "json_from_older_version_edit_disabled": (
+            "Metadane zostały utworzone w starszej wersji ({file_version}).\n"
+            "Edytowanie wysokości wymaga wersji {min_version} lub nowszej.\n"
+            "\n"
+            "Edytor zakresu wysokości będzie niedostępny.\n"
+            "\n"
+            "Kontynuować?"
+        ),
+        "invalid_json_missing_keys": "Nieprawidłowe metadane: brakuje wymaganych kluczy ({keys}).",
     },
 
     # Belarusian language
@@ -783,16 +864,22 @@ translations = {
         "close": "Закрыць",
         "restart_failed": "Не ўдалося перазапусціць праграму. Магчыма, файл абнаўлення перамешчаны або заблакаваны.",
         "restart_error": "Памылка перазапуску",
-        "welcome_title": "Сардэчна запрашаем у DisplaceBox 2.3!",
+        "welcome_title": "Сардэчна запрашаем у DisplaceBox 2.4!",
         "welcome_text": (
-            "Гэтае абнаўленне прыўносіць маштабныя змены.<br><br>"
-            "<b>Спіс змен:</b><br>"
-            "- <b>Міграцыя на PyQt6:</b> Поўная адмова ад Flet, а таксама бібліятэк <b>tkinter</b> і <b>screeninfo</b> на карысць <b>PyQt6</b>.<br><br>"
-            "- <b>Захаванне налад:</b> З'явіўся файл <b>settings.json</b>. Мова, тэма і апошняя адкрытая папка цяпер запамінаюцца паміж запускамі. Размешчаны ў %LOCALAPPDATA%/DisplaceBox/.<br><br>"
-            "- <b>Аўтавызначэнне памеру:</b> Праграма аўтаматычна счытвае параметр <b>LEVELSIZE</b> з <b>.ssl</b> файла карты. Ручны выбар пакінуты як варыянт на выпадак немагчымасці вызначыць памер аўтаматычна.<br><br>"
-            "- <b>Пашырэнне дыяпазону вышынь:</b> У зваротным канвертары з'явілася магчымасць пашырыць дыяпазон вышынь праз слайдэры (Min/Max). Дазваляе маляваць горы вышэй за арыгінальны максімум карты. Ліміт вызначаецца з <b>MAXHEIGHT</b> у <b>.ssl</b> файле.<br><br>"
-            "- <b>Менеджэр абнаўленняў:</b> Абноўлены інтэрфейс менеджэра абнаўленняў. Цяпер ён паказваецца не на ўвесь экран, а выяжджае знізу.<br><br>"
-            "- <b>Выпраўленні:</b> Ухілены некаторыя багі мінулай версіі."
+            "<b>Што новага:</b><br><br>"
+            "- <b>Новы фармат метаданых (.dgc):</b> Прыкладна на 30% меншы за JSON і "
+            "адкрываецца імгненна. Старыя <b>.json</b> працуюць і мігруюць "
+            "аўтаматычна.<br><br>"
+            "- <b>Арыгінальныя вышыні захаваны:</b> Паўторныя пашырэнні дыяпазону больш не "
+            "псуюць некранутыя пікселі. Кнопка <b>Скінуць</b> у рэдактары цяпер "
+            "аднаўляе сапраўдны арыгінальны дыяпазон.<br><br>"
+            "- <b>Рэдагаванне вышынь патрабуе метаданыя 2.3+:</b> Для старэйшых метаданых "
+            "рэдактар дыяпазону адключаецца з зразумелым папярэджаннем. Канвертацыя пры "
+            "гэтым працуе.<br><br>"
+            "- <b>Чысцейшае абнаўленне:</b> Абнаўленні спампоўваюцца як "
+            "<b>DisplaceBox_{version}.exe</b>, старыя файлы абнаўленняў выдаляюцца "
+            "аўтаматычна.<br><br>"
+            "- <b>Выпраўленні:</b> Іншыя дробныя выпраўленні памылак."
         ),
         "start": "Пачаць",
         "range_editor_title": "Дыяпазон вышынь",
@@ -808,5 +895,20 @@ translations = {
         "range_editor_apply": "Ужыць",
         "range_editor_no_original": "У гэтым JSON адсутнічаюць арыгінальныя значэнні. Пашырэнне дыяпазону закране ўсю карту.",
         "converting": "Канвертацыя...",
+        "legacy_json_warning": (
+            "Абраны файл выкарыстоўвае састарэлы фармат метаданых JSON.\n"
+            "Гэты фармат састарэлы і можа даваць некарэктны вынік.\n"
+            "\n"
+            "Усё роўна працягнуць?"
+        ),
+        "json_from_older_version_edit_disabled": (
+            "Метаданыя былі створаны ў старэйшай версіі ({file_version}).\n"
+            "Рэдагаванне вышынь патрабуе версіі {min_version} або навейшай.\n"
+            "\n"
+            "Рэдактар дыяпазону вышынь будзе недаступны.\n"
+            "\n"
+            "Працягнуць?"
+        ),
+        "invalid_json_missing_keys": "Некарэктныя метаданыя: адсутнічаюць абавязковыя ключы ({keys}).",
     }
 }

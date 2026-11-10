@@ -5,17 +5,19 @@ from PyQt6.QtWidgets import (
     QTextEdit, QSlider
 )
 from localization import translations
-from reverse_converter import reverse_converter, struct, RAWNot16BitError
+from reverse_converter import reverse_converter, struct, RAWNot16BitError, _decode_original_values
+from metadata import read_metadata, write_metadata, MetadataError
+from packaging.version import parse as parse_pep440, Version as PackVersion, InvalidVersion
 import os
 import logging
 from datetime import datetime
 import traceback
 import sys
 from PIL import Image
-from config import VERSION, BUILD
+from config import VERSION, BUILD, LOG_LEVEL
 from ui_components import (
     UIComponents, ThemeManager, LanguageDialog, AppWindow, OutlinedLineEdit, PillButton,
-    AnimatedTextButton, _wrap_text,
+    AnimatedTextButton, _wrap_text, _hex_to_rgb,
     ConversionThread
 )
 from lang_manager import LanguageManager
@@ -24,7 +26,7 @@ from settings_manager import settings
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=getattr(logging, LOG_LEVEL),
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler()
@@ -32,11 +34,37 @@ logging.basicConfig(
 )
 
 import locale
-locale.setlocale(locale.LC_ALL, "")
-current_locale = locale.getlocale()[0]
+
+try:
+    locale.setlocale(locale.LC_ALL, "")
+except locale.Error as e:
+    logging.warning(f"Failed to set system locale, using default: {e}")
+
+try:
+    current_locale = locale.getlocale()[0]
+except Exception as e:
+    logging.warning(f"Failed to read system locale: {e}")
+    current_locale = None
+
 system_lang = current_locale[:2] if current_locale else "En"
 
-lang = LanguageManager.set_language(system_lang if system_lang in translations else "En")
+_initial_lang_code = system_lang if system_lang in translations else "En"
+LanguageManager.set_language(_initial_lang_code)
+lang = translations[_initial_lang_code]
+
+FILE_VERSION_FOR_RANGE_EDIT = PackVersion("2.3")
+
+
+def _parse_version(version_str):
+    if not isinstance(version_str, str):
+        return None
+    stripped = version_str.strip()
+    if not stripped:
+        return None
+    try:
+        return parse_pep440(stripped)
+    except (InvalidVersion, ValueError):
+        return None
 
 
 def create_back_ui(window: AppWindow, lang_code="En"):
@@ -147,6 +175,7 @@ def create_back_ui(window: AppWindow, lang_code="En"):
     original_range = {"value": None}
     current_range = {"value": None}
     ssl_maxheight = {"value": None}
+    range_edit_allowed = {"value": True}
 
     def has_original_values():
         return isinstance(json_data["value"], dict) and "OriginalValues" in json_data["value"]
@@ -185,13 +214,16 @@ def create_back_ui(window: AppWindow, lang_code="En"):
             color = "#E65100" if is_custom else colors["muted"]
             range_label.setText(f"{lang['range_editor_current']}: {mn:.1f} – {mx:.1f}")
             range_label.setStyleSheet(f"color: {color}; font-size: 12px; font-family: 'Inter'; background: transparent;")
-            edit_range_btn.setVisible(True)
+            edit_range_btn.setVisible(range_edit_allowed["value"])
         else:
             range_label.setText("")
             edit_range_btn.setVisible(False)
 
     def show_range_dialog(_e=None):
         if not current_range["value"]:
+            return
+        if not range_edit_allowed["value"]:
+            logging.info("Range editing blocked for this metadata version")
             return
 
         dlg_colors = ThemeManager.get_theme_colors(window.theme_mode)
@@ -231,10 +263,11 @@ def create_back_ui(window: AppWindow, lang_code="En"):
             warn_lbl.setStyleSheet(f"color: #E65100; font-size: 12px; font-family: 'Inter'; background: transparent;")
             layout.addWidget(warn_lbl)
 
+        bc_r, bc_g, bc_b = _hex_to_rgb(dlg_colors['border_color'])
         slider_qss = f"""
             QSlider::groove:horizontal {{
                 border: none;
-                background: {dlg_colors['border_color']}80;
+                background: rgba({bc_r}, {bc_g}, {bc_b}, 0.5);
                 height: 6px;
                 border-radius: 3px;
             }}
@@ -390,137 +423,176 @@ def create_back_ui(window: AppWindow, lang_code="En"):
         )
 
     def on_json_selected(path):
-        if path:
-            json_file_path["value"] = path
-            _, ext = os.path.splitext(json_file_path["value"])
-            if ext.lower() != ".json":
-                ui_components.show_error_dialog(lang["error"], lang["wrong_extension_json"])
-                json_file_path["value"] = None
-                json_field.set_value("")
-                json_data["value"] = {}
-                original_range["value"] = None
-                current_range["value"] = None
-                ssl_maxheight["value"] = None
-                update_range_label()
-                return
+        if not path:
+            logging.info("JSON file selection canceled.")
+            return
 
+        json_file_path["value"] = path
+        _, ext = os.path.splitext(path)
+        ext = ext.lower()
+
+        if ext not in (".dgc", ".json"):
+            ui_components.show_error_dialog(lang["error"], lang["wrong_extension_json"])
+            json_file_path["value"] = None
+            json_field.set_value("")
+            json_data["value"] = {}
+            original_range["value"] = None
+            current_range["value"] = None
+            ssl_maxheight["value"] = None
+            range_edit_allowed["value"] = True
+            update_range_label()
+            return
+
+        is_legacy_json = ext == ".json"
+
+        def _close_all_overlays():
+            while window._extra_overlays:
+                window.close_overlay()
+            window.close_overlay()
+
+        def _reset_state():
+            json_file_path["value"] = None
+            json_data["value"] = {}
+            json_field.set_value("")
+            original_range["value"] = None
+            current_range["value"] = None
+            ssl_maxheight["value"] = None
+            range_edit_allowed["value"] = True
+            update_range_label()
+            _close_all_overlays()
+
+        def _load_and_validate():
             try:
-                import json
-                with open(json_file_path["value"], "r") as f:
-                    json_data["value"] = json.load(f)
-
-                required_keys = ["Min", "Max", "Delta"]
-                missing_keys = [key for key in required_keys if key not in json_data["value"]]
-                if missing_keys:
-                    error_msg = lang["invalid_json_missing_keys"].format(keys=", ".join(missing_keys))
-                    ui_components.show_error_dialog(lang["error"], error_msg)
-                    json_file_path["value"] = None
-                    json_data["value"] = {}
-                    json_field.set_value("")
-                    original_range["value"] = None
-                    current_range["value"] = None
-                    ssl_maxheight["value"] = None
-                    update_range_label()
-                    return
-
-                dgcver = json_data["value"].get("DGCVer")
-                current_version = VERSION
-
-                if not dgcver or not dgcver.startswith("DisplaceGUI_"):
-                    ui_components.show_error_dialog(lang["error"], lang["invalid_json_dgcver"])
-                    json_file_path["value"] = None
-                    json_data["value"] = {}
-                    json_field.set_value("")
-                    original_range["value"] = None
-                    current_range["value"] = None
-                    ssl_maxheight["value"] = None
-                    update_range_label()
-                    return
-
-                file_version_str = dgcver[len("DisplaceGUI_"):]
-
-                def parse_version(version_str):
-                    parts = version_str.split(".")
-                    try:
-                        major = int(parts[0])
-                        minor = int(parts[1]) if len(parts) > 1 else 0
-                    except (IndexError, ValueError):
-                        return None, None
-                    return major, minor
-
-                file_major, file_minor = parse_version(file_version_str)
-                current_major, current_minor = parse_version(current_version)
-
-                if file_major is None or current_major is None:
-                    ui_components.show_error_dialog(lang["error"], lang["invalid_json_version_format"])
-                    json_file_path["value"] = None
-                    json_data["value"] = {}
-                    json_field.set_value("")
-                    original_range["value"] = None
-                    current_range["value"] = None
-                    ssl_maxheight["value"] = None
-                    update_range_label()
-                    return
-
-                def proceed_with_selection():
-                    json_field.set_value(json_file_path["value"])
-                    json_field.edit.deselect()
-                    orig_min_val = float(json_data["value"]["Min"])
-                    orig_max_val = float(json_data["value"]["Max"])
-                    original_range["value"] = {"min": orig_min_val, "max": orig_max_val}
-                    current_range["value"] = {"min": orig_min_val, "max": orig_max_val}
-                    ssl_maxheight["value"] = get_ssl_maxheight(json_file_path["value"])
-                    update_range_label()
-                    window.close_overlay()
-
-                def cancel_selection():
-                    json_file_path["value"] = None
-                    json_data["value"] = {}
-                    json_field.set_value("")
-                    original_range["value"] = None
-                    current_range["value"] = None
-                    ssl_maxheight["value"] = None
-                    update_range_label()
-                    window.close_overlay()
-
-                json_field.set_value(json_file_path["value"])
-                json_field.edit.deselect()
-
-                if file_major < current_major or (file_major == current_major and file_minor < current_minor):
-                    ui_components.show_colored_dialog(
-                        "#E65100",
-                        "warning",
-                        lang["warning"],
-                        lang["json_from_older_version"],
-                        [(lang["yes"], proceed_with_selection), (lang["no"], cancel_selection)],
-                    )
-                    return
-
-                elif file_major > current_major or (file_major == current_major and file_minor > current_minor):
-                    ui_components.show_colored_dialog(
-                        "#E65100",
-                        "warning",
-                        lang["warning"],
-                        lang["json_from_newer_version"],
-                        [(lang["yes"], proceed_with_selection), (lang["no"], cancel_selection)],
-                    )
-                    return
-
-                else:
-                    proceed_with_selection()
-
+                json_data["value"] = read_metadata(path)
+            except MetadataError as ex:
+                logging.error(f"Metadata read error: {ex}")
+                ui_components.show_error_dialog(lang["error"], lang["invalid_json_metadata"])
+                _reset_state()
+                return
             except Exception as ex:
                 logging.error(f"Ошибка чтения JSON: {ex}")
                 ui_components.show_error_dialog(lang["error"], lang["invalid_json_metadata"])
-                json_file_path["value"] = None
-                json_data["value"] = {}
-                json_field.set_value("")
-                original_range["value"] = None
-                current_range["value"] = None
-                ssl_maxheight["value"] = None
+                _reset_state()
+                return
+
+            _validate()
+
+        def _validate():
+            required_keys = ["Min", "Max", "Delta"]
+            missing_keys = [key for key in required_keys if key not in json_data["value"]]
+            if missing_keys:
+                error_msg = lang.get(
+                    "invalid_json_missing_keys",
+                    "Missing required keys: {keys}"
+                ).format(keys=", ".join(missing_keys))
+                ui_components.show_error_dialog(lang["error"], error_msg)
+                _reset_state()
+                return
+
+            dgcver = json_data["value"].get("DGCVer")
+
+            if not dgcver or not dgcver.startswith("DisplaceGUI_"):
+                ui_components.show_error_dialog(lang["error"], lang["invalid_json_dgcver"])
+                _reset_state()
+                return
+
+            file_version_str = dgcver[len("DisplaceGUI_"):]
+
+            file_ver = _parse_version(file_version_str)
+            current_ver = _parse_version(VERSION)
+
+            if file_ver is None or current_ver is None:
+                logging.error(
+                    f"Version parse failed: file='{file_version_str}', current='{VERSION}'"
+                )
+                ui_components.show_error_dialog(lang["error"], lang["invalid_json_version_format"])
+                _reset_state()
+                return
+
+            def proceed_with_selection():
+                range_edit_allowed["value"] = file_ver >= FILE_VERSION_FOR_RANGE_EDIT
+                json_field.set_value(json_file_path["value"])
+                json_field.edit.deselect()
+
+                cur_min_val = float(json_data["value"]["Min"])
+                cur_max_val = float(json_data["value"]["Max"])
+
+                if "OriginalMin" in json_data["value"] and "OriginalMax" in json_data["value"]:
+                    orig_min_val = float(json_data["value"]["OriginalMin"])
+                    orig_max_val = float(json_data["value"]["OriginalMax"])
+                else:
+                    orig_min_val = cur_min_val
+                    orig_max_val = cur_max_val
+
+                original_range["value"] = {"min": orig_min_val, "max": orig_max_val}
+                current_range["value"] = {"min": cur_min_val, "max": cur_max_val}
+                ssl_maxheight["value"] = get_ssl_maxheight(json_file_path["value"])
+                logging.info(
+                    f"Metadata accepted: version {file_ver}, current {current_ver}, "
+                    f"original={orig_min_val:.2f}–{orig_max_val:.2f}, "
+                    f"current={cur_min_val:.2f}–{cur_max_val:.2f}, "
+                    f"range_edit_allowed={range_edit_allowed['value']}"
+                )
                 update_range_label()
-        else:
-            logging.info("JSON file selection canceled.")
+                _close_all_overlays()
+
+            if file_ver < FILE_VERSION_FOR_RANGE_EDIT:
+                msg = lang.get(
+                    "json_from_older_version_edit_disabled",
+                    "The metadata was created in an older version ({file_version}).\n"
+                    "Height editing requires version {min_version} or newer.\n"
+                    "The height range editor will be disabled.\n\nContinue?"
+                ).format(
+                    file_version=str(file_ver),
+                    min_version=str(FILE_VERSION_FOR_RANGE_EDIT),
+                )
+                ui_components.show_colored_dialog(
+                    "#E65100",
+                    "warning",
+                    lang["warning"],
+                    msg,
+                    [(lang["yes"], proceed_with_selection), (lang["no"], _reset_state)],
+                )
+                return
+
+            if file_ver > current_ver:
+                ui_components.show_colored_dialog(
+                    "#E65100",
+                    "warning",
+                    lang["warning"],
+                    lang["json_from_newer_version"],
+                    [(lang["yes"], proceed_with_selection), (lang["no"], _reset_state)],
+                )
+                return
+
+            if file_ver < current_ver:
+                ui_components.show_colored_dialog(
+                    "#E65100",
+                    "warning",
+                    lang["warning"],
+                    lang["json_from_older_version"],
+                    [(lang["yes"], proceed_with_selection), (lang["no"], _reset_state)],
+                )
+                return
+
+            proceed_with_selection()
+
+        if is_legacy_json:
+            ui_components.show_colored_dialog(
+                "#E65100",
+                "warning",
+                lang["warning"],
+                lang.get(
+                    "legacy_json_warning",
+                    "The selected file uses the legacy JSON metadata format.\n"
+                    "This format is deprecated and may produce incorrect results.\n\n"
+                    "Continue anyway?"
+                ),
+                [(lang["yes"], _load_and_validate), (lang["no"], _reset_state)],
+            )
+            return
+
+        _load_and_validate()
 
     def select_file(_e=None):
         last_dir = settings.get("last_dir", "")
@@ -531,7 +603,10 @@ def create_back_ui(window: AppWindow, lang_code="En"):
 
     def select_json(_e=None):
         last_dir = settings.get("last_dir", "")
-        path, _ = QFileDialog.getOpenFileName(window, lang["sel_button"], last_dir, "JSON (*.json);;All files (*.*)")
+        path, _ = QFileDialog.getOpenFileName(
+            window, lang["sel_button"], last_dir,
+            "Metadata (*.dgc *.json);;DGC (*.dgc);;Legacy JSON (*.json);;All files (*.*)"
+        )
         if path:
             settings.set("last_dir", os.path.dirname(path))
         on_json_selected(path)
@@ -668,18 +743,57 @@ def create_back_ui(window: AppWindow, lang_code="En"):
 
                 if custom_range:
                     try:
-                        import json as json_module
+                        if 'OriginalMin' not in data or 'OriginalMax' not in data or 'OriginalDelta' not in data:
+                            orig_floats = _decode_original_values(data, expected_length=None)
+                            if orig_floats:
+                                data['OriginalMin'] = float(min(orig_floats))
+                                data['OriginalMax'] = float(max(orig_floats))
+                                data['OriginalDelta'] = float(max(orig_floats) - min(orig_floats))
+                                logging.info(
+                                    f"Backfilled OriginalMin/Max/Delta from OriginalValues: "
+                                    f"{data['OriginalMin']:.2f} – {data['OriginalMax']:.2f}"
+                                )
+                            else:
+                                data['OriginalMin'] = float(data['Min'])
+                                data['OriginalMax'] = float(data['Max'])
+                                data['OriginalDelta'] = float(data['Delta'])
+                                logging.info(
+                                    f"Backfilled OriginalMin/Max/Delta from current Min/Max/Delta "
+                                    f"(no OriginalValues available): "
+                                    f"{data['OriginalMin']:.2f} – {data['OriginalMax']:.2f}"
+                                )
+
                         data['Min'] = float(custom_range[0])
                         data['Max'] = float(custom_range[1])
                         data['Delta'] = float(custom_range[1]) - float(custom_range[0])
-                        with open(json_file_path["value"], 'w', encoding='utf-8') as f:
-                            json_module.dump(data, f, indent=2)
+
+                        old_path = json_file_path["value"]
+                        new_path = os.path.splitext(old_path)[0] + ".dgc"
+                        write_metadata(new_path, data)
+
+                        if new_path != old_path:
+                            try:
+                                os.remove(old_path)
+                                logging.info(f"Migrated legacy metadata: {old_path} -> {new_path}")
+                            except Exception as e:
+                                logging.warning(f"Failed to remove legacy metadata {old_path}: {e}")
+                            json_file_path["value"] = new_path
+                            json_field.set_value(new_path)
+
                         json_data["value"] = data
-                        original_range["value"] = {"min": data['Min'], "max": data['Max']}
+                        if 'OriginalMin' in data and 'OriginalMax' in data:
+                            original_range["value"] = {"min": data['OriginalMin'], "max": data['OriginalMax']}
+                        else:
+                            original_range["value"] = {"min": data['Min'], "max": data['Max']}
                         update_range_label()
-                        logging.info(f"JSON updated with new range: {custom_range}")
+                        logging.info(
+                            f"Metadata saved: {new_path}, "
+                            f"new range {custom_range}, "
+                            f"original preserved as "
+                            f"({data['OriginalMin']:.2f} – {data['OriginalMax']:.2f})"
+                        )
                     except Exception as e:
-                        logging.error(f"Failed to update JSON: {e}")
+                        logging.error(f"Failed to update metadata: {e}")
 
             window.hide_loading_snackbar(min_duration_ms=1200, on_finished=show_result)
 
